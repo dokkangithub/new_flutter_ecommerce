@@ -1,3 +1,5 @@
+import 'dart:convert';
+
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import '../../../core/utils/local_storage/local_storage_keys.dart';
@@ -49,7 +51,7 @@ class AuthProvider extends ChangeNotifier {
     notifyListeners();
   }
 
-  void _setErrorMessage(String? message) {
+  void _setRequestMessage(String? message) {
     _errorMessage = message;
     notifyListeners();
   }
@@ -64,7 +66,7 @@ class AuthProvider extends ChangeNotifier {
         await SecureStorage().save(LocalStorageKey.userToken, _user!.accessToken!);
         isSuccess = true;
       }else if(_user!.result==false){
-        _setErrorMessage(_user!.message[0]);
+        _setRequestMessage(_user!.message[0]);
       }
     } catch (e) {
       print("Login Error: $e");
@@ -74,22 +76,24 @@ class AuthProvider extends ChangeNotifier {
   }
 
 
-  Future<void> signup(Map<String, dynamic> userData) async {
+  Future<bool> signup(Map<String, dynamic> userData) async {
     _setLoading(true);
+    bool isSuccess = false;
     try {
       Response response = await signupUseCase(userData);
-      print('sssssdd${response.data}');
       if(response.data['result']){
-        _user=response.data;
+        _user=AuthResponseModel.fromJson(response.data);
         await SecureStorage().save(LocalStorageKey.userToken, _user!.accessToken!);
-        _setErrorMessage(_user!.message);
+        isSuccess = true;
+        _setRequestMessage(_user!.message);
       }else {
-        _setErrorMessage(response.data['message'][0]);
+        _setRequestMessage(response.data['message'][0]);
       }
     } catch (e) {
       print("Signup Error: $e");
     }
     _setLoading(false);
+    return isSuccess;
   }
 
 

@@ -25,7 +25,7 @@ class AppRoutes {
       case splash:
         return MaterialPageRoute(builder: (_) => const SplashScreen());
       case onboarding:
-        return MaterialPageRoute(builder: (_) => const OnboardingScreen());
+        return MaterialPageRoute(builder: (_) => OnboardingScreen());
       case login:
         return MaterialPageRoute(builder: (_) =>  LoginScreen());
       case signUp:

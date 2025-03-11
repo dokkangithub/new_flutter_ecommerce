@@ -6,8 +6,6 @@ import 'package:laravel_ecommerce/core/utils/widgets/custom_form_field.dart';
 import 'package:laravel_ecommerce/core/utils/widgets/custom_loading.dart';
 import 'package:laravel_ecommerce/presentation/auth/controller/auth_provider.dart';
 import 'package:provider/provider.dart';
-
-import '../../../core/di/injection_container.dart';
 import '../../../core/utils/constants/app_assets.dart';
 import '../../../core/utils/widgets/custom_snackbar.dart';
 import '../widgets/social_button.dart';
@@ -64,6 +62,13 @@ class LoginScreen extends StatelessWidget {
                     CustomTextFormField(
                       controller: emailController,
                       hint: 'email'.tr(context),
+                      prefixIcon: Icon(Icons.email),
+                      validator: (value) {
+                        if (value == null || value.isEmpty) {
+                          return 'Please enter your email or phone';
+                        }
+                        return null;
+                      },
                     ),
                     const SizedBox(height: 16),
 
@@ -72,6 +77,13 @@ class LoginScreen extends StatelessWidget {
                       controller: passwordController,
                       isPassword: true,
                       hint: 'password'.tr(context),
+                      prefixIcon: Icon(Icons.lock_clock_outlined),
+                      validator: (value) {
+                        if (value == null || value.isEmpty) {
+                          return 'Please enter your password';
+                        }
+                        return null;
+                      },
                     ),
 
                     // Forgot Password

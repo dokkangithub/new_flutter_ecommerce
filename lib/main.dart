@@ -62,7 +62,7 @@ class MyApp extends StatelessWidget {
             return supportedLocales.first;
           },
           onGenerateRoute: AppRoutes.generateRoute,
-          initialRoute: AppRoutes.login,
+          initialRoute: AppRoutes.splash,
         );
       }
     );

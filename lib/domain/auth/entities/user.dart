@@ -3,9 +3,9 @@ import 'package:meta/meta.dart';
 
 class User extends Equatable {
   final int id;
-  final String type;
+  final dynamic type;
   final String name;
-  final String email;
+  final dynamic email;
   final dynamic avatar;
   final String avatarOriginal;
   final dynamic phone;

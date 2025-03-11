@@ -1,162 +1,182 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 import 'package:laravel_ecommerce/config/routes.dart/routes.dart';
-import 'package:provider/provider.dart';
-import 'controller/provider.dart';
-import 'data/onboarding_data.dart';
-import 'data/onboarding_model.dart';
+import 'package:laravel_ecommerce/core/utils/constants/app_assets.dart';
+import 'package:laravel_ecommerce/core/utils/local_storage/local_storage_keys.dart';
+import '../../core/di/injection_container.dart';
+import '../../core/utils/local_storage/secure_storage.dart';
 
-class OnboardingScreen extends StatelessWidget {
-  const OnboardingScreen({Key? key}) : super(key: key);
+
+
+class OnboardingScreen extends StatefulWidget {
+  const OnboardingScreen({super.key});
+
+  @override
+  _OnboardingScreenState createState() => _OnboardingScreenState();
+}
+
+class _OnboardingScreenState extends State<OnboardingScreen> {
+  final PageController _pageController = PageController();
+  int _currentPage = 0;
+
+  List<Map<String, String>> onboardingData = [
+    {
+      'title': 'Browse the menu and order directly from the application',
+      'image': AppSvgs.onboarding1,
+    },
+    {
+      'title':
+          'Your order will be immediately collected an sent by our courier',
+      'image': AppSvgs.onboarding2,
+    },
+    {
+      'title': 'Pick up delivery at your door and enjoy your food',
+      'image': AppSvgs.onboarding3,
+    },
+  ];
+
+  @override
+  void initState() {
+    super.initState();
+  }
+
+  @override
+  void dispose() {
+    _pageController.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
-    return ChangeNotifierProvider(
-      create: (_) => OnboardingProvider(),
-      child: Scaffold(
-        body: Consumer<OnboardingProvider>(
-          builder: (context, provider, _) {
-            return Stack(
-              children: [
-                // PageView for onboarding pages
-                PageView.builder(
-                  itemCount: onboardingData.length,
-                  onPageChanged: (index) {
-                    provider.setPage(index);
-                  },
-                  itemBuilder: (context, index) {
-                    return OnboardingPage(
-                      model: onboardingData[index],
-                    );
-                  },
-                ),
-
-                // Bottom navigation (dots and button)
-                Positioned(
-                  bottom: 30,
-                  left: 0,
-                  right: 0,
-                  child: Column(
-                    children: [
-                      // Page indicator dots
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: List.generate(
-                          onboardingData.length,
-                              (index) =>
-                              Padding(
-                                padding: const EdgeInsets.symmetric(
-                                    horizontal: 5),
-                                child: CircleAvatar(
-                                  radius: 5,
-                                  backgroundColor: provider.currentPage == index
-                                      ? Colors.purple
-                                      : Colors.grey.shade300,
-                                ),
-                              ),
-                        ),
+    final secureStorage = sl<SecureStorage>();
+    return Scaffold(
+      backgroundColor: Color(0xFFF2E2D0), // Beige background
+      body: SafeArea(
+        child: Column(
+          children: [
+            Expanded(
+              flex: 9,
+              child: PageView.builder(
+                controller: _pageController,
+                onPageChanged: (index) {
+                  setState(() {
+                    _currentPage = index;
+                  });
+                },
+                itemCount: onboardingData.length,
+                itemBuilder:
+                    (context, index) => OnboardingContent(
+                      image: onboardingData[index]['image']!,
+                      title: onboardingData[index]['title']!,
+                    ),
+              ),
+            ),
+            Expanded(
+              flex: 1,
+              child: Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 20),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Row(
+                      children: List.generate(
+                        onboardingData.length,
+                        (index) => buildDot(index: index),
                       ),
-                      const SizedBox(height: 20),
-
-                      // Next/Finish button
-                      Padding(
-                        padding: const EdgeInsets.symmetric(horizontal: 40),
-                        child: SizedBox(
-                          width: double.infinity,
-                          child: ElevatedButton(
-                            onPressed: () {
-                              provider.isLastPage
-                                  ? AppRoutes.navigateToAndRemoveUntil(context, AppRoutes.login)
-                                  :null
-                              ;
-                            },
-                            style: ElevatedButton.styleFrom(
-                              backgroundColor: Colors.purple,
-                              foregroundColor: Colors.white,
-                              padding: const EdgeInsets.symmetric(vertical: 15),
-                              shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(30),
-                              ),
-                            ),
-                            child: Text(
-                              provider.isLastPage ? 'Finish' : 'Next',
-                              style: const TextStyle(
-                                fontSize: 16,
-                                fontWeight: FontWeight.bold,
-                              ),
-                            ),
-                          ),
-                        ),
+                    ),
+                    ElevatedButton(
+                      onPressed: () {
+                        if (_currentPage == onboardingData.length - 1) {
+                          AppRoutes.navigateToAndRemoveUntil(
+                            context,
+                            AppRoutes.login,
+                          );
+                          secureStorage.save(LocalStorageKey.hasCompletedOnboarding, true);
+                        } else {
+                          _pageController.nextPage(
+                            duration: Duration(milliseconds: 300),
+                            curve: Curves.easeInToLinear,
+                          );
+                        }
+                      },
+                      style: ElevatedButton.styleFrom(
+                        shape: CircleBorder(),
+                        backgroundColor: Colors.black,
+                        padding: EdgeInsets.all(15),
                       ),
-                    ],
-                  ),
+                      child: Icon(
+                        _currentPage == onboardingData.length - 1
+                            ? Icons.check
+                            : Icons.arrow_forward,
+                        color: Colors.white,
+                      ),
+                    ),
+                  ],
                 ),
-              ],
-            );
-          },
+              ),
+            ),
+          ],
         ),
+      ),
+    );
+  }
+
+  AnimatedContainer buildDot({required int index}) {
+    return AnimatedContainer(
+      duration: Duration(milliseconds: 200),
+      margin: EdgeInsets.only(right: 5),
+      height: 10,
+      width: _currentPage == index ? 20 : 10,
+      decoration: BoxDecoration(
+        color: _currentPage == index ? Colors.black : Colors.black26,
+        borderRadius: BorderRadius.circular(5),
       ),
     );
   }
 }
 
+class OnboardingContent extends StatelessWidget {
+  const OnboardingContent({
+    super.key,
+    required this.image,
+    required this.title,
+  });
 
-class OnboardingPage extends StatelessWidget {
-  final OnboardingModel model;
-
-  const OnboardingPage({
-    Key? key,
-    required this.model,
-  }) : super(key: key);
+  final String image;
+  final String title;
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      color: Colors.blue,
-      child: Column(
-        children: [
-          // Image section (takes approximately 2/3 of the screen)
-          Expanded(
-            flex: 3,
-            child: Image.asset(
-              model.imagePath,
-              fit: BoxFit.cover,
-            ),
-          ),
-
-          // Text content section (takes approximately 1/3 of the screen)
-          Expanded(
-            flex: 2,
-            child: Container(
-              padding: const EdgeInsets.all(20),
-              width: double.infinity,
-              color: Colors.white,
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Text(
-                    model.title,
-                    style: const TextStyle(
-                      fontSize: 24,
-                      fontWeight: FontWeight.bold,
-                      color: Colors.black87,
-                    ),
-                    textAlign: TextAlign.center,
-                  ),
-                  const SizedBox(height: 20),
-                  Text(
-                    model.description,
-                    style: const TextStyle(
-                      fontSize: 16,
-                      color: Colors.black54,
-                    ),
-                    textAlign: TextAlign.center,
-                  ),
-                ],
+    return Column(
+      children: [
+        Padding(
+          padding: const EdgeInsets.all(16.0),
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.end,
+            children: [
+              TextButton(
+                onPressed: () {
+                  AppRoutes.navigateToAndRemoveUntil(context, AppRoutes.login);
+                  sl<SecureStorage>().save(LocalStorageKey.hasCompletedOnboarding, true);
+                },
+                child: Text("SKIP", style: TextStyle(color: Colors.black54)),
               ),
-            ),
+            ],
           ),
-        ],
-      ),
+        ),
+        Spacer(),
+        SvgPicture.asset(image, height: 250),
+        Spacer(),
+        Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 20),
+          child: Text(
+            title,
+            textAlign: TextAlign.center,
+            style: TextStyle(fontSize: 18, fontWeight: FontWeight.w500),
+          ),
+        ),
+        Spacer(),
+      ],
     );
   }
 }

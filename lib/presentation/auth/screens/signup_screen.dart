@@ -24,17 +24,11 @@ class _RegistrationScreenState extends State<RegistrationScreen>
   final _formKey = GlobalKey<FormState>();
   late AnimationController _animationController;
   late Animation<double> _fadeAnimation;
-  bool _obscurePassword = true;
-  bool _obscureConfirmPassword = true;
-  bool _termsAccepted = false;
 
-  // Add toggle for email/phone registration
-  bool _isEmailRegistration = true;
 
   // Controllers for form fields
   final TextEditingController _nameController = TextEditingController();
   final TextEditingController _emailController = TextEditingController();
-  final TextEditingController _phoneController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
   final TextEditingController _confirmPasswordController =
       TextEditingController();
@@ -57,7 +51,6 @@ class _RegistrationScreenState extends State<RegistrationScreen>
     _animationController.dispose();
     _nameController.dispose();
     _emailController.dispose();
-    _phoneController.dispose();
     _passwordController.dispose();
     _confirmPasswordController.dispose();
     super.dispose();
@@ -172,21 +165,24 @@ class _RegistrationScreenState extends State<RegistrationScreen>
                               Map<String, dynamic> userData = {
                                 "name": _nameController.text,
                                 "password": _passwordController.text,
-                                "email_or_phone": _emailController.text.contains('@')?_emailController.text:_phoneController.text,
+                                "email_or_phone": _emailController.text ,
                                 "password_confirmation":
                                     _confirmPasswordController.text,
                                 "register_by": _emailController.text.contains('@')?'email':'phone',
                               };
 
                               if (_formKey.currentState!.validate()) {
-                                 await authProvider.signup(
+                                bool isSuccess= await authProvider.signup(
                                   userData,
                                 );
                                  CustomSnackbar.show(
                                    context,
                                    message: authProvider.errorMessage!,
-                                   isError: true,
+                                   isError: !isSuccess,
                                  );
+                                 if(isSuccess){
+                                   AppRoutes.navigateToAndRemoveUntil(context, AppRoutes.homeScreen);
+                                 }
                               }
                             },
                           ),

@@ -1,12 +1,13 @@
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 
 import '../constants/app_assets.dart';
 
 class CustomImage extends StatelessWidget {
-  final String? imageUrl; // URL for network images
-  final String? assetPath; // Path for local assets
-  final String? placeholderAsset; // Placeholder image path
+  final String? imageUrl;
+  final String? assetPath;
+  final String? placeholderAsset;
   final double? width;
   final double? height;
   final BoxFit fit;
@@ -35,21 +36,46 @@ class CustomImage extends StatelessWidget {
 
   Widget _buildImage() {
     if (imageUrl != null && imageUrl!.isNotEmpty) {
+      return _buildNetworkImage();
+    } else if (assetPath != null && assetPath!.isNotEmpty) {
+      return _buildAssetImage();
+    }
+    return _buildPlaceholder();
+  }
+
+  /// Builds network image, handling both raster and SVG formats.
+  Widget _buildNetworkImage() {
+    if (imageUrl!.endsWith('.svgs')) {
+      return SvgPicture.network(
+        imageUrl!,
+        width: width,
+        height: height,
+        fit: fit,
+        placeholderBuilder: (context) => _buildPlaceholder(),
+      );
+    } else {
       return CachedNetworkImage(
         imageUrl: imageUrl!,
         width: width,
         height: height,
         fit: fit,
-        placeholder: (context, url) => Image.asset(
-          placeholderAsset!,
-          width: width,
-          height: height,
-          fit: fit,
-        ),
+        placeholder: (context, url) => _buildPlaceholder(),
         errorWidget: (context, url, error) => errorWidget ??
             Icon(Icons.error, size: width != null ? width! / 2 : 40, color: Colors.red),
       );
-    } else if (assetPath != null && assetPath!.isNotEmpty) {
+    }
+  }
+
+  /// Builds asset image, handling both raster and SVG formats.
+  Widget _buildAssetImage() {
+    if (assetPath!.endsWith('.svgs')) {
+      return SvgPicture.asset(
+        assetPath!,
+        width: width,
+        height: height,
+        fit: fit,
+      );
+    } else {
       return Image.asset(
         assetPath!,
         width: width,
@@ -57,12 +83,24 @@ class CustomImage extends StatelessWidget {
         fit: fit,
       );
     }
-    // Fallback if no valid source is provided
-    return Image.asset(
-      placeholderAsset!,
-      width: width,
-      height: height,
-      fit: fit,
-    );
+  }
+
+  /// Builds a placeholder image.
+  Widget _buildPlaceholder() {
+    if (placeholderAsset!.endsWith('.svgs')) {
+      return SvgPicture.asset(
+        placeholderAsset!,
+        width: width,
+        height: height,
+        fit: fit,
+      );
+    } else {
+      return Image.asset(
+        placeholderAsset!,
+        width: width,
+        height: height,
+        fit: fit,
+      );
+    }
   }
 }

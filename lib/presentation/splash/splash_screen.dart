@@ -1,3 +1,4 @@
+import 'package:laravel_ecommerce/core/utils/constants/app_strings.dart';
 import 'package:laravel_ecommerce/core/utils/local_storage/local_storage_keys.dart';
 import 'package:flutter/material.dart';
 import '../../config/routes.dart/routes.dart';
@@ -6,7 +7,7 @@ import '../../core/utils/local_storage/secure_storage.dart';
 
 
 class SplashScreen extends StatefulWidget {
-  const SplashScreen({Key? key}) : super(key: key);
+  const SplashScreen({super.key});
 
   @override
   State<SplashScreen> createState() => _SplashScreenState();
@@ -22,12 +23,16 @@ class _SplashScreenState extends State<SplashScreen> {
   Future<String> getStartupScreen() async {
     final secureStorage = sl<SecureStorage>();
     final bool hasCompletedOnboarding =
-        await secureStorage.get(LocalStorageKey.hasCompletedOnboarding) ?? false;
+        await secureStorage.get<bool>(LocalStorageKey.hasCompletedOnboarding) ?? false;
+    AppStrings.token =
+        await secureStorage.get<String>(LocalStorageKey.userToken);
 
     if (!hasCompletedOnboarding) {
       return AppRoutes.onboarding;
-    } else {
+    } else if(AppStrings.token==null){
       return AppRoutes.login;
+    }else{
+      return AppRoutes.homeScreen;
     }
   }
 

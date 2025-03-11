@@ -26,13 +26,10 @@ class AppAnimations {
 }
 
 class AppSvgs {
-  static const String animationPath = 'assets/svg';
-
-  static const String loginEllipse1 = '$animationPath/login_ellipse1.svg';
-  static const String loginEllipse2 = '$animationPath/login_ellipse2.svg';
-  static const String svgDokkanLogo = '$animationPath/svg_dokkan_logo.svg';
-  static const String btnNotifications = '$animationPath/btnNotifications.svg';
-  static const String menu = '$animationPath/menu.svg';
+  static const String svgPath = 'assets/svgs';
+  static const String onboarding1 = '$svgPath/onboarding1.svg';
+  static const String onboarding2 = '$svgPath/onboarding2.svg';
+  static const String onboarding3 = '$svgPath/onboarding3.svg';
 
 
 }

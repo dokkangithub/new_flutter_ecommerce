@@ -34,7 +34,7 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
   @override
   Future<Response> signup(Map<String, dynamic> userData) async {
     final response = await apiProvider.post(LaravelApiEndPoint.signup, data: userData);
-    return response.data;
+    return response;
   }
 
   @override
