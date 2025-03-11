@@ -1,3 +1,4 @@
+import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import '../../../core/utils/local_storage/local_storage_keys.dart';
 import '../../../core/utils/local_storage/secure_storage.dart';
@@ -37,42 +38,54 @@ class AuthProvider extends ChangeNotifier {
 
   bool _isLoading = false;
   AuthResponseModel? _user;
+  String? _errorMessage;
 
   bool get isLoading => _isLoading;
   AuthResponseModel? get user => _user;
+  String? get errorMessage => _errorMessage;
 
   void _setLoading(bool value) {
     _isLoading = value;
     notifyListeners();
   }
 
-  Future<void> login(String email, String password) async {
+  void _setErrorMessage(String? message) {
+    _errorMessage = message;
+    notifyListeners();
+  }
+
+
+  Future<bool> login(String email, String password,String loginBy) async {
     _setLoading(true);
+    bool isSuccess = false;
     try {
-      _user = await loginUseCase(email, password);
-      await SecureStorage().save(LocalStorageKey.userToken, _user!.accessToken!);
+      _user = await loginUseCase(email, password,loginBy);
+      if (_user != null && _user!.accessToken != null) {
+        await SecureStorage().save(LocalStorageKey.userToken, _user!.accessToken!);
+        isSuccess = true;
+      }else if(_user!.result==false){
+        _setErrorMessage(_user!.message[0]);
+      }
     } catch (e) {
       print("Login Error: $e");
     }
     _setLoading(false);
+    return isSuccess;
   }
+
 
   Future<void> signup(Map<String, dynamic> userData) async {
     _setLoading(true);
     try {
-      final response = await signupUseCase(userData); // Response<dynamic>
-      final responseData = response.data; // Extract the actual data
-
-      if (responseData['result'] == true) {
-        int userId = responseData['user_id'];
-        print("User ID: $userId");
-
-        // TODO: Store userId if needed (e.g., for verification step)
+      Response response = await signupUseCase(userData);
+      print('sssssdd${response.data}');
+      if(response.data['result']){
+        _user=response.data;
+        await SecureStorage().save(LocalStorageKey.userToken, _user!.accessToken!);
+        _setErrorMessage(_user!.message);
+      }else {
+        _setErrorMessage(response.data['message'][0]);
       }
-
-      print("Signup Success: ${responseData['message']}");
-      // TODO: Show success message & navigate to login if needed
-
     } catch (e) {
       print("Signup Error: $e");
     }

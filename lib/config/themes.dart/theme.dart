@@ -53,37 +53,37 @@ class AppTheme {
     // Text Theme
     textTheme: const TextTheme(
       displayLarge: TextStyle(
-        color: lightTextColor,
+        color: black,
         fontSize: 32,
         fontWeight: FontWeight.bold,
       ),
       displayMedium: TextStyle(
-        color: lightTextColor,
+        color: black,
         fontSize: 28,
         fontWeight: FontWeight.bold,
       ),
       displaySmall: TextStyle(
-        color: lightTextColor,
+        color: black,
         fontSize: 24,
         fontWeight: FontWeight.bold,
       ),
       headlineMedium: TextStyle(
-        color: lightTextColor,
+        color: black,
         fontSize: 20,
         fontWeight: FontWeight.w600,
       ),
       headlineSmall: TextStyle(
-        color: lightTextColor,
+        color: black,
         fontSize: 18,
         fontWeight: FontWeight.w600,
       ),
       titleLarge: TextStyle(
-        color: lightTextColor,
+        color: black,
         fontSize: 16,
         fontWeight: FontWeight.w600,
       ),
       titleMedium: TextStyle(
-        color: lightTextColor,
+        color: black,
         fontSize: 16,
         fontWeight: FontWeight.w500,
       ),
@@ -93,22 +93,22 @@ class AppTheme {
         fontWeight: FontWeight.w500,
       ),
       bodyLarge: TextStyle(
-        color: lightTextColor,
+        color: black,
         fontSize: 16,
         fontWeight: FontWeight.normal,
       ),
       bodyMedium: TextStyle(
-        color: lightTextColor,
+        color: black,
         fontSize: 14,
         fontWeight: FontWeight.normal,
       ),
       bodySmall: TextStyle(
-        color: lightSecondaryTextColor,
+        color: black,
         fontSize: 12,
         fontWeight: FontWeight.normal,
       ),
       labelLarge: TextStyle(
-        color: lightTextColor,
+        color: black,
         fontSize: 14,
         fontWeight: FontWeight.w500,
       ),

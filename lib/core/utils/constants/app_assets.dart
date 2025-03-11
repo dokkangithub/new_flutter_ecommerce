@@ -24,6 +24,7 @@ class AppAnimations {
   static const String onboarding2 = '$animationPath/onboarding2.json';
   static const String onboarding3 = '$animationPath/onboarding3.json';
 }
+
 class AppSvgs {
   static const String animationPath = 'assets/svg';
 
@@ -32,6 +33,16 @@ class AppSvgs {
   static const String svgDokkanLogo = '$animationPath/svg_dokkan_logo.svg';
   static const String btnNotifications = '$animationPath/btnNotifications.svg';
   static const String menu = '$animationPath/menu.svg';
+
+
+}
+
+class AppIcons {
+  static const String iconPath = 'assets/icons';
+
+  static const String google = '$iconPath/google.png';
+  static const String facebook = '$iconPath/facebook.png';
+  static const String apple = '$iconPath/apple.png';
 
 
 }

@@ -6,6 +6,7 @@ import 'package:laravel_ecommerce/presentation/auth/screens/signup_screen.dart';
 import '../../presentation/auth/screens/forgot_password_screen.dart';
 import '../../presentation/auth/screens/reset_password_screen.dart';
 import '../../presentation/auth/screens/verification_screen.dart';
+import '../../presentation/home/screens/home.dart';
 import '../../presentation/onboarding/onboarding_screen.dart';
 import '../../presentation/splash/splash_screen.dart';
 
@@ -17,6 +18,7 @@ class AppRoutes {
   static const String forgetPassword = '/forgot-password';
   static const String resetPassword = '/reset-password';
   static const String verificationScreen = '/verification';
+  static const String homeScreen = '/home';
 
   static Route<dynamic> generateRoute(RouteSettings settings) {
     switch (settings.name) {
@@ -25,15 +27,17 @@ class AppRoutes {
       case onboarding:
         return MaterialPageRoute(builder: (_) => const OnboardingScreen());
       case login:
-        return MaterialPageRoute(builder: (_) => const LoginScreen());
+        return MaterialPageRoute(builder: (_) =>  LoginScreen());
       case signUp:
-        return MaterialPageRoute(builder: (_) => const SignupScreen());
+        return MaterialPageRoute(builder: (_) => const RegistrationScreen());
       case forgetPassword:
         return MaterialPageRoute(builder: (_) => ForgotPasswordScreen());
       case resetPassword:
         return MaterialPageRoute(builder: (_) => const ResetPasswordScreen());
       case verificationScreen:
-        return MaterialPageRoute(builder: (_) => const VerificationScreen());
+        return MaterialPageRoute(builder: (_) => VerificationScreen(contactInfo: '',));
+      case homeScreen:
+        return MaterialPageRoute(builder: (_) => HomeScreen());
       default:
         return MaterialPageRoute(
           builder: (_) => Scaffold(

@@ -1,7 +1,7 @@
 enum Environment { development, staging, production }
 
 class AppConfig {
-  late String apiBaseUrl = 'https://silverpure-eg.com/api/v2';
+  late String apiBaseUrl = 'https://admin.homelyhubmarket.com/api/v2';
   late Environment environment;
   bool enableLogging = true;
   String appName = 'Leader Company';

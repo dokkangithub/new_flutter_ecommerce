@@ -6,7 +6,7 @@ import '../models/auth_response_model.dart';
 
 /// Interface for authentication remote data source
 abstract class AuthRemoteDataSource {
-  Future<AuthResponseModel> login(String email, String password);
+  Future<AuthResponseModel> login(String email, String password,String loginBy);
   Future<Response> signup(Map<String, dynamic> userData);
   Future<AuthResponseModel> socialLogin(String provider, String token);
   Future<void> logout();
@@ -23,10 +23,10 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
   AuthRemoteDataSourceImpl(this.apiProvider);
 
   @override
-  Future<AuthResponseModel> login(String email, String password) async {
+  Future<AuthResponseModel> login(String email, String password,String loginBy) async {
     final response = await apiProvider.post(
       LaravelApiEndPoint.login,
-      data: {'email': email, 'password': password},
+      data: {'email': email, 'password': password,'login_by':loginBy},
     );
     return AuthResponseModel.fromJson(response.data);
   }

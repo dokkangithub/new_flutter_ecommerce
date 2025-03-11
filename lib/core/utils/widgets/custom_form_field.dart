@@ -41,7 +41,7 @@ class CustomTextFormField extends StatefulWidget {
     this.minLines,
     this.maxLength,
     this.textStyle,
-    this.borderRadius = 30.0, // More rounded default
+    this.borderRadius = 25.0, // Set border radius to 25
   });
 
   @override
@@ -87,59 +87,70 @@ class _CustomTextFormFieldState extends State<CustomTextFormField> {
           ),
         ]
             : [
-           BoxShadow(
-            color: Colors.black12.withValues(alpha: 0.05),
+          BoxShadow(
+            color: Colors.black12.withValues(alpha:0.05),
             blurRadius: 1,
-            offset: Offset(0.2, 0.2),
+            offset: const Offset(0.2, 0.2),
           ),
         ],
       ),
-      child: Card(
-        elevation: _isFocused ? 6.0 : 2.0,
-        shadowColor: Colors.black.withValues(alpha: 0.2),
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(widget.borderRadius),
-        ),
-        child: TextFormField(
-          focusNode: _focusNode,
-          controller: widget.controller,
-          obscureText: widget.isPassword ? _isObscured : false,
-          readOnly: widget.isReadOnly,
-          autofocus: widget.autoFocus,
-          keyboardType: widget.keyboardType,
-          textInputAction: widget.textInputAction,
-          onChanged: widget.onChanged,
-          onFieldSubmitted: widget.onFieldSubmitted,
-          validator: widget.validator,
-          maxLines: widget.maxLines,
-          minLines: widget.minLines,
-          maxLength: widget.maxLength,
-          style: widget.textStyle ?? Theme.of(context).textTheme.bodyMedium,
-          decoration: InputDecoration(
-            labelText: widget.label,
-            labelStyle: const TextStyle(color: Colors.black54),
-            hintText: widget.hint,
-            hintStyle: const TextStyle(color: Colors.black54),
-            errorText: widget.errorText,
-            prefixIcon: widget.prefixIcon,
-            suffixIcon: widget.isPassword
-                ? IconButton(
-              icon: Icon(
-                _isObscured ? Icons.visibility_off : Icons.visibility,
-                color: Theme.of(context).primaryColor.withValues(alpha: 0.3),
-              ),
-              onPressed: () {
-                setState(() {
-                  _isObscured = !_isObscured;
-                });
-              },
-            )
-                : widget.suffixIcon,
-            border: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(widget.borderRadius), // Adjust for rounded corners
-          borderSide: BorderSide.none, // Removes border while keeping shape
-        ),
+      child: TextFormField(
+        focusNode: _focusNode,
+        controller: widget.controller,
+        obscureText: widget.isPassword ? _isObscured : false,
+        readOnly: widget.isReadOnly,
+        autofocus: widget.autoFocus,
+        keyboardType: widget.keyboardType,
+        textInputAction: widget.textInputAction,
+        onChanged: widget.onChanged,
+        onFieldSubmitted: widget.onFieldSubmitted,
+        validator: widget.validator,
+        maxLines: widget.maxLines,
+        minLines: widget.minLines,
+        maxLength: widget.maxLength,
+        style: widget.textStyle ?? Theme.of(context).textTheme.bodyMedium,
+        decoration: InputDecoration(
+          labelText: widget.label,
+          labelStyle: const TextStyle(color: Colors.black54),
+          hintText: widget.hint,
+          hintStyle: const TextStyle(color: Colors.black54),
+          errorText: widget.errorText,
+          prefixIcon: widget.prefixIcon,
+          suffixIcon: widget.isPassword
+              ? IconButton(
+            icon: Icon(
+              _isObscured ? Icons.visibility_off : Icons.visibility,
+              color: Theme.of(context).primaryColor.withOpacity(0.3),
+            ),
+            onPressed: () {
+              setState(() {
+                _isObscured = !_isObscured;
+              });
+            },
+          )
+              : widget.suffixIcon,
+          border: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(25), // Rounded border
+            borderSide: const BorderSide(color: Colors.transparent),
           ),
+          enabledBorder: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(25), // Rounded border
+            borderSide: BorderSide(color: Colors.grey.shade300),
+          ),
+          focusedBorder: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(25), // Rounded border
+            borderSide: BorderSide(color: Theme.of(context).primaryColor, width: 2),
+          ),
+          errorBorder: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(25), // Rounded border
+            borderSide: const BorderSide(color: Colors.red),
+          ),
+          focusedErrorBorder: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(25), // Rounded border
+            borderSide: const BorderSide(color: Colors.red, width: 2),
+          ),
+          filled: true,
+          fillColor: Colors.white,
         ),
       ),
     );

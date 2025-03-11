@@ -94,7 +94,7 @@ class _CustomButtonState extends State<CustomButton>
             borderRadius: BorderRadius.circular(widget.borderRadius ?? 8.0),
             child: Container(
               padding: widget.padding ??
-                  const EdgeInsets.symmetric(vertical: 10, horizontal: 15),
+                  const EdgeInsets.symmetric(vertical: 15, horizontal: 15),
               child: widget.isLoading
                   ? const Center(
                       child: CustomLoadingWidget(),
@@ -102,6 +102,7 @@ class _CustomButtonState extends State<CustomButton>
                   : Row(
                       spacing: 4,
                       mainAxisSize: MainAxisSize.min,
+                      mainAxisAlignment: MainAxisAlignment.center,
                       children: [
                         widget.icon != null
                             ? Image.asset(
@@ -116,7 +117,7 @@ class _CustomButtonState extends State<CustomButton>
                           style: widget.textStyle ??
                               Theme.of(context)
                                   .textTheme
-                                  .titleSmall
+                                  .titleLarge
                                   ?.copyWith(color: AppTheme.white),
                         ),
                       ],

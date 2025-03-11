@@ -40,7 +40,7 @@ class MyApp extends StatelessWidget {
           debugShowCheckedModeBanner: false,
           theme: AppTheme.lightTheme,
           darkTheme: AppTheme.darkTheme,
-          themeMode: ThemeMode.system,
+          themeMode: ThemeMode.light,
           locale: languageProvider.locale,
           supportedLocales: const [
             Locale('en', 'US'),
@@ -62,7 +62,7 @@ class MyApp extends StatelessWidget {
             return supportedLocales.first;
           },
           onGenerateRoute: AppRoutes.generateRoute,
-          initialRoute: AppRoutes.splash,
+          initialRoute: AppRoutes.login,
         );
       }
     );

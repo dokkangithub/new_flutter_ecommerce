@@ -6,5 +6,12 @@
   "onboarding_description_2": "We have both a lot of variety and a lot of quantity!",
 
   "onboarding_title_3": "Cashbacks are waiting for you!",
-  "onboarding_description_3": "Buy all the products you order in a more affordable way with cashbacks waiting for you in next payments!"
+  "onboarding_description_3": "Buy all the products you order in a more affordable way with cashbacks waiting for you in next payments!",
+  "login": "Login",
+  "email": "Email",
+  "Password": "Password",
+  "don't_have_an_account?": "Don't have an account?",
+  "sign_up": "Sign Up",
+  "create_account": "Create Account"
+
 }

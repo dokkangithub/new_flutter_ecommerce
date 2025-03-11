@@ -9,6 +9,7 @@ class User extends Equatable {
   final dynamic avatar;
   final String avatarOriginal;
   final dynamic phone;
+  final bool emailVerified;
 
   const User({
     required this.id,
@@ -17,6 +18,7 @@ class User extends Equatable {
     required this.email,
     required this.avatar,
     required this.avatarOriginal,
+    required this.emailVerified,
     this.phone,
   });
 
@@ -28,6 +30,7 @@ class User extends Equatable {
     email,
     avatar,
     avatarOriginal,
+    emailVerified,
     phone,
   ];
 }

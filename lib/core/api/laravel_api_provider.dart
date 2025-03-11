@@ -19,6 +19,7 @@ class LaravelApiProvider implements ApiProvider {
         headers: {
           'Accept': 'application/json',
           'Content-Type': 'application/json',
+          'System-Key': '123456'
         },
       ),
     );
@@ -32,7 +33,8 @@ class LaravelApiProvider implements ApiProvider {
           responseHeader: true,
           responseBody: true,
           error: true,
-          compact: true, // Set to false for expanded logs
+          compact: true,
+          // Set to false for expanded logs
           maxWidth: 90, // Adjust log width
         ),
       );
@@ -54,11 +56,11 @@ class LaravelApiProvider implements ApiProvider {
 
   @override
   Future<Response<dynamic>> get(
-      String endpoint, {
-        Map<String, dynamic>? queryParameters,
-        Options? options,
-        CancelToken? cancelToken,
-      }) async {
+    String endpoint, {
+    Map<String, dynamic>? queryParameters,
+    Options? options,
+    CancelToken? cancelToken,
+  }) async {
     try {
       return await _dio.get(
         endpoint,
@@ -73,12 +75,12 @@ class LaravelApiProvider implements ApiProvider {
 
   @override
   Future<Response<dynamic>> post(
-      String endpoint, {
-        dynamic data,
-        Map<String, dynamic>? queryParameters,
-        Options? options,
-        CancelToken? cancelToken,
-      }) async {
+    String endpoint, {
+    dynamic data,
+    Map<String, dynamic>? queryParameters,
+    Options? options,
+    CancelToken? cancelToken,
+  }) async {
     try {
       return await _dio.post(
         endpoint,
@@ -94,12 +96,12 @@ class LaravelApiProvider implements ApiProvider {
 
   @override
   Future<Response<dynamic>> put(
-      String endpoint, {
-        dynamic data,
-        Map<String, dynamic>? queryParameters,
-        Options? options,
-        CancelToken? cancelToken,
-      }) async {
+    String endpoint, {
+    dynamic data,
+    Map<String, dynamic>? queryParameters,
+    Options? options,
+    CancelToken? cancelToken,
+  }) async {
     try {
       return await _dio.put(
         endpoint,
@@ -115,12 +117,12 @@ class LaravelApiProvider implements ApiProvider {
 
   @override
   Future<Response<dynamic>> delete(
-      String endpoint, {
-        dynamic data,
-        Map<String, dynamic>? queryParameters,
-        Options? options,
-        CancelToken? cancelToken,
-      }) async {
+    String endpoint, {
+    dynamic data,
+    Map<String, dynamic>? queryParameters,
+    Options? options,
+    CancelToken? cancelToken,
+  }) async {
     try {
       return await _dio.delete(
         endpoint,
@@ -136,12 +138,12 @@ class LaravelApiProvider implements ApiProvider {
 
   @override
   Future<Response<dynamic>> patch(
-      String endpoint, {
-        dynamic data,
-        Map<String, dynamic>? queryParameters,
-        Options? options,
-        CancelToken? cancelToken,
-      }) async {
+    String endpoint, {
+    dynamic data,
+    Map<String, dynamic>? queryParameters,
+    Options? options,
+    CancelToken? cancelToken,
+  }) async {
     try {
       return await _dio.patch(
         endpoint,
@@ -191,9 +193,10 @@ class LaravelApiProvider implements ApiProvider {
               errors: errors is Map ? Map<String, dynamic>.from(errors) : null,
             );
           } else {
-            final message = responseData is Map
-                ? responseData['message'] ?? 'Server error'
-                : 'Server error';
+            final message =
+                responseData is Map
+                    ? responseData['message'] ?? 'Server error'
+                    : 'Server error';
             return ServerException(message);
           }
         case DioExceptionType.cancel:
