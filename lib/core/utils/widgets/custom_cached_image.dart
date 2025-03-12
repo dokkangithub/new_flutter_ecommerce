@@ -21,7 +21,7 @@ class CustomImage extends StatelessWidget {
     this.placeholderAsset = AppImages.placeHolder,
     this.width,
     this.height,
-    this.fit = BoxFit.cover,
+    this.fit = BoxFit.fill,
     this.borderRadius,
     this.errorWidget,
   }) : assert(imageUrl != null || assetPath != null, "Provide either an imageUrl or assetPath");
@@ -45,7 +45,7 @@ class CustomImage extends StatelessWidget {
 
   /// Builds network image, handling both raster and SVG formats.
   Widget _buildNetworkImage() {
-    if (imageUrl!.endsWith('.svgs')) {
+    if (imageUrl!.endsWith('.svg')) {
       return SvgPicture.network(
         imageUrl!,
         width: width,
@@ -68,7 +68,7 @@ class CustomImage extends StatelessWidget {
 
   /// Builds asset image, handling both raster and SVG formats.
   Widget _buildAssetImage() {
-    if (assetPath!.endsWith('.svgs')) {
+    if (assetPath!.endsWith('.svg')) {  // Changed from .svgs to .svg
       return SvgPicture.asset(
         assetPath!,
         width: width,
@@ -87,7 +87,7 @@ class CustomImage extends StatelessWidget {
 
   /// Builds a placeholder image.
   Widget _buildPlaceholder() {
-    if (placeholderAsset!.endsWith('.svgs')) {
+    if (placeholderAsset!.endsWith('.svg')) {  // Changed from .svgs to .svg
       return SvgPicture.asset(
         placeholderAsset!,
         width: width,

@@ -1,14 +1,13 @@
-import 'package:laravel_ecommerce/domain/auth/usecases/auth/forget_password_use_case.dart';
 import 'package:laravel_ecommerce/presentation/auth/screens/login_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:laravel_ecommerce/presentation/auth/screens/signup_screen.dart';
-
 import '../../presentation/auth/screens/forgot_password_screen.dart';
 import '../../presentation/auth/screens/reset_password_screen.dart';
 import '../../presentation/auth/screens/verification_screen.dart';
 import '../../presentation/home/screens/home.dart';
 import '../../presentation/onboarding/onboarding_screen.dart';
 import '../../presentation/splash/splash_screen.dart';
+
 
 class AppRoutes {
   static const String splash = '/';

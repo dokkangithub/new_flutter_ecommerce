@@ -58,6 +58,8 @@ dependencies:
   flutter_native_splash: ^2.4.5
   pin_code_fields: ^8.0.1
   flutter_svg: ^2.0.17
+  awesome_drawer_bar: ^1.2.1
+
 
 
 dev_dependencies:

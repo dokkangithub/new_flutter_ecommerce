@@ -27,10 +27,11 @@ class AppAnimations {
 
 class AppSvgs {
   static const String svgPath = 'assets/svgs';
+
   static const String onboarding1 = '$svgPath/onboarding1.svg';
   static const String onboarding2 = '$svgPath/onboarding2.svg';
   static const String onboarding3 = '$svgPath/onboarding3.svg';
-
+  static const String filter = '$svgPath/filter.svg';
 
 }
 
