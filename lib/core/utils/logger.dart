@@ -1,6 +1,5 @@
 import 'package:flutter/foundation.dart';
-
-import '../../config/app_config.dart/app_config.dart';
+import '../config/app_config.dart/app_config.dart';
 
 /// A simple logging utility for the application
 class Logger {

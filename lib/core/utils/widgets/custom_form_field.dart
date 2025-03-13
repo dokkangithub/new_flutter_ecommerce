@@ -73,7 +73,7 @@ class _CustomTextFormFieldState extends State<CustomTextFormField> {
   @override
   Widget build(BuildContext context) {
     // Gray color for the background
-    final Color backgroundColor = Colors.grey.shade200;
+    final Color backgroundColor = Colors.grey.shade300;
 
     return Container(
       margin: const EdgeInsets.symmetric(vertical: 8.0),
@@ -83,23 +83,6 @@ class _CustomTextFormFieldState extends State<CustomTextFormField> {
         decoration: BoxDecoration(
           color: backgroundColor,
           borderRadius: BorderRadius.circular(widget.borderRadius),
-          // 3D shadow effect
-          boxShadow: [
-            // Bottom shadow (darker)
-            BoxShadow(
-              color: Colors.grey.shade500,
-              offset: const Offset(2, 2),
-              blurRadius: 3,
-              spreadRadius: 1,
-            ),
-            // Top light effect (lighter)
-            BoxShadow(
-              color: Colors.grey.shade100,
-              offset: const Offset(-4, -4),
-              blurRadius: 5,
-              spreadRadius: 1,
-            ),
-          ],
         ),
         child: TextFormField(
           focusNode: _focusNode,

@@ -1,7 +1,6 @@
-import 'package:laravel_ecommerce/config/themes.dart/theme.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-
+import '../../config/themes.dart/theme.dart';
 import '../../providers/localization/app_localizations.dart';
 import '../../providers/localization/language_provider.dart';
 import 'custom_button.dart';

@@ -87,9 +87,9 @@ class CustomImage extends StatelessWidget {
 
   /// Builds a placeholder image.
   Widget _buildPlaceholder() {
-    if (placeholderAsset!.endsWith('.svg')) {  // Changed from .svgs to .svg
+    if (placeholderAsset!.endsWith('.svg')) {
       return SvgPicture.asset(
-        placeholderAsset!,
+        AppIcons.filter,
         width: width,
         height: height,
         fit: fit,

@@ -1,13 +1,15 @@
-import 'package:laravel_ecommerce/presentation/auth/controller/auth_provider.dart';
 import 'package:flutter/material.dart';
-import 'config/app_config.dart/app_config.dart';
-import 'config/routes.dart/routes.dart';
-import 'config/themes.dart/theme.dart';
+import 'package:laravel_ecommerce/features/presentation/home/controller/home_provider.dart';
+import 'core/config/app_config.dart/app_config.dart';
+import 'core/config/routes.dart/routes.dart';
+import 'core/config/themes.dart/theme.dart';
 import 'core/di/injection_container.dart';
 import 'package:provider/provider.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'core/providers/localization/app_localizations.dart';
 import 'core/providers/localization/language_provider.dart';
+import 'features/presentation/auth/controller/auth_provider.dart';
+import 'features/presentation/main layout/controller/layout_provider.dart';
 
 
 Future<void> main() async {
@@ -21,6 +23,8 @@ Future<void> main() async {
     MultiProvider(
       providers: [
         ChangeNotifierProvider(create: (_) => sl<AuthProvider>()),
+        ChangeNotifierProvider(create: (_) => sl<HomeProvider>()),
+        ChangeNotifierProvider(create: (_) => sl<LayoutProvider>()),
         ChangeNotifierProvider(create: (_) => sl<LanguageProvider>()..setLocale(locale)),
 
       ],

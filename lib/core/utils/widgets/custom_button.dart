@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import '../../../config/themes.dart/theme.dart';
+import '../../config/themes.dart/theme.dart';
 import 'custom_loading.dart';
 
 class CustomButton extends StatefulWidget {

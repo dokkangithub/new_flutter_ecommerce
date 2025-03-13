@@ -2,7 +2,7 @@ import 'dart:io';
 import 'package:dio/dio.dart';
 import 'package:talker_dio_logger/talker_dio_logger.dart';
 import 'package:talker/talker.dart';
-import '../../config/app_config.dart/app_config.dart';
+import '../config/app_config.dart/app_config.dart';
 import '../errors/exceptions.dart';
 import 'api_provider.dart';
 
