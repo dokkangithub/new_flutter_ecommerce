@@ -29,6 +29,7 @@ Future<void> main() async {
         ChangeNotifierProvider(create: (_) => sl<LayoutProvider>()),
         ChangeNotifierProvider(create: (_) => sl<LanguageProvider>()..setLocale(locale)),
         ChangeNotifierProvider(create: (_) => ProductEditState()),
+        ChangeNotifierProvider(create: (_) => sl<CategoryProvider>()),  // Add this line
 
 
       ],

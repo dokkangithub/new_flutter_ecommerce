@@ -4,6 +4,8 @@ import 'package:dio/dio.dart';
 import 'package:laravel_ecommerce/features/presentation/home/controller/home_provider.dart';
 import '../../features/data/auth/datasources/auth_remote_datasource.dart';
 import '../../features/data/auth/repositories/auth_repository_impl.dart';
+import '../../features/data/category/datasources/category_remote_datasource.dart';
+import '../../features/data/category/repositories/category_repository_impl.dart';
 import '../../features/domain/auth/repositories/auth_repository.dart';
 import '../../features/domain/auth/usecases/auth/confirm_code_use_case.dart';
 import '../../features/domain/auth/usecases/auth/confirm_reset_password_use_case.dart';
@@ -14,22 +16,26 @@ import '../../features/domain/auth/usecases/auth/logout_use_case.dart';
 import '../../features/domain/auth/usecases/auth/resend_code_use_case.dart';
 import '../../features/domain/auth/usecases/auth/signup_use_case.dart';
 import '../../features/domain/auth/usecases/auth/social_login_use_case.dart';
+import '../../features/domain/category/repositories/category_repository.dart';
+import '../../features/domain/category/usecases/get_categories_use_case.dart';
+import '../../features/domain/category/usecases/get_featured_categories_use_case.dart';
+import '../../features/domain/category/usecases/get_filter_page_categories_use_case.dart';
+import '../../features/domain/category/usecases/get_top_categories_use_case.dart';
 import '../../features/presentation/auth/controller/auth_provider.dart';
+import '../../features/presentation/category/controller/provider.dart';
 import '../../features/presentation/main layout/controller/layout_provider.dart';
 import '../api/api_provider.dart';
 import '../config/app_config.dart/app_config.dart';
 import '../providers/localization/language_provider.dart';
 import '../utils/local_storage/secure_storage.dart';
 
-
-
 final sl = GetIt.instance;
 
 void setupDependencies() {
-  // Register AppConfig
+  // Core
   sl.registerLazySingleton<AppConfig>(() => AppConfig());
+  sl.registerLazySingleton<SecureStorage>(() => SecureStorage());
 
-  // Register Dio instance with configurations
   sl.registerLazySingleton<Dio>(() {
     final dio = Dio();
     final appConfig = sl<AppConfig>();
@@ -39,25 +45,29 @@ void setupDependencies() {
     return dio;
   });
 
-  // Register API providers
+  // API Providers
   sl.registerLazySingleton<LaravelApiProvider>(() => LaravelApiProvider());
-
-  // Register ApiProvider as the implementation you want to use
   sl.registerLazySingleton<ApiProvider>(() => sl<LaravelApiProvider>());
 
-  // Register AuthRemoteDataSource
-  sl.registerLazySingleton<AuthRemoteDataSource>(
-        () => AuthRemoteDataSourceImpl(sl<LaravelApiProvider>()),
-  );
-
-  // Register AuthRepository
-  sl.registerLazySingleton<AuthRepository>(
-        () => AuthRepositoryImpl(sl<AuthRemoteDataSource>()),
-  );
-  sl.registerLazySingleton<SecureStorage>(() => SecureStorage());
 
 
-  // Register Use Cases
+  // Data Sources
+  sl.registerLazySingleton<AuthRemoteDataSource>(() => AuthRemoteDataSourceImpl(sl<LaravelApiProvider>()));
+  sl.registerLazySingleton<CategoryRemoteDataSource>(() => CategoryRemoteDataSourceImpl(sl<ApiProvider>()));
+
+
+
+
+
+
+  // Repositories
+  sl.registerLazySingleton<AuthRepository>(() => AuthRepositoryImpl(sl<AuthRemoteDataSource>()));
+  sl.registerLazySingleton<CategoryRepository>(() => CategoryRepositoryImpl(sl<CategoryRemoteDataSource>()));
+
+
+
+
+  // Use Cases
   sl.registerLazySingleton(() => LoginUseCase(sl()));
   sl.registerLazySingleton(() => SignupUseCase(sl()));
   sl.registerLazySingleton(() => SocialLoginUseCase(sl()));
@@ -67,9 +77,13 @@ void setupDependencies() {
   sl.registerLazySingleton(() => ResendCodeUseCase(sl()));
   sl.registerLazySingleton(() => ConfirmCodeUseCase(sl()));
   sl.registerLazySingleton(() => GetUserByTokenUseCase(sl()));
+  sl.registerLazySingleton(() => GetCategoriesUseCase(sl()));
+  sl.registerLazySingleton(() => GetFeaturedCategoriesUseCase(sl()));
+  sl.registerLazySingleton(() => GetTopCategoriesUseCase(sl()));
+  sl.registerLazySingleton(() => GetFilterPageCategoriesUseCase(sl()));
 
 
-  // Register AuthProvider
+  // Providers
   sl.registerLazySingleton(() => AuthProvider(
     loginUseCase: sl(),
     signupUseCase: sl(),
@@ -81,18 +95,13 @@ void setupDependencies() {
     confirmCodeUseCase: sl(),
     getUserByTokenUseCase: sl(),
   ));
-
-  // Register LanguageProvider
+  sl.registerLazySingleton(() => CategoryProvider(
+    getCategoriesUseCase: sl(),
+    getFeaturedCategoriesUseCase: sl(),
+    getTopCategoriesUseCase: sl(),
+    getFilterPageCategoriesUseCase: sl(),
+  ));
   sl.registerLazySingleton(() => LanguageProvider());
-
-  //home provider
   sl.registerLazySingleton(() => HomeProvider());
   sl.registerLazySingleton(() => LayoutProvider());
-
-
-
-
-
-
-
 }

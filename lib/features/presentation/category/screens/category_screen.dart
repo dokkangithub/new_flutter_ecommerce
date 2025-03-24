@@ -1,50 +1,87 @@
+// lib/features/presentation/category/screens/category_screen.dart
 import 'package:flutter/material.dart';
-import 'package:laravel_ecommerce/core/utils/extension/text_style_extension.dart';
+import 'package:laravel_ecommerce/core/utils/widgets/custom_loading.dart';
+import 'package:provider/provider.dart';
+import '../controller/provider.dart';
 import '../widgets/category_card_widget.dart';
 
-class CategoryScreen extends StatelessWidget {
+class CategoryScreen extends StatefulWidget {
   const CategoryScreen({super.key});
 
   @override
-  Widget build(BuildContext context) {
-    final List<Map<String, dynamic>> categories = [
-      {'name': 'Fruits', 'count': 3, 'icon': Icons.local_dining},
-      {'name': 'Grains', 'count': 12, 'icon': Icons.grass},
-      {'name': 'Meat', 'count': 17, 'icon': Icons.fastfood},
-      {'name': 'Vegetables', 'count': 12, 'icon': Icons.local_florist},
-    ];
+  State<CategoryScreen> createState() => _CategoryScreenState();
+}
 
-    return Scaffold(
-      body: SafeArea(
-        child: Padding(
-          padding: const EdgeInsets.all(16.0),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Expanded(
-                child: Center(
-                  child: GridView.builder(
-                    shrinkWrap: true,
-                    gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                      crossAxisCount: 2,
-                      crossAxisSpacing: 16,
-                      mainAxisSpacing: 16,
-                      childAspectRatio: 0.8,
-                    ),
-                    itemCount: categories.length,
-                    itemBuilder: (context, index) {
-                      return CategoryCardInCategoryScreen(
-                        categoryName: categories[index]['name'],
-                        itemCount: categories[index]['count'],
-                        icon: categories[index]['icon'],
-                      );
-                    },
+class _CategoryScreenState extends State<CategoryScreen> {
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      context.read<CategoryProvider>().getCategories();
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return SafeArea(
+      child: Consumer<CategoryProvider>(
+        builder: (context, categoryProvider, child) {
+          if (categoryProvider.categoriesState == CategoryLoadingState.loading) {
+            return const Center(child: CustomLoadingWidget());
+          }
+
+          // Show error if fetching failed
+          if (categoryProvider.categoriesState == CategoryLoadingState.error) {
+            return Center(
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  const Text('Failed to load categories'),
+                  const SizedBox(height: 16),
+                  ElevatedButton(
+                    onPressed: () => categoryProvider.getCategories(),
+                    child: const Text('Retry'),
                   ),
-                ),
+                ],
               ),
-            ],
-          ),
-        ),
+            );
+          }
+
+          // Show categories if data is loaded
+          if (categoryProvider.categoriesState == CategoryLoadingState.loaded &&
+              categoryProvider.categoriesResponse?.data != null) {
+            final categories = categoryProvider.categoriesResponse!.data;
+
+            if (categories.isEmpty) {
+              return const Center(child: Text('No categories found'));
+            }
+
+            return Padding(
+              padding: const EdgeInsets.all(16.0),
+              child: GridView.builder(
+                gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                  crossAxisCount: 2,
+                  crossAxisSpacing: 16,
+                  mainAxisSpacing: 16,
+                  childAspectRatio: 0.8,
+                ),
+                itemCount: categories.length,
+                itemBuilder: (context, index) {
+                  final category = categories[index];
+                  return CategoryCardInCategoryScreen(
+                    categoryName: category.name ?? 'Unknown',
+                    itemCount: category.productCount ?? 0,
+                    icon: Icons.category,
+                    imageUrl: category.icon,
+                  );
+                },
+              ),
+            );
+          }
+
+          // Default empty state
+          return const Center(child: Text('No categories available'));
+        },
       ),
     );
   }
