@@ -1,5 +1,6 @@
 import 'dart:io';
 import 'package:dio/dio.dart';
+import 'package:laravel_ecommerce/core/api/api_exceptions.dart' show UserNotFoundException;
 import 'package:talker_dio_logger/talker_dio_logger.dart';
 import 'package:talker/talker.dart';
 import '../config/app_config.dart/app_config.dart';
@@ -190,6 +191,8 @@ class LaravelApiProvider implements ApiProvider {
   }
 
   /// Handles Dio errors and throws appropriate exceptions
+// lib/core/api/laravel_api_provider.dart
+
   Exception _handleDioError(dynamic error) {
     if (error is DioException) {
       switch (error.type) {
@@ -206,21 +209,24 @@ class LaravelApiProvider implements ApiProvider {
           _talker.debug('Response data: $responseData');
 
           if (statusCode == 401) {
+            // Check the response body for "User not found"
+            final message = responseData is Map ? responseData['message'] : null;
+            if (message == 'User not found') {
+              return UserNotFoundException(message);
+            }
             return const UnauthorizedException('Unauthorized');
           } else if (statusCode == 403) {
             return const ForbiddenException('Forbidden');
           } else if (statusCode == 404) {
             return const NotFoundException('Resource not found');
           } else if (statusCode == 422) {
-            // Handle validation errors
             final errors = responseData is Map ? responseData['errors'] : null;
             return ValidationException(
               'Validation error',
               errors: errors is Map ? Map<String, dynamic>.from(errors) : null,
             );
           } else {
-            final message =
-            responseData is Map
+            final message = responseData is Map
                 ? responseData['message'] ?? 'Server error'
                 : 'Server error';
             return ServerException(message);
@@ -247,7 +253,6 @@ class LaravelApiProvider implements ApiProvider {
       return ServerException(error.toString());
     }
   }
-
   // Getter to expose the talker instance for external use
   Talker get talker => _talker;
 }

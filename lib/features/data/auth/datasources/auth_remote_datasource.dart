@@ -1,11 +1,11 @@
 import 'package:dio/dio.dart';
 import '../../../../core/api/api_provider.dart';
 import '../../../../core/utils/constants/app_endpoints.dart';
+import '../../../../core/utils/results.dart';
 import '../models/auth_response_model.dart';
 
 abstract class AuthRemoteDataSource {
-  Future<AuthResponseModel> login(String email, String password,String loginBy);
-  Future<Response> signup(Map<String, dynamic> userData);
+  Future<Result<AuthResponseModel>> login(String email, String password, String loginBy);  Future<Response> signup(Map<String, dynamic> userData);
   Future<AuthResponseModel> socialLogin(String provider, String token);
   Future<void> logout();
   Future<void> forgetPassword(String email);
@@ -21,12 +21,23 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
   AuthRemoteDataSourceImpl(this.apiProvider);
 
   @override
-  Future<AuthResponseModel> login(String email, String password,String loginBy) async {
-    final response = await apiProvider.post(
-      LaravelApiEndPoint.login,
-      data: {'email': email, 'password': password,'login_by':loginBy},
-    );
-    return AuthResponseModel.fromJson(response.data);
+  Future<Result<AuthResponseModel>> login(String email, String password, String loginBy) async {
+    try {
+      final response = await apiProvider.post(
+        LaravelApiEndPoint.login,
+        data: {'email': email, 'password': password, 'login_by': loginBy},
+      );
+      final authResponse = AuthResponseModel.fromJson(response.data);
+      if (authResponse.result) {
+        return Success(authResponse);
+      } else {
+        return Failure(authResponse.message);
+      }
+    } on DioException catch (e) {
+      return Failure(e.response?.data['message'] ?? 'Network error');
+    } catch (e) {
+      return Failure('$e');
+    }
   }
 
   @override

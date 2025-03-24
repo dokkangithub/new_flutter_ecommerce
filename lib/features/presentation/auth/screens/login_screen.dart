@@ -110,31 +110,42 @@ class LoginScreen extends StatelessWidget {
                     // Login Button
                     authProvider.isLoading
                         ? CustomLoadingWidget()
-                        : CustomButton(
+                        : Column(
+                      children: [
+                        if (authProvider.errorMessage != null)
+                          Padding(
+                            padding: const EdgeInsets.only(bottom: 8.0),
+                            child: Text(
+                              authProvider.errorMessage!,
+                              style: TextStyle(color: Colors.red),
+                            ),
+                          ),
+                        CustomButton(
                           text: 'login'.tr(context),
                           onPressed: () async {
                             if (_formKey.currentState!.validate()) {
                               bool isSuccess = await authProvider.login(
                                 emailController.text,
                                 passwordController.text,
-                                emailController.text.contains('@')?'email':'phone'
+                                emailController.text.contains('@') ? 'email' : 'phone',
                               );
                               if (isSuccess) {
                                 AppRoutes.navigateToAndRemoveUntil(
                                   context,
-                                  AppRoutes.homeScreen,
+                                  AppRoutes.mainLayoutScreen,
                                 );
                               } else {
                                 CustomSnackbar.show(
                                   context,
-                                  message:
-                                      'Login failed. Please check your credentials.',
+                                  message: authProvider.errorMessage ?? 'Login failed. Please check your credentials.',
                                   isError: true,
                                 );
                               }
                             }
                           },
                         ),
+                      ],
+                    ),
                     const SizedBox(height: 24),
 
                     // OR Divider

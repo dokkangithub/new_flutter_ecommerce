@@ -9,7 +9,9 @@ import 'package:flutter_localizations/flutter_localizations.dart';
 import 'core/providers/localization/app_localizations.dart';
 import 'core/providers/localization/language_provider.dart';
 import 'features/presentation/auth/controller/auth_provider.dart';
+import 'features/presentation/category/controller/provider.dart';
 import 'features/presentation/main layout/controller/layout_provider.dart';
+import 'features/presentation/product/screens/product_screen.dart';
 
 
 Future<void> main() async {
@@ -26,6 +28,8 @@ Future<void> main() async {
         ChangeNotifierProvider(create: (_) => sl<HomeProvider>()),
         ChangeNotifierProvider(create: (_) => sl<LayoutProvider>()),
         ChangeNotifierProvider(create: (_) => sl<LanguageProvider>()..setLocale(locale)),
+        ChangeNotifierProvider(create: (_) => ProductEditState()),
+
 
       ],
       child: const MyApp(),

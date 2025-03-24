@@ -1,4 +1,5 @@
 import 'package:dio/dio.dart';
+import '../../../../core/utils/results.dart';
 import '../../../domain/auth/repositories/auth_repository.dart';
 import '../datasources/auth_remote_datasource.dart';
 import '../models/auth_response_model.dart';
@@ -10,7 +11,7 @@ class AuthRepositoryImpl implements AuthRepository {
   AuthRepositoryImpl(this.authRemoteDataSource);
 
   @override
-  Future<AuthResponseModel> login(String email, String password,String loginBy) async {
+  Future<Result<AuthResponseModel>> login(String email, String password, String loginBy) async {
     return await authRemoteDataSource.login(email, password, loginBy);
   }
 

@@ -31,7 +31,7 @@ class UnauthorizedException extends ServerException {
   const UnauthorizedException(String message) : super(message);
 
   @override
-  String toString() => 'UnauthorizedException: $message';
+  String toString() => '$message';
 }
 
 /// Exception thrown when user is forbidden from accessing a resource

@@ -2,8 +2,10 @@ import 'dart:convert';
 
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
+import '../../../../core/api/api_exceptions.dart';
 import '../../../../core/utils/local_storage/local_storage_keys.dart';
 import '../../../../core/utils/local_storage/secure_storage.dart';
+import '../../../../core/utils/results.dart';
 import '../../../data/auth/models/auth_response_model.dart';
 import '../../../domain/auth/usecases/auth/confirm_code_use_case.dart';
 import '../../../domain/auth/usecases/auth/confirm_reset_password_use_case.dart';
@@ -57,19 +59,25 @@ class AuthProvider extends ChangeNotifier {
   }
 
 
-  Future<bool> login(String email, String password,String loginBy) async {
+  Future<bool> login(String email, String password, String loginBy) async {
     _setLoading(true);
     bool isSuccess = false;
     try {
-      _user = await loginUseCase(email, password,loginBy);
-      if (_user != null && _user!.accessToken != null) {
+      final result = await loginUseCase(email, password, loginBy);
+      if (result is Success<AuthResponseModel>) {
+        _user = result.data;
         await SecureStorage().save(LocalStorageKey.userToken, _user!.accessToken!);
         isSuccess = true;
-      }else if(_user!.result==false){
-        _setRequestMessage(_user!.message[0]);
+        _setRequestMessage(null);
+      } else if (result is Failure<AuthResponseModel>) {
+        _setRequestMessage(result.message);
       }
+    } on UserNotFoundException catch (e) {
+      _setRequestMessage(e.message);
+    } on UnauthorizedException catch (e) {
+      _setRequestMessage('Invalid credentials. Please try again.');
     } catch (e) {
-      print("Login Error: $e");
+      _setRequestMessage(e.toString());
     }
     _setLoading(false);
     return isSuccess;

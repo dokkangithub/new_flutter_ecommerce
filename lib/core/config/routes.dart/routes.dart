@@ -12,6 +12,7 @@ import '../../../features/presentation/cart/screens/cart_screen.dart';
 import '../../../features/presentation/home/screens/home.dart';
 import '../../../features/presentation/main layout/screens/main_layout_screen.dart';
 import '../../../features/presentation/onboarding/onboarding_screen.dart';
+import '../../../features/presentation/product/screens/product_screen.dart';
 import '../../../features/presentation/splash/splash_screen.dart';
 
 class AppRoutes {
@@ -28,6 +29,7 @@ class AppRoutes {
   static const String profileScreen = '/profile';
   static const String mainLayoutScreen = '/mainLayout';
   static const String cartScreen = '/cart';
+  static const String productScreen = '/product';
 
   static Route<dynamic> generateRoute(RouteSettings settings) {
     Widget page;
@@ -58,13 +60,15 @@ class AppRoutes {
       case categoryScreen:
         page = CategoryScreen();
       case wishListScreen:
-        page = WishListScreen();
+        page = WishlistScreen();
       case profileScreen:
         page = ProfileScreen();
       case mainLayoutScreen:
         page = MainLayoutScreen();
       case cartScreen:
         page = CartScreen();
+      case productScreen:
+        page = ProductDetailScreen();
         break;
       default:
         page = Scaffold(

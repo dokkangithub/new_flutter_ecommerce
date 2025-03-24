@@ -202,7 +202,7 @@ class HomeScreen extends StatelessWidget {
         CarouselSlider.builder(
           itemCount: products.isNotEmpty ? products.length : 10,
           options: CarouselOptions(
-            height: 200,
+            height: 175,
             viewportFraction: 0.98,
             enableInfiniteScroll: products.length > 3,
             autoPlay: products.length > 1,

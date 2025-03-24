@@ -1,3 +1,4 @@
+import '../../../../../core/utils/results.dart';
 import '../../../../data/auth/models/auth_response_model.dart';
 import '../../repositories/auth_repository.dart';
 
@@ -6,7 +7,7 @@ class LoginUseCase {
 
   LoginUseCase(this.authRepository);
 
-  Future<AuthResponseModel> call(String email, String password,String loginBy) async {
-    return await authRepository.login(email, password,loginBy);
+  Future<Result<AuthResponseModel>> call(String email, String password, String loginBy) async {
+    return await authRepository.login(email, password, loginBy);
   }
 }

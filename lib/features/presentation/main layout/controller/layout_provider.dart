@@ -19,7 +19,7 @@ class LayoutProvider extends ChangeNotifier {
   List<Widget> mainScreens=[
     HomeScreen(),
     CategoryScreen(),
-    WishListScreen(),
+    WishlistScreen(),
     ProfileScreen(),
   ];
 

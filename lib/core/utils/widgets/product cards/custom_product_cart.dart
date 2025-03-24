@@ -1,5 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:laravel_ecommerce/core/config/themes.dart/theme.dart';
 import 'package:laravel_ecommerce/core/utils/extension/text_style_extension.dart';
+
+import '../../../config/routes.dart/routes.dart';
 
 class ProductItemInCart extends StatelessWidget {
   final Map<String, dynamic> item;
@@ -42,30 +45,44 @@ class ProductItemInCart extends StatelessWidget {
             onDelete!();
           }
         },
-        child: Container(
-          width: MediaQuery.of(context).size.width,
-          decoration: BoxDecoration(
-            color: Colors.white,
-            borderRadius: BorderRadius.circular(15),
-            boxShadow: [
-              BoxShadow(
-                color: Colors.grey.withOpacity(0.1),
-                spreadRadius: 1,
-                blurRadius: 2,
-                offset: const Offset(0, 1),
-              ),
-            ],
-          ),
-          child: Stack(
+        child: SizedBox(
+          height: 100,
+          child: Row(
             children: [
-              Padding(
-                padding: const EdgeInsets.all(10.0),
-                child: Row(
-                  spacing: 15,
-                  children: [
-                    _productImage(),
-                    _productDetails(context),
-                  ],
+              _quantityButtonsWidget(context),
+              SizedBox(width: 8),
+              InkWell(
+                onTap: (){
+                  AppRoutes.navigateTo(context, AppRoutes.productScreen);
+                },
+                child: Expanded(
+                  flex: 5,
+                  child: Container(
+                    decoration: BoxDecoration(
+                      color: Colors.white,
+                      borderRadius: BorderRadius.circular(15),
+                      boxShadow: [
+                        BoxShadow(
+                          color: Colors.grey.withOpacity(0.1),
+                          spreadRadius: 1,
+                          blurRadius: 2,
+                          offset: const Offset(0, 1),
+                        ),
+                      ],
+                    ),
+                    child: Expanded(
+                      child: Padding(
+                        padding: const EdgeInsets.all(10.0),
+                        child: Row(
+                          spacing: 15,
+                          children: [
+                            _productImage(),
+                            _productDetails(context),
+                          ],
+                        ),
+                      ),
+                    ),
+                  ),
                 ),
               ),
             ],
@@ -127,64 +144,59 @@ class ProductItemInCart extends StatelessWidget {
             '\$${item['price'].toStringAsFixed(2)}',
             style: context.titleMedium,
           ),
-          const SizedBox(height: 8),
-
-          _quantityButtonsWidget(),
         ],
       ),
     );
   }
 
-  Widget _quantityButtonsWidget(){
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.end,
-      children: [
-        // Minus button
-        _buildQuantityButton(
-          icon: Icons.remove,
-          onPressed: () {
-            if ((item['quantity'] as int) > 1 &&
-                onQuantityChanged != null) {
-              onQuantityChanged!(
-                (item['quantity'] as int) - 1,
-              );
-            }
-          },
-          enabled: (item['quantity'] as int) > 1,
+  Widget _quantityButtonsWidget(BuildContext context){
+    return Expanded(
+      flex: 1,
+      child: Container(
+        decoration: BoxDecoration(
+          color: Theme.of(context).primaryColor,
+          borderRadius: BorderRadius.circular(15),
         ),
-        // Quantity display
-        Container(
-          margin: const EdgeInsets.symmetric(
-            horizontal: 8,
-          ),
-          padding: const EdgeInsets.symmetric(
-            horizontal: 12,
-            vertical: 4,
-          ),
-          decoration: BoxDecoration(
-            color: Colors.grey.shade100,
-            borderRadius: BorderRadius.circular(8),
-          ),
-          child: Text(
-            '${item['quantity']}',
-            style: const TextStyle(
-              fontSize: 14,
-              fontWeight: FontWeight.w600,
+        child: Column(
+          children: [
+            // Minus button
+            Expanded(
+              child: _buildQuantityButton(
+                icon: Icons.remove,
+                onPressed: () {
+                  if ((item['quantity'] as int) > 1 &&
+                      onQuantityChanged != null) {
+                    onQuantityChanged!(
+                      (item['quantity'] as int) - 1,
+                    );
+                  }
+                },
+                enabled: (item['quantity'] as int) > 1,
+              ),
             ),
-          ),
+            // Quantity display
+            Expanded(
+              child: Text(
+                '${item['quantity']}',
+                style: context.titleSmall.copyWith(color: AppTheme.white),
+              ),
+            ),
+            // Plus button
+            Expanded(
+              child: _buildQuantityButton(
+                icon: Icons.add,
+                onPressed: () {
+                  if (onQuantityChanged != null) {
+                    onQuantityChanged!(
+                      (item['quantity'] as int) + 1,
+                    );
+                  }
+                },
+              ),
+            ),
+          ],
         ),
-        // Plus button
-        _buildQuantityButton(
-          icon: Icons.add,
-          onPressed: () {
-            if (onQuantityChanged != null) {
-              onQuantityChanged!(
-                (item['quantity'] as int) + 1,
-              );
-            }
-          },
-        ),
-      ],
+      ),
     );
   }
 
@@ -193,20 +205,9 @@ class ProductItemInCart extends StatelessWidget {
     required VoidCallback onPressed,
     bool enabled = true,
   }) {
-    return Container(
-      width: 28,
-      height: 28,
-      decoration: BoxDecoration(
-        color: enabled ? Colors.blue : Colors.grey.shade300,
-        shape: BoxShape.circle,
-      ),
-      child: IconButton(
-        padding: EdgeInsets.zero,
-        constraints: const BoxConstraints(),
-        icon: Icon(icon, size: 16, color: Colors.white),
-        onPressed: enabled ? onPressed : null,
-      ),
-    );
+    return InkWell(
+        onTap: enabled ? onPressed : null,
+        child: Icon(icon, size: 24, color: enabled?AppTheme.white:AppTheme.lightDividerColor));
   }
 
 

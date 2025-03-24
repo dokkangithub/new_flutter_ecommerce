@@ -13,6 +13,15 @@ class ApiException implements Exception {
   }
 }
 
+class UserNotFoundException implements Exception {
+  final String message;
+
+  const UserNotFoundException(this.message);
+
+  @override
+  String toString() => message;
+}
+
 /// Exception thrown when there's a network connectivity issue
 class NetworkException extends ApiException {
   NetworkException(String message, {dynamic error, StackTrace? stackTrace})
