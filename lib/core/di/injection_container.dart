@@ -6,8 +6,8 @@ import '../../features/data/auth/datasources/auth_remote_datasource.dart';
 import '../../features/data/auth/repositories/auth_repository_impl.dart';
 import '../../features/data/category/datasources/category_remote_datasource.dart';
 import '../../features/data/category/repositories/category_repository_impl.dart';
-import '../../features/data/product/datasources/product_remote_datasource.dart'; // You'll need to create this
-import '../../features/data/product/repositories/product_repository_impl.dart'; // You'll need to create this
+import '../../features/data/product/datasources/product_remote_datasource.dart';
+import '../../features/data/product/repositories/product_repository_impl.dart';
 import '../../features/data/slider/datasources/slider_remote_datasource.dart';
 import '../../features/data/slider/repositories/slider_repository_impl.dart';
 import '../../features/domain/auth/repositories/auth_repository.dart';
@@ -26,11 +26,20 @@ import '../../features/domain/category/usecases/get_featured_categories_use_case
 import '../../features/domain/category/usecases/get_filter_page_categories_use_case.dart';
 import '../../features/domain/category/usecases/get_top_categories_use_case.dart';
 import '../../features/domain/product/repositories/product_repository.dart';
+import '../../features/domain/product/usecases/get_brand_products_use_case.dart';
+import '../../features/domain/product/usecases/get_category_products_use_case.dart';
+import '../../features/domain/product/usecases/get_digital_products_use_case.dart';
 import '../../features/domain/product/usecases/get_featured_products_use_case.dart';
 import '../../features/domain/product/usecases/get_best_selling_products_use_case.dart';
+import '../../features/domain/product/usecases/get_filtered_products_use_case.dart';
 import '../../features/domain/product/usecases/get_new_added_products_use_case.dart';
+import '../../features/domain/product/usecases/get_product_details_use_case.dart';
+import '../../features/domain/product/usecases/get_related_products_use_case.dart';
+import '../../features/domain/product/usecases/get_shop_products_use_case.dart';
 import '../../features/domain/product/usecases/get_todays_deal_products_use_case.dart';
 import '../../features/domain/product/usecases/get_flash_deal_products_use_case.dart';
+import '../../features/domain/product/usecases/get_top_from_this_seller_products_use_case.dart';
+import '../../features/domain/product/usecases/get_variant_wise_info_use_case.dart';
 import '../../features/domain/slider/repositories/slider_repository.dart';
 import '../../features/domain/slider/usecases/get_sliders_use_case.dart';
 import '../../features/presentation/auth/controller/auth_provider.dart';
@@ -102,7 +111,17 @@ void setupDependencies() {
   sl.registerLazySingleton(() => GetNewAddedProductsUseCase(sl()));
   sl.registerLazySingleton(() => GetTodaysDealProductsUseCase(sl()));
   sl.registerLazySingleton(() => GetFlashDealProductsUseCase(sl()));
+  sl.registerLazySingleton(() => GetCategoryProductsUseCase(sl()));
+  sl.registerLazySingleton(() => GetBrandProductsUseCase(sl()));
+  sl.registerLazySingleton(() => GetDigitalProductsUseCase(sl()));
+  sl.registerLazySingleton(() => GetFilteredProductsUseCase(sl()));
+  sl.registerLazySingleton(() => GetProductDetailsUseCase(sl()));
+  sl.registerLazySingleton(() => GetRelatedProductsUseCase(sl()));
+  sl.registerLazySingleton(() => GetShopProductsUseCase(sl()));
+  sl.registerLazySingleton(() => GetTopFromThisSellerProductsUseCase(sl()));
+  sl.registerLazySingleton(() => GetVariantWiseInfoUseCase(sl()));
 
+  // Use Cases - Sliders
   sl.registerLazySingleton(() => GetSlidersUseCase(sl()));
 
   // Providers
@@ -130,12 +149,25 @@ void setupDependencies() {
   ));
 
   sl.registerLazySingleton(() => HomeProvider(
+    // Existing use cases
     getFeaturedProductsUseCase: sl(),
     getBestSellingProductsUseCase: sl(),
     getNewAddedProductsUseCase: sl(),
     getTodaysDealProductsUseCase: sl(),
     getFlashDealProductsUseCase: sl(),
+
+    // New use cases
+    getCategoryProductsUseCase: sl(),
+    getBrandProductsUseCase: sl(),
+    getDigitalProductsUseCase: sl(),
+    getFilteredProductsUseCase: sl(),
+    getProductDetailsUseCase: sl(),
+    getRelatedProductsUseCase: sl(),
+    getShopProductsUseCase: sl(),
+    getTopFromThisSellerProductsUseCase: sl(),
+    getVariantWiseInfoUseCase: sl(),
   ));
+
 
   sl.registerLazySingleton(() => LanguageProvider());
   sl.registerLazySingleton(() => LayoutProvider());
