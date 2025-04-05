@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:laravel_ecommerce/features/presentation/category/screens/category_screen.dart';
 import 'package:laravel_ecommerce/features/presentation/profile/screens/profile_screen.dart';
 import 'package:laravel_ecommerce/features/presentation/wishlist/screens/wishlist_screen.dart';
-
+import '../../../features/domain/product/entities/product.dart';
 import '../../../features/presentation/all products/screens/all_products.dart';
 import '../../../features/presentation/auth/screens/forgot_password_screen.dart';
 import '../../../features/presentation/auth/screens/login_screen.dart';
@@ -55,7 +55,10 @@ class AppRoutes {
         page = const ResetPasswordScreen();
         break;
       case verificationScreen:
-        page = VerificationScreen(contactInfo: '',);
+        final args = settings.arguments as Map<String, dynamic>?;
+        page = VerificationScreen(
+          contactInfo: args?['contactInfo'] as String? ?? '',
+        );
         break;
       case homeScreen:
         page = HomeScreen();
@@ -79,7 +82,11 @@ class AppRoutes {
         page = ProductDetailScreen();
         break;
       case allProductsScreen:
-        page = AllProductsScreen();
+        final args = settings.arguments as Map<String, dynamic>?;
+        page = AllProductsScreen(
+          initialCategoryName: args?['initialCategoryName'] as String?,
+          initialProducts: args?['initialProducts'] as List<Product>?,
+        );
         break;
       default:
         page = Scaffold(
@@ -99,14 +106,24 @@ class AppRoutes {
   }
 
   static void navigateTo(BuildContext context, String route, {Object? arguments}) {
-    Navigator.push(context, generateRoute(RouteSettings(name: route, arguments: arguments)));
+    Navigator.push(
+      context,
+      generateRoute(RouteSettings(name: route, arguments: arguments)),
+    );
   }
 
   static void navigateToAndReplace(BuildContext context, String route, {Object? arguments}) {
-    Navigator.pushReplacement(context, generateRoute(RouteSettings(name: route, arguments: arguments)));
+    Navigator.pushReplacement(
+      context,
+      generateRoute(RouteSettings(name: route, arguments: arguments)),
+    );
   }
 
   static void navigateToAndRemoveUntil(BuildContext context, String route) {
-    Navigator.pushAndRemoveUntil(context, generateRoute(RouteSettings(name: route)), (route) => false);
+    Navigator.pushAndRemoveUntil(
+      context,
+      generateRoute(RouteSettings(name: route)),
+          (route) => false,
+    );
   }
 }

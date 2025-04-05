@@ -1,65 +1,61 @@
 import 'package:flutter/material.dart';
-import 'dart:math';
+import 'package:laravel_ecommerce/core/config/routes.dart/routes.dart';
+import 'package:laravel_ecommerce/core/utils/extension/text_style_extension.dart';
+import 'package:laravel_ecommerce/core/utils/extension/translate_extension.dart';
+import 'package:laravel_ecommerce/core/utils/widgets/custom_loading.dart';
+import 'package:provider/provider.dart';
+import '../../../../core/utils/shimmer/category_without_image_shimmer.dart';
+import '../../../../core/utils/shimmer/product_shimmer.dart';
+import '../../../../core/utils/widgets/custom_back_button.dart';
+import '../../../../core/utils/widgets/product cards/custom_gridview_prodcut.dart';
+import '../../../domain/product/entities/product.dart';
+import '../../category/controller/provider.dart';
+import '../../home/controller/home_provider.dart';
+import '../../home/widgets/search_bar.dart';
 
 class AllProductsScreen extends StatefulWidget {
-  const AllProductsScreen({super.key});
+  final String? initialCategoryName;
+  final List<Product>? initialProducts;
+
+  const AllProductsScreen({
+    super.key,
+    this.initialCategoryName,
+    this.initialProducts,
+  });
 
   @override
   _AllProductsScreenState createState() => _AllProductsScreenState();
 }
 
+
 class _AllProductsScreenState extends State<AllProductsScreen> {
   final TextEditingController _searchController = TextEditingController();
-  String _searchQuery = '';
-  String _selectedCategory = 'All';
-  int _currentPage = 0;
-  final int _itemsPerPage = 8;
+  final String _searchQuery = '';
+  String _selectedCategoryName = 'All';
+  int? _selectedCategoryId;
   bool _isLoading = false;
   final ScrollController _scrollController = ScrollController();
-
-  // Dummy data
-  final List<Category> _categories = [
-    Category(id: '1', name: 'All'),
-    Category(id: '2', name: 'Electronics'),
-    Category(id: '3', name: 'Clothing'),
-    Category(id: '4', name: 'Home'),
-    Category(id: '5', name: 'Beauty'),
-    Category(id: '6', name: 'Sports'),
-    Category(id: '7', name: 'Books'),
-    Category(id: '8', name: 'Toys'),
-  ];
-
-  final List<Product> _allProducts = List.generate(
-    50,
-        (index) => Product(
-      id: 'prod_${index + 1}',
-      name: 'Product ${index + 1}',
-      price: (Random().nextDouble() * 100 + 10).toStringAsFixed(2),
-      imageUrl: 'https://picsum.photos/seed/${index + 1}/300/300',
-      category: ['All', 'Electronics', 'Clothing', 'Home', 'Beauty', 'Sports', 'Books', 'Toys'][Random().nextInt(8)],
-      rating: (Random().nextDouble() * 5).toStringAsFixed(1),
-    ),
-  );
-
-  List<Product> get _filteredProducts {
-    return _allProducts.where((product) {
-      final matchesSearch = product.name.toLowerCase().contains(_searchQuery.toLowerCase());
-      final matchesCategory = _selectedCategory == 'All' || product.category == _selectedCategory;
-      return matchesSearch && matchesCategory;
-    }).toList();
-  }
-
-  List<Product> get _paginatedProducts {
-    final startIndex = _currentPage * _itemsPerPage;
-    final endIndex = min(startIndex + _itemsPerPage, _filteredProducts.length);
-    if (startIndex >= _filteredProducts.length) return [];
-    return _filteredProducts.sublist(startIndex, endIndex);
-  }
 
   @override
   void initState() {
     super.initState();
     _scrollController.addListener(_scrollListener);
+    _selectedCategoryName = widget.initialCategoryName ?? 'All';
+
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      final homeProvider = Provider.of<HomeProvider>(context, listen: false);
+      final categoryProvider = Provider.of<CategoryProvider>(
+        context,
+        listen: false,
+      );
+
+      if (widget.initialProducts != null && widget.initialProducts!.isNotEmpty) {
+        homeProvider.setInitialProducts(widget.initialProducts!);
+      } else {
+        homeProvider.fetchFilteredProducts(name: _searchQuery, refresh: true);
+      }
+      categoryProvider.getFilterPageCategories();
+    });
   }
 
   @override
@@ -70,50 +66,92 @@ class _AllProductsScreenState extends State<AllProductsScreen> {
   }
 
   void _scrollListener() {
-    if (_scrollController.position.pixels == _scrollController.position.maxScrollExtent) {
+    if (_scrollController.position.pixels ==
+        _scrollController.position.maxScrollExtent) {
       _loadMoreProducts();
     }
   }
 
   Future<void> _loadMoreProducts() async {
     if (_isLoading) return;
-    if (_currentPage * _itemsPerPage >= _filteredProducts.length) return;
+    final provider = Provider.of<HomeProvider>(context, listen: false);
 
-    setState(() {
-      _isLoading = true;
-    });
+    if (_selectedCategoryId == null) {
+      if (!provider.hasMoreFilteredProducts) return;
+    } else {
+      if (!provider.hasMoreCategoryProducts) return;
+    }
 
-    // Simulate network delay
-    await Future.delayed(const Duration(milliseconds: 800));
+    setState(() => _isLoading = true);
 
-    setState(() {
-      _currentPage++;
-      _isLoading = false;
-    });
+    if (_selectedCategoryId == null) {
+      await provider.fetchFilteredProducts(name: _searchQuery);
+    } else {
+      await provider.fetchCategoryProducts(
+        _selectedCategoryId!,
+        name: _searchQuery,
+      );
+    }
+
+    setState(() => _isLoading = false);
   }
 
-  void _selectCategory(String category) {
+  void _selectCategory(String name, int? id) {
     setState(() {
-      _selectedCategory = category;
-      _currentPage = 0;
+      _selectedCategoryName = name;
+      _selectedCategoryId = id;
+      final provider = Provider.of<HomeProvider>(context, listen: false);
+
+      if (name == widget.initialCategoryName && widget.initialProducts != null) {
+        // If re-selecting the initial category (e.g., "Best Seller"), use initial products
+        provider.setInitialProducts(widget.initialProducts!);
+      } else if (id == null) {
+        // For "All" or other null-ID categories (excluding initial category)
+        provider.fetchFilteredProducts(name: _searchQuery, refresh: true);
+      } else {
+        // For categories with an ID
+        provider.fetchCategoryProducts(id, refresh: true, name: _searchQuery);
+      }
     });
   }
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: Colors.grey[50],
-      body: SafeArea(
-        child: Column(
-          children: [
-            _buildAppBar(),
-            _buildSearchBar(),
-            _buildCategoryList(),
-            Expanded(
-              child: _buildProductGrid(),
-            ),
-          ],
+    return MultiProvider(
+      providers: [
+        ChangeNotifierProvider.value(value: Provider.of<HomeProvider>(context)),
+        ChangeNotifierProvider.value(
+          value: Provider.of<CategoryProvider>(context),
         ),
+      ],
+      child: Consumer2<HomeProvider, CategoryProvider>(
+        builder: (context, homeProvider, categoryProvider, child) {
+          // Show shimmer if initial data is loading and no products are available yet
+          if ((homeProvider.filteredProductsState == HomeLoadingState.loading &&
+              homeProvider.filteredProducts.isEmpty) ||
+              (categoryProvider.filterPageCategoriesState ==
+                  CategoryLoadingState.loading &&
+                  categoryProvider.filterPageCategoriesResponse == null)) {
+            return const ProductShimmer();
+          }
+
+          return Scaffold(
+            backgroundColor: Colors.grey[50],
+            body: SafeArea(
+              child: Column(
+                children: [
+                  _buildAppBar(),
+                  Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 12.0),
+                    child: CustomSearchBar(),
+                  ),
+                  _buildCategoryList(categoryProvider),
+                  Expanded(child: _buildProductGrid(homeProvider)),
+                ],
+              ),
+            ),
+          );
+        },
       ),
     );
   }
@@ -124,78 +162,60 @@ class _AllProductsScreenState extends State<AllProductsScreen> {
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
-          const Text(
-            'Discover Products',
-            style: TextStyle(
-              fontSize: 24,
-              fontWeight: FontWeight.bold,
-            ),
-          ),
+          CustomBackButton(),
+          Text('discover_products'.tr(context), style: context.headlineMedium),
           IconButton(
             icon: const Icon(Icons.shopping_cart_outlined),
-            onPressed: () {},
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildSearchBar() {
-    return AnimatedContainer(
-      duration: const Duration(milliseconds: 300),
-      margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(12),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withOpacity(0.05),
-            blurRadius: 10,
-            spreadRadius: 0,
-          ),
-        ],
-      ),
-      child: TextField(
-        controller: _searchController,
-        onChanged: (value) {
-          setState(() {
-            _searchQuery = value;
-            _currentPage = 0;
-          });
-        },
-        decoration: InputDecoration(
-          hintText: 'Search products...',
-          prefixIcon: const Icon(Icons.search, color: Colors.grey),
-          suffixIcon: _searchQuery.isNotEmpty
-              ? IconButton(
-            icon: const Icon(Icons.clear, color: Colors.grey),
             onPressed: () {
-              setState(() {
-                _searchController.clear();
-                _searchQuery = '';
-                _currentPage = 0;
-              });
+              AppRoutes.navigateTo(context, AppRoutes.cartScreen);
             },
-          )
-              : null,
-          border: InputBorder.none,
-          contentPadding: const EdgeInsets.symmetric(vertical: 12),
-        ),
+          ),
+        ],
       ),
     );
   }
 
-  Widget _buildCategoryList() {
+  Widget _buildCategoryList(CategoryProvider categoryProvider) {
+    if (categoryProvider.filterPageCategoriesState ==
+        CategoryLoadingState.loading) {
+      return const CategoryWithoutImageShimmer();
+    }
+
+    if (categoryProvider.filterPageCategoriesState ==
+        CategoryLoadingState.error) {
+      return SizedBox(
+        height: 50,
+        child: Center(child: Text('Error: ${categoryProvider.errorMessage}')),
+      );
+    }
+
+    final categories = <Map<String, dynamic>>[];
+
+    // Add initial category if provided (e.g., "Best Seller")
+    if (widget.initialCategoryName != null) {
+      categories.add({
+        'name': widget.initialCategoryName!,
+        'id': null,
+      });
+    }
+
+    // Add the rest of the categories from the provider
+    categories.addAll(
+      categoryProvider.filterPageCategoriesResponse?.data
+          .map((c) => {'name': c.name, 'id': c.id}) ??
+          [],
+    );
+
     return Container(
       height: 50,
       margin: const EdgeInsets.only(top: 8),
       child: ListView.builder(
         scrollDirection: Axis.horizontal,
-        itemCount: _categories.length,
+        itemCount: categories.length,
         padding: const EdgeInsets.symmetric(horizontal: 12),
         itemBuilder: (context, index) {
-          final category = _categories[index];
-          final isSelected = category.name == _selectedCategory;
+          final category = categories[index];
+          final isSelected = category['name'] == _selectedCategoryName;
 
           return AnimatedContainer(
             duration: const Duration(milliseconds: 300),
@@ -205,16 +225,23 @@ class _AllProductsScreenState extends State<AllProductsScreen> {
               borderRadius: BorderRadius.circular(20),
               elevation: isSelected ? 4 : 1,
               child: InkWell(
-                onTap: () => _selectCategory(category.name),
+                onTap: () => _selectCategory(
+                  category['name'] as String,
+                  category['id'] as int?,
+                ),
                 borderRadius: BorderRadius.circular(20),
                 child: Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 16,
+                    vertical: 8,
+                  ),
                   child: Center(
                     child: Text(
-                      category.name,
+                      category['name'] as String,
                       style: TextStyle(
                         color: isSelected ? Colors.white : Colors.black87,
-                        fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
+                        fontWeight:
+                        isSelected ? FontWeight.bold : FontWeight.normal,
                       ),
                     ),
                   ),
@@ -227,8 +254,53 @@ class _AllProductsScreenState extends State<AllProductsScreen> {
     );
   }
 
-  Widget _buildProductGrid() {
-    if (_filteredProducts.isEmpty) {
+  Widget _buildProductGrid(HomeProvider provider) {
+    final products =
+        _selectedCategoryId == null
+            ? provider.filteredProducts
+            : provider.categoryProducts;
+    final state =
+        _selectedCategoryId == null
+            ? provider.filteredProductsState
+            : provider.categoryProductsState;
+    final error =
+        _selectedCategoryId == null
+            ? provider.filteredProductsError
+            : provider.categoryProductsError;
+
+    if (state == HomeLoadingState.loading && products.isEmpty) {
+      return const Center(child: CustomLoadingWidget());
+    }
+
+    if (state == HomeLoadingState.error) {
+      return Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Text('Error: $error'),
+            ElevatedButton(
+              onPressed: () {
+                if (_selectedCategoryId == null) {
+                  provider.fetchFilteredProducts(
+                    name: _searchQuery,
+                    refresh: true,
+                  );
+                } else {
+                  provider.fetchCategoryProducts(
+                    _selectedCategoryId!,
+                    refresh: true,
+                    name: _searchQuery,
+                  );
+                }
+              },
+              child: const Text('Retry'),
+            ),
+          ],
+        ),
+      );
+    }
+
+    if (products.isEmpty) {
       return const Center(
         child: Text(
           'No products found',
@@ -246,152 +318,22 @@ class _AllProductsScreenState extends State<AllProductsScreen> {
         crossAxisSpacing: 16,
         mainAxisSpacing: 16,
       ),
-      itemCount: _paginatedProducts.length + (_isLoading ? 2 : 0),
+      itemCount: products.length + (_isLoading ? 2 : 0),
       itemBuilder: (context, index) {
-        if (index >= _paginatedProducts.length) {
-          return const Center(child: CircularProgressIndicator());
+        if (index >= products.length) {
+          return const Center(child: CustomLoadingWidget());
         }
-
-        return _buildProductCard(_paginatedProducts[index], index);
+        final product = products[index];
+        return ProductGridCard(
+          imageUrl: product.thumbnailImage,
+          productName: product.name,
+          price: product.mainPrice.toString(),
+          isBestSeller: product.hasDiscount,
+          onAddToCart: () {},
+          onFavoriteToggle: () {},
+        );
       },
     );
   }
 
-  Widget _buildProductCard(Product product, int index) {
-    return Hero(
-      tag: 'product-${product.id}',
-      child: AnimatedOpacity(
-        duration: Duration(milliseconds: 500 + (index % 5) * 100),
-        opacity: 1.0,
-        curve: Curves.easeInOut,
-        child: Material(
-          borderRadius: BorderRadius.circular(16),
-          elevation: 2,
-          child: InkWell(
-            onTap: () {},
-            borderRadius: BorderRadius.circular(16),
-            child: Container(
-              decoration: BoxDecoration(
-                color: Colors.white,
-                borderRadius: BorderRadius.circular(16),
-              ),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  ClipRRect(
-                    borderRadius: const BorderRadius.only(
-                      topLeft: Radius.circular(16),
-                      topRight: Radius.circular(16),
-                    ),
-                    child: AspectRatio(
-                      aspectRatio: 1,
-                      child: Image.network(
-                        product.imageUrl,
-                        fit: BoxFit.cover,
-                        loadingBuilder: (context, child, loadingProgress) {
-                          if (loadingProgress == null) return child;
-                          return Center(
-                            child: CircularProgressIndicator(
-                              value: loadingProgress.expectedTotalBytes != null
-                                  ? loadingProgress.cumulativeBytesLoaded /
-                                  loadingProgress.expectedTotalBytes!
-                                  : null,
-                            ),
-                          );
-                        },
-                      ),
-                    ),
-                  ),
-                  Padding(
-                    padding: const EdgeInsets.all(12),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          product.name,
-                          style: const TextStyle(
-                            fontWeight: FontWeight.bold,
-                            fontSize: 14,
-                          ),
-                          maxLines: 1,
-                          overflow: TextOverflow.ellipsis,
-                        ),
-                        const SizedBox(height: 4),
-                        Text(
-                          product.category,
-                          style: TextStyle(
-                            color: Colors.grey[600],
-                            fontSize: 12,
-                          ),
-                        ),
-                        const SizedBox(height: 8),
-                        Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                          children: [
-                            Text(
-                              '\$${product.price}',
-                              style: const TextStyle(
-                                fontWeight: FontWeight.bold,
-                                fontSize: 16,
-                                color: Colors.blue,
-                              ),
-                            ),
-                            Row(
-                              children: [
-                                const Icon(
-                                  Icons.star,
-                                  color: Colors.amber,
-                                  size: 16,
-                                ),
-                                const SizedBox(width: 2),
-                                Text(
-                                  product.rating,
-                                  style: const TextStyle(
-                                    fontSize: 12,
-                                    fontWeight: FontWeight.bold,
-                                  ),
-                                ),
-                              ],
-                            ),
-                          ],
-                        ),
-                      ],
-                    ),
-                  ),
-                ],
-              ),
-            ),
-          ),
-        ),
-      ),
-    );
-  }
-}
-
-class Product {
-  final String id;
-  final String name;
-  final String price;
-  final String imageUrl;
-  final String category;
-  final String rating;
-
-  Product({
-    required this.id,
-    required this.name,
-    required this.price,
-    required this.imageUrl,
-    required this.category,
-    required this.rating,
-  });
-}
-
-class Category {
-  final String id;
-  final String name;
-
-  Category({
-    required this.id,
-    required this.name,
-  });
 }

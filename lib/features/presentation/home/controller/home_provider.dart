@@ -139,6 +139,14 @@ class HomeProvider extends ChangeNotifier {
     ]);
   }
 
+
+  void setInitialProducts(List<Product> products) {
+    filteredProducts = products;
+    filteredProductsState = HomeLoadingState.loaded;
+    hasMoreFilteredProducts = false; // Assuming initial list is complete
+    notifyListeners();
+  }
+
   // Featured Products methods
   Future<void> fetchFeaturedProducts({bool refresh = false}) async {
     try {

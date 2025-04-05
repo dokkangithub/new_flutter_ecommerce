@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:carousel_slider/carousel_slider.dart';
 import 'package:provider/provider.dart';
-import 'package:flutter/foundation.dart';
+import '../../../../core/utils/shimmer/banner_shimmer.dart';
 import '../../slider/controller/provider.dart';
-import 'package:laravel_ecommerce/features/presentation/home/widgets/shimmer/banner_shimmer.dart';
+
 
 class SimpleBannerCarousel extends StatefulWidget {
   const SimpleBannerCarousel({super.key});

@@ -9,7 +9,7 @@ class CustomBackButton extends StatelessWidget {
   Widget build(BuildContext context) {
     return Row(
       children: [
-        SizedBox(width: 20),
+        SizedBox(width: 10),
         InkWell(
           onTap: () {
             Navigator.pop(context);
