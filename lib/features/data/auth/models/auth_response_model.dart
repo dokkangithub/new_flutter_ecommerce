@@ -25,7 +25,7 @@ class AuthResponseModel {
       message: json['message'] ?? '',
       accessToken: json['access_token'],
       tokenType: json['token_type'],
-      expiresAt: json['expires_at']?.toString(),
+      expiresAt: json['expires_at'], // Allow null value
       user: json['user'] != null ? UserModel.fromJson(json['user']) : null,
     );
   }

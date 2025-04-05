@@ -6,6 +6,8 @@ import '../../features/data/auth/datasources/auth_remote_datasource.dart';
 import '../../features/data/auth/repositories/auth_repository_impl.dart';
 import '../../features/data/category/datasources/category_remote_datasource.dart';
 import '../../features/data/category/repositories/category_repository_impl.dart';
+import '../../features/data/product/datasources/product_remote_datasource.dart'; // You'll need to create this
+import '../../features/data/product/repositories/product_repository_impl.dart'; // You'll need to create this
 import '../../features/domain/auth/repositories/auth_repository.dart';
 import '../../features/domain/auth/usecases/auth/confirm_code_use_case.dart';
 import '../../features/domain/auth/usecases/auth/confirm_reset_password_use_case.dart';
@@ -21,6 +23,12 @@ import '../../features/domain/category/usecases/get_categories_use_case.dart';
 import '../../features/domain/category/usecases/get_featured_categories_use_case.dart';
 import '../../features/domain/category/usecases/get_filter_page_categories_use_case.dart';
 import '../../features/domain/category/usecases/get_top_categories_use_case.dart';
+import '../../features/domain/product/repositories/product_repository.dart';
+import '../../features/domain/product/usecases/get_featured_products_use_case.dart';
+import '../../features/domain/product/usecases/get_best_selling_products_use_case.dart';
+import '../../features/domain/product/usecases/get_new_added_products_use_case.dart';
+import '../../features/domain/product/usecases/get_todays_deal_products_use_case.dart';
+import '../../features/domain/product/usecases/get_flash_deal_products_use_case.dart';
 import '../../features/presentation/auth/controller/auth_provider.dart';
 import '../../features/presentation/category/controller/provider.dart';
 import '../../features/presentation/main layout/controller/layout_provider.dart';
@@ -49,25 +57,17 @@ void setupDependencies() {
   sl.registerLazySingleton<LaravelApiProvider>(() => LaravelApiProvider());
   sl.registerLazySingleton<ApiProvider>(() => sl<LaravelApiProvider>());
 
-
-
   // Data Sources
   sl.registerLazySingleton<AuthRemoteDataSource>(() => AuthRemoteDataSourceImpl(sl<LaravelApiProvider>()));
   sl.registerLazySingleton<CategoryRemoteDataSource>(() => CategoryRemoteDataSourceImpl(sl<ApiProvider>()));
-
-
-
-
-
+  sl.registerLazySingleton<ProductRemoteDataSource>(() => ProductRemoteDataSourceImpl(sl<ApiProvider>()));
 
   // Repositories
   sl.registerLazySingleton<AuthRepository>(() => AuthRepositoryImpl(sl<AuthRemoteDataSource>()));
   sl.registerLazySingleton<CategoryRepository>(() => CategoryRepositoryImpl(sl<CategoryRemoteDataSource>()));
+  sl.registerLazySingleton<ProductRepository>(() => ProductRepositoryImpl(sl<ProductRemoteDataSource>()));
 
-
-
-
-  // Use Cases
+  // Use Cases - Auth
   sl.registerLazySingleton(() => LoginUseCase(sl()));
   sl.registerLazySingleton(() => SignupUseCase(sl()));
   sl.registerLazySingleton(() => SocialLoginUseCase(sl()));
@@ -77,11 +77,19 @@ void setupDependencies() {
   sl.registerLazySingleton(() => ResendCodeUseCase(sl()));
   sl.registerLazySingleton(() => ConfirmCodeUseCase(sl()));
   sl.registerLazySingleton(() => GetUserByTokenUseCase(sl()));
+
+  // Use Cases - Category
   sl.registerLazySingleton(() => GetCategoriesUseCase(sl()));
   sl.registerLazySingleton(() => GetFeaturedCategoriesUseCase(sl()));
   sl.registerLazySingleton(() => GetTopCategoriesUseCase(sl()));
   sl.registerLazySingleton(() => GetFilterPageCategoriesUseCase(sl()));
 
+  // Use Cases - Product
+  sl.registerLazySingleton(() => GetFeaturedProductsUseCase(sl()));
+  sl.registerLazySingleton(() => GetBestSellingProductsUseCase(sl()));
+  sl.registerLazySingleton(() => GetNewAddedProductsUseCase(sl()));
+  sl.registerLazySingleton(() => GetTodaysDealProductsUseCase(sl()));
+  sl.registerLazySingleton(() => GetFlashDealProductsUseCase(sl()));
 
   // Providers
   sl.registerLazySingleton(() => AuthProvider(
@@ -95,13 +103,22 @@ void setupDependencies() {
     confirmCodeUseCase: sl(),
     getUserByTokenUseCase: sl(),
   ));
+
   sl.registerLazySingleton(() => CategoryProvider(
     getCategoriesUseCase: sl(),
     getFeaturedCategoriesUseCase: sl(),
     getTopCategoriesUseCase: sl(),
     getFilterPageCategoriesUseCase: sl(),
   ));
+
+  sl.registerLazySingleton(() => HomeProvider(
+    getFeaturedProductsUseCase: sl(),
+    getBestSellingProductsUseCase: sl(),
+    getNewAddedProductsUseCase: sl(),
+    getTodaysDealProductsUseCase: sl(),
+    getFlashDealProductsUseCase: sl(),
+  ));
+
   sl.registerLazySingleton(() => LanguageProvider());
-  sl.registerLazySingleton(() => HomeProvider());
   sl.registerLazySingleton(() => LayoutProvider());
 }

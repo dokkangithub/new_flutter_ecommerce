@@ -25,7 +25,7 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
     try {
       final response = await apiProvider.post(
         LaravelApiEndPoint.login,
-        data: {'email': email, 'password': password, 'login_by': loginBy},
+        data: {'email_or_phone': email, 'password': password, 'login_by': loginBy},
       );
       final authResponse = AuthResponseModel.fromJson(response.data);
       if (authResponse.result) {
