@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:laravel_ecommerce/core/utils/extension/responsive_extension.dart';
 
 class CategoryCard extends StatelessWidget {
   final String imageUrl;
@@ -16,50 +17,39 @@ class CategoryCard extends StatelessWidget {
   Widget build(BuildContext context) {
     return GestureDetector(
       onTap: onTap,
-      child: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 12.0),
+      child: Container(
+        width: context.responsive(100),
+        decoration: BoxDecoration(
+          borderRadius: BorderRadius.circular(12),
+        ),
         child: Column(
-          mainAxisSize: MainAxisSize.min,
+          mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Stack(
-              alignment: Alignment.center,
-              children: [
-                CircleAvatar(
-                  radius: 40,
-                  backgroundColor: Colors.grey[300],
-                  backgroundImage: NetworkImage(imageUrl),
-                  onBackgroundImageError: (_, __) {},
+            ClipRRect(
+              borderRadius: BorderRadius.circular(12),
+              child: Image.network(
+                imageUrl,
+                width: context.responsive(60),
+                height: context.responsive(40),
+                fit: BoxFit.cover,
+                errorBuilder: (context, error, stackTrace) => Icon(
+                  Icons.broken_image,
+                  size: context.responsive(60),
+                  color: Colors.grey,
                 ),
-                Container(
-                  width: 80,
-                  height: 80,
-                  decoration: BoxDecoration(
-                    shape: BoxShape.circle,
-                    color: Colors.black.withValues(alpha: 0.4),
-                  ),
-                ),
-                Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 8),
-                  child: Text(
-                    name,
-                    style: const TextStyle(
-                      color: Colors.white,
-                      fontSize: 16,
-                      fontWeight: FontWeight.bold,
-                      shadows: [
-                        Shadow(
-                          color: Colors.black26,
-                          offset: Offset(1, 1),
-                          blurRadius: 2,
-                        ),
-                      ],
-                    ),
-                    textAlign: TextAlign.center,
-                    maxLines: 2,
-                    overflow: TextOverflow.ellipsis,
-                  ),
-                ),
-              ],
+              ),
+            ),
+            const SizedBox(height: 8),
+            Text(
+              name,
+              style: TextStyle(
+                fontSize: context.responsive(12),
+                fontWeight: FontWeight.w400,
+                color: Colors.black87,
+              ),
+              textAlign: TextAlign.center,
+              maxLines: 2,
+              overflow: TextOverflow.ellipsis,
             ),
           ],
         ),

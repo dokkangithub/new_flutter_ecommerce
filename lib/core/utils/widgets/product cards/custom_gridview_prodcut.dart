@@ -5,7 +5,7 @@ import 'package:laravel_ecommerce/core/utils/extension/text_style_extension.dart
 class ProductGridCard extends StatelessWidget {
   final String imageUrl;
   final String productName;
-  final double price;
+  final String price;
   final bool isBestSeller;
   final VoidCallback onAddToCart;
   final VoidCallback onFavoriteToggle;
@@ -56,7 +56,7 @@ class ProductGridCard extends StatelessWidget {
                     imageUrl,
                     height: 100,
                     width: double.infinity,
-                    fit: BoxFit.cover,
+                    fit: BoxFit.contain,
                   ),
                 ),
                 Positioned(
@@ -120,7 +120,7 @@ class ProductGridCard extends StatelessWidget {
                   ),
                   const SizedBox(height: 4),
                   Text(
-                    '\$${price.toStringAsFixed(2)}',
+                    '\$${price.toString()}',
                     style: context.titleSmall.copyWith(
                       color: Theme.of(context).primaryColor,
                     ),

@@ -8,6 +8,8 @@ import '../../features/data/category/datasources/category_remote_datasource.dart
 import '../../features/data/category/repositories/category_repository_impl.dart';
 import '../../features/data/product/datasources/product_remote_datasource.dart'; // You'll need to create this
 import '../../features/data/product/repositories/product_repository_impl.dart'; // You'll need to create this
+import '../../features/data/slider/datasources/slider_remote_datasource.dart';
+import '../../features/data/slider/repositories/slider_repository_impl.dart';
 import '../../features/domain/auth/repositories/auth_repository.dart';
 import '../../features/domain/auth/usecases/auth/confirm_code_use_case.dart';
 import '../../features/domain/auth/usecases/auth/confirm_reset_password_use_case.dart';
@@ -29,9 +31,12 @@ import '../../features/domain/product/usecases/get_best_selling_products_use_cas
 import '../../features/domain/product/usecases/get_new_added_products_use_case.dart';
 import '../../features/domain/product/usecases/get_todays_deal_products_use_case.dart';
 import '../../features/domain/product/usecases/get_flash_deal_products_use_case.dart';
+import '../../features/domain/slider/repositories/slider_repository.dart';
+import '../../features/domain/slider/usecases/get_sliders_use_case.dart';
 import '../../features/presentation/auth/controller/auth_provider.dart';
 import '../../features/presentation/category/controller/provider.dart';
 import '../../features/presentation/main layout/controller/layout_provider.dart';
+import '../../features/presentation/slider/controller/provider.dart';
 import '../api/api_provider.dart';
 import '../config/app_config.dart/app_config.dart';
 import '../providers/localization/language_provider.dart';
@@ -61,11 +66,18 @@ void setupDependencies() {
   sl.registerLazySingleton<AuthRemoteDataSource>(() => AuthRemoteDataSourceImpl(sl<LaravelApiProvider>()));
   sl.registerLazySingleton<CategoryRemoteDataSource>(() => CategoryRemoteDataSourceImpl(sl<ApiProvider>()));
   sl.registerLazySingleton<ProductRemoteDataSource>(() => ProductRemoteDataSourceImpl(sl<ApiProvider>()));
+  sl.registerLazySingleton<SliderRemoteDataSource>(
+        () => SliderRemoteDataSourceImpl(sl()),
+  );
+
 
   // Repositories
   sl.registerLazySingleton<AuthRepository>(() => AuthRepositoryImpl(sl<AuthRemoteDataSource>()));
   sl.registerLazySingleton<CategoryRepository>(() => CategoryRepositoryImpl(sl<CategoryRemoteDataSource>()));
   sl.registerLazySingleton<ProductRepository>(() => ProductRepositoryImpl(sl<ProductRemoteDataSource>()));
+  sl.registerLazySingleton<SliderRepository>(
+        () => SliderRepositoryImpl(sl()),
+  );
 
   // Use Cases - Auth
   sl.registerLazySingleton(() => LoginUseCase(sl()));
@@ -91,6 +103,8 @@ void setupDependencies() {
   sl.registerLazySingleton(() => GetTodaysDealProductsUseCase(sl()));
   sl.registerLazySingleton(() => GetFlashDealProductsUseCase(sl()));
 
+  sl.registerLazySingleton(() => GetSlidersUseCase(sl()));
+
   // Providers
   sl.registerLazySingleton(() => AuthProvider(
     loginUseCase: sl(),
@@ -102,6 +116,10 @@ void setupDependencies() {
     resendCodeUseCase: sl(),
     confirmCodeUseCase: sl(),
     getUserByTokenUseCase: sl(),
+  ));
+
+  sl.registerFactory(() => SliderProvider(
+    getSlidersUseCase: sl(),
   ));
 
   sl.registerLazySingleton(() => CategoryProvider(

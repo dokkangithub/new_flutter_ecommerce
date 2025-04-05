@@ -3,6 +3,7 @@ import 'package:laravel_ecommerce/features/presentation/category/screens/categor
 import 'package:laravel_ecommerce/features/presentation/profile/screens/profile_screen.dart';
 import 'package:laravel_ecommerce/features/presentation/wishlist/screens/wishlist_screen.dart';
 
+import '../../../features/presentation/all products/screens/all_products.dart';
 import '../../../features/presentation/auth/screens/forgot_password_screen.dart';
 import '../../../features/presentation/auth/screens/login_screen.dart';
 import '../../../features/presentation/auth/screens/reset_password_screen.dart';
@@ -30,6 +31,7 @@ class AppRoutes {
   static const String mainLayoutScreen = '/mainLayout';
   static const String cartScreen = '/cart';
   static const String productScreen = '/product';
+  static const String allProductsScreen = '/all-product';
 
   static Route<dynamic> generateRoute(RouteSettings settings) {
     Widget page;
@@ -75,6 +77,9 @@ class AppRoutes {
         break;
       case productScreen:
         page = ProductDetailScreen();
+        break;
+      case allProductsScreen:
+        page = AllProductsScreen();
         break;
       default:
         page = Scaffold(

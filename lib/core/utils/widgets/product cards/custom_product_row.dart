@@ -8,8 +8,8 @@ import '../../../config/routes.dart/routes.dart';
 class ProductItemInRow1 extends StatelessWidget {
   final String imageUrl;
   final String productName;
-  final double price;
-  final double originalPrice;
+  final String price;
+  final String originalPrice;
   final bool isBestSeller;
   final bool isFavorite;
   final VoidCallback onFavoriteToggle;
@@ -20,7 +20,7 @@ class ProductItemInRow1 extends StatelessWidget {
     required this.imageUrl,
     required this.productName,
     required this.price,
-    this.originalPrice = 0,
+    this.originalPrice = '0',
     this.isBestSeller = false,
     this.isFavorite = false,
     required this.onFavoriteToggle,
@@ -93,7 +93,7 @@ class ProductItemInRow1 extends StatelessWidget {
 
                       // Price display
                       Text(
-                        '\$${price.toStringAsFixed(2)}',
+                        '\$${price.toString()}',
                         style: const TextStyle(
                           fontSize: 18,
                           fontWeight: FontWeight.bold,
@@ -102,9 +102,9 @@ class ProductItemInRow1 extends StatelessWidget {
                       ),
 
                       // Original price (strikethrough) if present
-                      if (originalPrice > 0)
+                      //if (originalPrice > 0)
                         Text(
-                          '\$${originalPrice.toStringAsFixed(2)}',
+                          '\$${originalPrice.toString()}',
                           style: TextStyle(
                             fontSize: 14,
                             color: Colors.grey.shade400,

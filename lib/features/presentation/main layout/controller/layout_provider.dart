@@ -15,6 +15,10 @@ class LayoutProvider extends ChangeNotifier {
     notifyListeners();
   }
 
+  set currentIndex(int index) {
+    _currentIndex = index;
+    notifyListeners();
+  }
 
   List<Widget> mainScreens=[
     HomeScreen(),

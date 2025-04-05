@@ -8,7 +8,7 @@ import '../../../config/routes.dart/routes.dart';
 class ProductCard extends StatelessWidget {
   final String imageUrl;
   final String productName;
-  final double price;
+  final String price;
   final bool isBestSeller;
   final bool isFavorite;
   final VoidCallback onFavoriteToggle;
@@ -52,8 +52,8 @@ class ProductCard extends StatelessWidget {
                   ),
                   child: SizedBox(
                     width: double.infinity,
-                    height: context.responsive(150),
-                    child: CustomImage(imageUrl: imageUrl, fit: BoxFit.cover),
+                    height: context.responsive(120),
+                    child: CustomImage(imageUrl: imageUrl, fit: BoxFit.contain),
                   ),
                 ),
 
@@ -67,8 +67,8 @@ class ProductCard extends StatelessWidget {
                       // Product name
                       Text(
                         productName,
-                        style: context.titleMedium,
-                        maxLines: 1,
+                        style: context.titleSmall,
+                        maxLines: 2,
                         overflow: TextOverflow.ellipsis,
                       ),
 
@@ -76,11 +76,11 @@ class ProductCard extends StatelessWidget {
                       Column(
                         children: [
                           Text(
-                            '\$${price.toStringAsFixed(2)}',
+                            '\$${price.toString()}',
                             style: context.titleMedium,
                           ),
                           Text(
-                            '\$${price.toStringAsFixed(2)}',
+                            '\$${price.toString()}',
                             style: context.bodyMedium.copyWith(
                               color: Colors.grey.shade400,
                               decoration: TextDecoration.lineThrough,

@@ -28,4 +28,6 @@ class LaravelApiEndPoint {
   static const String featuredCategories = '/categories/featured';
   static const String topCategories = '/categories/top';
   static const String filterPageCategories = '/filter/categories';
+  static const sliders = '/sliders';
+
 }

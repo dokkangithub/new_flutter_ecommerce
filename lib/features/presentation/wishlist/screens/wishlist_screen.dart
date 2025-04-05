@@ -191,8 +191,8 @@ class _WishlistScreenState extends State<WishlistScreen> {
                   child: ProductItemInRow1(
                     imageUrl: product.imageUrl,
                     productName: product.name,
-                    price: product.price,
-                    originalPrice: product.originalPrice,
+                    price: product.price.toString(),
+                    originalPrice: product.originalPrice.toString(),
                     isBestSeller: product.isBestSeller,
                     isFavorite: true, // Always true in wishlist
                     onFavoriteToggle: () => _toggleFavorite(product.id),
