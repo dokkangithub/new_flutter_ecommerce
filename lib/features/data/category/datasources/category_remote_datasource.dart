@@ -1,6 +1,6 @@
 import '../../../../core/api/api_provider.dart';
 import '../../../../core/utils/constants/app_endpoints.dart';
-import '../models/category_response_model.dart';
+import '../models/category_model.dart';
 
 abstract class CategoryRemoteDataSource {
   Future<CategoryResponseModel> getCategories({String? parentId});

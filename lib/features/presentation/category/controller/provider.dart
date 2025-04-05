@@ -1,10 +1,9 @@
-// lib/features/presentation/category/controller/provider.dart
 import 'package:flutter/material.dart';
-import '../../../../features/data/category/models/category_response_model.dart';
 import '../../../../features/domain/category/usecases/get_categories_use_case.dart';
 import '../../../../features/domain/category/usecases/get_featured_categories_use_case.dart';
 import '../../../../features/domain/category/usecases/get_top_categories_use_case.dart';
 import '../../../../features/domain/category/usecases/get_filter_page_categories_use_case.dart';
+import '../../../data/category/models/category_model.dart';
 
 enum CategoryLoadingState { initial, loading, loaded, error }
 

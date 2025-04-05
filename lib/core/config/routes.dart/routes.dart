@@ -57,16 +57,22 @@ class AppRoutes {
         break;
       case homeScreen:
         page = HomeScreen();
+        break;
       case categoryScreen:
         page = CategoryScreen();
+        break;
       case wishListScreen:
         page = WishlistScreen();
+        break;
       case profileScreen:
         page = ProfileScreen();
+        break;
       case mainLayoutScreen:
         page = MainLayoutScreen();
+        break;
       case cartScreen:
         page = CartScreen();
+        break;
       case productScreen:
         page = ProductDetailScreen();
         break;

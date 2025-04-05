@@ -1,4 +1,4 @@
-import '../../../data/category/models/category_response_model.dart';
+import '../../../data/category/models/category_model.dart';
 
 abstract class CategoryRepository {
   Future<CategoryResponseModel> getCategories({String? parentId});
