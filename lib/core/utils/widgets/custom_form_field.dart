@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:laravel_ecommerce/core/config/themes.dart/theme.dart';
 
 class CustomTextFormField extends StatefulWidget {
   final TextEditingController controller;
@@ -72,8 +73,7 @@ class _CustomTextFormFieldState extends State<CustomTextFormField> {
 
   @override
   Widget build(BuildContext context) {
-    // Gray color for the background
-    final Color backgroundColor = Colors.grey.shade300;
+    final Color backgroundColor = AppTheme.accentColor.withValues(alpha: 0.2);
 
     return Container(
       margin: const EdgeInsets.symmetric(vertical: 8.0),

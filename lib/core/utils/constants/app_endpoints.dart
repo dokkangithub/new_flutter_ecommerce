@@ -10,6 +10,7 @@ class LaravelApiEndPoint {
   static const String resendCode = "/auth/resend-code";
   static const String confirmCode = "/auth/confirm-code";
   static const String getUserByToken = "/auth/user";
+  static const allProducts = '/products';
   static const featuredProducts = '/products/featured';
   static const bestSellerProducts = '/products/best-seller';
   static const newAddedProducts = '/addlast';

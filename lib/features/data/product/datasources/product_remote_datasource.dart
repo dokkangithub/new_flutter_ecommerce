@@ -4,6 +4,9 @@ import '../models/product_model.dart';
 import '../models/product_response_model.dart';
 
 abstract class ProductRemoteDataSource {
+
+  Future<ProductResponseModel> getAllProducts(int page, {String? name});
+
   Future<ProductResponseModel> getFeaturedProducts(int page);
 
   Future<ProductResponseModel> getBestSellingProducts(int page);
@@ -44,8 +47,6 @@ abstract class ProductRemoteDataSource {
 
   Future<ProductResponseModel> getDigitalProducts(int page);
 
-  Future<ProductModel> getProductDetails(int id);
-
   Future<ProductModel> getDigitalProductDetails(int id);
 
   Future<ProductResponseModel> getRelatedProducts(int id);
@@ -59,6 +60,16 @@ class ProductRemoteDataSourceImpl implements ProductRemoteDataSource {
   final ApiProvider apiProvider;
 
   ProductRemoteDataSourceImpl(this.apiProvider);
+
+  @override
+  Future<ProductResponseModel> getAllProducts(int page, {String? name}) async {
+    String url = '${LaravelApiEndPoint.allProducts}?page=$page';
+    if (name != null && name.isNotEmpty) {
+      url += '&name=$name';
+    }
+    final response = await apiProvider.get(url);
+    return ProductResponseModel.fromJson(response.data);
+  }
 
   @override
   Future<ProductResponseModel> getFeaturedProducts(int page) async {
@@ -178,13 +189,6 @@ class ProductRemoteDataSourceImpl implements ProductRemoteDataSource {
     return ProductResponseModel.fromJson(response.data);
   }
 
-  @override
-  Future<ProductModel> getProductDetails(int id) async {
-    final response = await apiProvider.get(
-      '${LaravelApiEndPoint.productDetails}$id',
-    );
-    return ProductModel.fromJson(response.data);
-  }
 
   @override
   Future<ProductModel> getDigitalProductDetails(int id) async {

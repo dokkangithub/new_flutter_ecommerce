@@ -7,6 +7,7 @@ import '../../../config/routes.dart/routes.dart';
 class ProductItemInCart extends StatelessWidget {
   final Map<String, dynamic> item;
   final int index;
+  final String productSlug;
   final Function? onDelete;
   final bool isFavorite;
   final VoidCallback? onFavoriteToggle;
@@ -19,7 +20,7 @@ class ProductItemInCart extends StatelessWidget {
     this.onDelete,
     this.isFavorite = false,
     this.onFavoriteToggle,
-    this.onQuantityChanged,
+    this.onQuantityChanged, required this.productSlug,
   });
 
   @override
@@ -53,7 +54,9 @@ class ProductItemInCart extends StatelessWidget {
               SizedBox(width: 8),
               InkWell(
                 onTap: (){
-                  AppRoutes.navigateTo(context, AppRoutes.productScreen);
+                  AppRoutes.navigateTo(context, AppRoutes.productDetailScreen,arguments: {
+                    'slug': productSlug,
+                  }, );
                 },
                 child: Expanded(
                   flex: 5,

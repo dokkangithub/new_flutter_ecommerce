@@ -8,6 +8,7 @@ import '../../../config/routes.dart/routes.dart';
 class ProductCard extends StatelessWidget {
   final String imageUrl;
   final String productName;
+  final String productSlug;
   final String price;
   final bool isBestSeller;
   final bool isFavorite;
@@ -22,14 +23,16 @@ class ProductCard extends StatelessWidget {
     this.isBestSeller = false,
     this.isFavorite = false,
     required this.onFavoriteToggle,
-    required this.onAddToCart,
+    required this.onAddToCart, required this.productSlug,
   });
 
   @override
   Widget build(BuildContext context) {
     return InkWell(
       onTap: (){
-        AppRoutes.navigateTo(context, AppRoutes.productScreen);
+        AppRoutes.navigateTo(context, AppRoutes.productDetailScreen,arguments: {
+          'slug': productSlug,
+        }, );
       },
       child: Container(
         width: context.responsive(180),

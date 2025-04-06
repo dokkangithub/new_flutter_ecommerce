@@ -11,6 +11,7 @@ import 'core/providers/localization/language_provider.dart';
 import 'features/presentation/auth/controller/auth_provider.dart';
 import 'features/presentation/category/controller/provider.dart';
 import 'features/presentation/main layout/controller/layout_provider.dart';
+import 'features/presentation/product/controller/product_provider.dart';
 import 'features/presentation/slider/controller/provider.dart';
 
 
@@ -27,6 +28,7 @@ Future<void> main() async {
         ChangeNotifierProvider(create: (_) => sl<AuthProvider>()),
         ChangeNotifierProvider(create: (_) => sl<HomeProvider>()),
         ChangeNotifierProvider(create: (_) => sl<LayoutProvider>()),
+        ChangeNotifierProvider(create: (_) => sl<ProductDetailsProvider>()),
         ChangeNotifierProvider(create: (_) => sl<LanguageProvider>()..setLocale(locale)),
         ChangeNotifierProvider(create: (_) => sl<CategoryProvider>()),  // Add this line
         ChangeNotifierProvider(create: (_) => sl<SliderProvider>()),

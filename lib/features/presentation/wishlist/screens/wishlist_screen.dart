@@ -194,6 +194,7 @@ class _WishlistScreenState extends State<WishlistScreen> {
                     price: product.price.toString(),
                     originalPrice: product.originalPrice.toString(),
                     isBestSeller: product.isBestSeller,
+                    productSlug: 'slug',
                     isFavorite: true, // Always true in wishlist
                     onFavoriteToggle: () => _toggleFavorite(product.id),
                     onAddToCart: () => _addToCart(product.id),

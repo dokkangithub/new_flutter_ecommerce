@@ -4,35 +4,36 @@ import 'package:laravel_ecommerce/core/utils/extension/text_style_extension.dart
 import 'package:laravel_ecommerce/core/utils/extension/translate_extension.dart';
 import 'package:laravel_ecommerce/core/utils/widgets/custom_loading.dart';
 import 'package:provider/provider.dart';
+import '../../../../core/utils/enums/loading_state.dart';
+import '../../../../core/utils/shimmer/all_category_products_shimmer.dart';
 import '../../../../core/utils/shimmer/category_without_image_shimmer.dart';
 import '../../../../core/utils/shimmer/product_shimmer.dart';
 import '../../../../core/utils/widgets/custom_back_button.dart';
 import '../../../../core/utils/widgets/product cards/custom_gridview_prodcut.dart';
-import '../../../domain/product/entities/product.dart';
 import '../../category/controller/provider.dart';
 import '../../home/controller/home_provider.dart';
 import '../../home/widgets/search_bar.dart';
 
-class AllProductsScreen extends StatefulWidget {
-  final String? initialCategoryName;
-  final List<Product>? initialProducts;
+class AllCategoryProductsScreen extends StatefulWidget {
+  final int selectedCategoryId;
+  final String selectedCategoryName;
 
-  const AllProductsScreen({
+  const AllCategoryProductsScreen({
     super.key,
-    this.initialCategoryName,
-    this.initialProducts,
+    required this.selectedCategoryId,
+    required this.selectedCategoryName,
   });
 
   @override
-  _AllProductsScreenState createState() => _AllProductsScreenState();
+  _AllCategoryProductsScreenState createState() =>
+      _AllCategoryProductsScreenState();
 }
 
-
-class _AllProductsScreenState extends State<AllProductsScreen> {
+class _AllCategoryProductsScreenState extends State<AllCategoryProductsScreen> {
   final TextEditingController _searchController = TextEditingController();
   final String _searchQuery = '';
-  String _selectedCategoryName = 'All';
-  int? _selectedCategoryId;
+  late String _selectedCategoryName;
+  late int _selectedCategoryId;
   bool _isLoading = false;
   final ScrollController _scrollController = ScrollController();
 
@@ -40,7 +41,8 @@ class _AllProductsScreenState extends State<AllProductsScreen> {
   void initState() {
     super.initState();
     _scrollController.addListener(_scrollListener);
-    _selectedCategoryName = widget.initialCategoryName ?? 'All';
+    _selectedCategoryName = widget.selectedCategoryName;
+    _selectedCategoryId = widget.selectedCategoryId;
 
     WidgetsBinding.instance.addPostFrameCallback((_) {
       final homeProvider = Provider.of<HomeProvider>(context, listen: false);
@@ -49,11 +51,11 @@ class _AllProductsScreenState extends State<AllProductsScreen> {
         listen: false,
       );
 
-      if (widget.initialProducts != null && widget.initialProducts!.isNotEmpty) {
-        homeProvider.setInitialProducts(widget.initialProducts!);
-      } else {
-        homeProvider.fetchFilteredProducts(name: _searchQuery, refresh: true);
-      }
+      homeProvider.fetchCategoryProducts(
+        _selectedCategoryId,
+        name: _searchQuery,
+        refresh: true,
+      );
       categoryProvider.getFilterPageCategories();
     });
   }
@@ -76,65 +78,41 @@ class _AllProductsScreenState extends State<AllProductsScreen> {
     if (_isLoading) return;
     final provider = Provider.of<HomeProvider>(context, listen: false);
 
-    if (_selectedCategoryId == null) {
-      if (!provider.hasMoreFilteredProducts) return;
-    } else {
-      if (!provider.hasMoreCategoryProducts) return;
-    }
+    if (!provider.hasMoreCategoryProducts) return;
 
     setState(() => _isLoading = true);
 
-    if (_selectedCategoryId == null) {
-      await provider.fetchFilteredProducts(name: _searchQuery);
-    } else {
-      await provider.fetchCategoryProducts(
-        _selectedCategoryId!,
-        name: _searchQuery,
-      );
-    }
+    await provider.fetchCategoryProducts(
+      _selectedCategoryId,
+      name: _searchQuery,
+    );
 
     setState(() => _isLoading = false);
   }
 
-  void _selectCategory(String name, int? id) {
+  void _selectCategory(String name, int id) {
     setState(() {
       _selectedCategoryName = name;
       _selectedCategoryId = id;
       final provider = Provider.of<HomeProvider>(context, listen: false);
-
-      if (name == widget.initialCategoryName && widget.initialProducts != null) {
-        // If re-selecting the initial category (e.g., "Best Seller"), use initial products
-        provider.setInitialProducts(widget.initialProducts!);
-      } else if (id == null) {
-        // For "All" or other null-ID categories (excluding initial category)
-        provider.fetchFilteredProducts(name: _searchQuery, refresh: true);
-      } else {
-        // For categories with an ID
-        provider.fetchCategoryProducts(id, refresh: true, name: _searchQuery);
-      }
+      provider.fetchCategoryProducts(id, refresh: true, name: _searchQuery);
     });
   }
 
   @override
   Widget build(BuildContext context) {
-    return MultiProvider(
-      providers: [
-        ChangeNotifierProvider.value(value: Provider.of<HomeProvider>(context)),
-        ChangeNotifierProvider.value(
-          value: Provider.of<CategoryProvider>(context),
-        ),
-      ],
-      child: Consumer2<HomeProvider, CategoryProvider>(
-        builder: (context, homeProvider, categoryProvider, child) {
-          // Show shimmer if initial data is loading and no products are available yet
-          if ((homeProvider.filteredProductsState == HomeLoadingState.loading &&
-              homeProvider.filteredProducts.isEmpty) ||
-              (categoryProvider.filterPageCategoriesState ==
-                  CategoryLoadingState.loading &&
-                  categoryProvider.filterPageCategoriesResponse == null)) {
-            return const ProductShimmer();
-          }
+    return Consumer2<HomeProvider, CategoryProvider>(
+      builder: (context, homeProvider, categoryProvider, child) {
+        if (categoryProvider.filterPageCategoriesState ==
+                CategoryLoadingState.loading &&
+            categoryProvider.filterPageCategoriesResponse == null) {
+          return const Scaffold(
+            body: SafeArea(child: AllCategoryProductsShimmer()),
+          );
+        }
 
+        if (homeProvider.categoryProductsState == LoadingState.loading &&
+            homeProvider.categoryProducts.isEmpty) {
           return Scaffold(
             backgroundColor: Colors.grey[50],
             body: SafeArea(
@@ -146,13 +124,30 @@ class _AllProductsScreenState extends State<AllProductsScreen> {
                     child: CustomSearchBar(),
                   ),
                   _buildCategoryList(categoryProvider),
-                  Expanded(child: _buildProductGrid(homeProvider)),
+                  const Expanded(child: Center(child: CustomLoadingWidget())),
                 ],
               ),
             ),
           );
-        },
-      ),
+        }
+
+        return Scaffold(
+          backgroundColor: Colors.grey[50],
+          body: SafeArea(
+            child: Column(
+              children: [
+                _buildAppBar(),
+                Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 12.0),
+                  child: CustomSearchBar(),
+                ),
+                _buildCategoryList(categoryProvider),
+                Expanded(child: _buildProductGrid(homeProvider)),
+              ],
+            ),
+          ),
+        );
+      },
     );
   }
 
@@ -189,22 +184,11 @@ class _AllProductsScreenState extends State<AllProductsScreen> {
       );
     }
 
-    final categories = <Map<String, dynamic>>[];
-
-    // Add initial category if provided (e.g., "Best Seller")
-    if (widget.initialCategoryName != null) {
-      categories.add({
-        'name': widget.initialCategoryName!,
-        'id': null,
-      });
-    }
-
-    // Add the rest of the categories from the provider
-    categories.addAll(
-      categoryProvider.filterPageCategoriesResponse?.data
-          .map((c) => {'name': c.name, 'id': c.id}) ??
-          [],
-    );
+    final categories =
+        categoryProvider.filterPageCategoriesResponse?.data
+            .map((c) => {'name': c.name, 'id': c.id})
+            .toList() ??
+        [];
 
     return Container(
       height: 50,
@@ -215,7 +199,7 @@ class _AllProductsScreenState extends State<AllProductsScreen> {
         padding: const EdgeInsets.symmetric(horizontal: 12),
         itemBuilder: (context, index) {
           final category = categories[index];
-          final isSelected = category['name'] == _selectedCategoryName;
+          final isSelected = category['id'] == _selectedCategoryId;
 
           return AnimatedContainer(
             duration: const Duration(milliseconds: 300),
@@ -225,10 +209,11 @@ class _AllProductsScreenState extends State<AllProductsScreen> {
               borderRadius: BorderRadius.circular(20),
               elevation: isSelected ? 4 : 1,
               child: InkWell(
-                onTap: () => _selectCategory(
-                  category['name'] as String,
-                  category['id'] as int?,
-                ),
+                onTap:
+                    () => _selectCategory(
+                      category['name'] as String,
+                      category['id'] as int,
+                    ),
                 borderRadius: BorderRadius.circular(20),
                 child: Container(
                   padding: const EdgeInsets.symmetric(
@@ -241,7 +226,7 @@ class _AllProductsScreenState extends State<AllProductsScreen> {
                       style: TextStyle(
                         color: isSelected ? Colors.white : Colors.black87,
                         fontWeight:
-                        isSelected ? FontWeight.bold : FontWeight.normal,
+                            isSelected ? FontWeight.bold : FontWeight.normal,
                       ),
                     ),
                   ),
@@ -255,24 +240,15 @@ class _AllProductsScreenState extends State<AllProductsScreen> {
   }
 
   Widget _buildProductGrid(HomeProvider provider) {
-    final products =
-        _selectedCategoryId == null
-            ? provider.filteredProducts
-            : provider.categoryProducts;
-    final state =
-        _selectedCategoryId == null
-            ? provider.filteredProductsState
-            : provider.categoryProductsState;
-    final error =
-        _selectedCategoryId == null
-            ? provider.filteredProductsError
-            : provider.categoryProductsError;
+    final products = provider.categoryProducts;
+    final state = provider.categoryProductsState;
+    final error = provider.categoryProductsError;
 
-    if (state == HomeLoadingState.loading && products.isEmpty) {
+    if (state == LoadingState.loading && products.isEmpty) {
       return const Center(child: CustomLoadingWidget());
     }
 
-    if (state == HomeLoadingState.error) {
+    if (state == LoadingState.error) {
       return Center(
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
@@ -280,18 +256,11 @@ class _AllProductsScreenState extends State<AllProductsScreen> {
             Text('Error: $error'),
             ElevatedButton(
               onPressed: () {
-                if (_selectedCategoryId == null) {
-                  provider.fetchFilteredProducts(
-                    name: _searchQuery,
-                    refresh: true,
-                  );
-                } else {
-                  provider.fetchCategoryProducts(
-                    _selectedCategoryId!,
-                    refresh: true,
-                    name: _searchQuery,
-                  );
-                }
+                provider.fetchCategoryProducts(
+                  _selectedCategoryId,
+                  refresh: true,
+                  name: _searchQuery,
+                );
               },
               child: const Text('Retry'),
             ),
@@ -327,6 +296,7 @@ class _AllProductsScreenState extends State<AllProductsScreen> {
         return ProductGridCard(
           imageUrl: product.thumbnailImage,
           productName: product.name,
+          productSlug: product.slug,
           price: product.mainPrice.toString(),
           isBestSeller: product.hasDiscount,
           onAddToCart: () {},
@@ -335,5 +305,4 @@ class _AllProductsScreenState extends State<AllProductsScreen> {
       },
     );
   }
-
 }

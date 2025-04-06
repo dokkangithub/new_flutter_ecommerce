@@ -1,11 +1,14 @@
 import 'package:laravel_ecommerce/core/api/laravel_api_provider.dart';
 import 'package:get_it/get_it.dart';
 import 'package:dio/dio.dart';
+import 'package:laravel_ecommerce/features/domain/product%20details/entities/product_details.dart';
 import 'package:laravel_ecommerce/features/presentation/home/controller/home_provider.dart';
 import '../../features/data/auth/datasources/auth_remote_datasource.dart';
 import '../../features/data/auth/repositories/auth_repository_impl.dart';
 import '../../features/data/category/datasources/category_remote_datasource.dart';
 import '../../features/data/category/repositories/category_repository_impl.dart';
+import '../../features/data/product details/datasources/product_details_remote_datasource.dart';
+import '../../features/data/product details/repositories/product_details_repository_impl.dart';
 import '../../features/data/product/datasources/product_remote_datasource.dart';
 import '../../features/data/product/repositories/product_repository_impl.dart';
 import '../../features/data/slider/datasources/slider_remote_datasource.dart';
@@ -25,7 +28,10 @@ import '../../features/domain/category/usecases/get_categories_use_case.dart';
 import '../../features/domain/category/usecases/get_featured_categories_use_case.dart';
 import '../../features/domain/category/usecases/get_filter_page_categories_use_case.dart';
 import '../../features/domain/category/usecases/get_top_categories_use_case.dart';
+import '../../features/domain/product details/repositories/product_details_repository.dart';
+import '../../features/domain/product details/usecases/get_product_details_use_case.dart';
 import '../../features/domain/product/repositories/product_repository.dart';
+import '../../features/domain/product/usecases/get_all_products_use_case.dart';
 import '../../features/domain/product/usecases/get_brand_products_use_case.dart';
 import '../../features/domain/product/usecases/get_category_products_use_case.dart';
 import '../../features/domain/product/usecases/get_digital_products_use_case.dart';
@@ -33,7 +39,6 @@ import '../../features/domain/product/usecases/get_featured_products_use_case.da
 import '../../features/domain/product/usecases/get_best_selling_products_use_case.dart';
 import '../../features/domain/product/usecases/get_filtered_products_use_case.dart';
 import '../../features/domain/product/usecases/get_new_added_products_use_case.dart';
-import '../../features/domain/product/usecases/get_product_details_use_case.dart';
 import '../../features/domain/product/usecases/get_related_products_use_case.dart';
 import '../../features/domain/product/usecases/get_shop_products_use_case.dart';
 import '../../features/domain/product/usecases/get_todays_deal_products_use_case.dart';
@@ -45,6 +50,7 @@ import '../../features/domain/slider/usecases/get_sliders_use_case.dart';
 import '../../features/presentation/auth/controller/auth_provider.dart';
 import '../../features/presentation/category/controller/provider.dart';
 import '../../features/presentation/main layout/controller/layout_provider.dart';
+import '../../features/presentation/product/controller/product_provider.dart';
 import '../../features/presentation/slider/controller/provider.dart';
 import '../api/api_provider.dart';
 import '../config/app_config.dart/app_config.dart';
@@ -57,6 +63,7 @@ void setupDependencies() {
   // Core
   sl.registerLazySingleton<AppConfig>(() => AppConfig());
   sl.registerLazySingleton<SecureStorage>(() => SecureStorage());
+
 
   sl.registerLazySingleton<Dio>(() {
     final dio = Dio();
@@ -75,8 +82,9 @@ void setupDependencies() {
   sl.registerLazySingleton<AuthRemoteDataSource>(() => AuthRemoteDataSourceImpl(sl<LaravelApiProvider>()));
   sl.registerLazySingleton<CategoryRemoteDataSource>(() => CategoryRemoteDataSourceImpl(sl<ApiProvider>()));
   sl.registerLazySingleton<ProductRemoteDataSource>(() => ProductRemoteDataSourceImpl(sl<ApiProvider>()));
+  sl.registerLazySingleton<ProductDetailsRemoteDataSource>(() => ProductDetailsRemoteDataSourceImpl(sl<ApiProvider>()));
   sl.registerLazySingleton<SliderRemoteDataSource>(
-        () => SliderRemoteDataSourceImpl(sl()),
+        () => SliderRemoteDataSourceImpl(sl())
   );
 
 
@@ -84,8 +92,9 @@ void setupDependencies() {
   sl.registerLazySingleton<AuthRepository>(() => AuthRepositoryImpl(sl<AuthRemoteDataSource>()));
   sl.registerLazySingleton<CategoryRepository>(() => CategoryRepositoryImpl(sl<CategoryRemoteDataSource>()));
   sl.registerLazySingleton<ProductRepository>(() => ProductRepositoryImpl(sl<ProductRemoteDataSource>()));
+  sl.registerLazySingleton<ProductDetailsRepository>(() => ProductDetailsRepositoryImpl(sl<ProductDetailsRemoteDataSource>()));
   sl.registerLazySingleton<SliderRepository>(
-        () => SliderRepositoryImpl(sl()),
+        () => SliderRepositoryImpl(sl())
   );
 
   // Use Cases - Auth
@@ -106,6 +115,7 @@ void setupDependencies() {
   sl.registerLazySingleton(() => GetFilterPageCategoriesUseCase(sl()));
 
   // Use Cases - Product
+  sl.registerLazySingleton(() => GetAllProductsUseCase(sl()));
   sl.registerLazySingleton(() => GetFeaturedProductsUseCase(sl()));
   sl.registerLazySingleton(() => GetBestSellingProductsUseCase(sl()));
   sl.registerLazySingleton(() => GetNewAddedProductsUseCase(sl()));
@@ -115,11 +125,13 @@ void setupDependencies() {
   sl.registerLazySingleton(() => GetBrandProductsUseCase(sl()));
   sl.registerLazySingleton(() => GetDigitalProductsUseCase(sl()));
   sl.registerLazySingleton(() => GetFilteredProductsUseCase(sl()));
-  sl.registerLazySingleton(() => GetProductDetailsUseCase(sl()));
   sl.registerLazySingleton(() => GetRelatedProductsUseCase(sl()));
   sl.registerLazySingleton(() => GetShopProductsUseCase(sl()));
   sl.registerLazySingleton(() => GetTopFromThisSellerProductsUseCase(sl()));
   sl.registerLazySingleton(() => GetVariantWiseInfoUseCase(sl()));
+
+  // Use Cases - Product Details
+  sl.registerLazySingleton(() => GetProductDetailsUseCase(sl()));
 
   // Use Cases - Sliders
   sl.registerLazySingleton(() => GetSlidersUseCase(sl()));
@@ -149,23 +161,24 @@ void setupDependencies() {
   ));
 
   sl.registerLazySingleton(() => HomeProvider(
-    // Existing use cases
+    getAllProductsUseCase: sl(),
     getFeaturedProductsUseCase: sl(),
     getBestSellingProductsUseCase: sl(),
     getNewAddedProductsUseCase: sl(),
     getTodaysDealProductsUseCase: sl(),
     getFlashDealProductsUseCase: sl(),
-
-    // New use cases
     getCategoryProductsUseCase: sl(),
     getBrandProductsUseCase: sl(),
     getDigitalProductsUseCase: sl(),
     getFilteredProductsUseCase: sl(),
-    getProductDetailsUseCase: sl(),
     getRelatedProductsUseCase: sl(),
     getShopProductsUseCase: sl(),
     getTopFromThisSellerProductsUseCase: sl(),
     getVariantWiseInfoUseCase: sl(),
+  ));
+
+  sl.registerFactory(() => ProductDetailsProvider(
+    getProductDetailsUseCase: sl(),
   ));
 
 

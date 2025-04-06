@@ -5,6 +5,7 @@ import 'package:laravel_ecommerce/core/utils/extension/text_style_extension.dart
 class ProductGridCard extends StatelessWidget {
   final String imageUrl;
   final String productName;
+  final String productSlug;
   final String price;
   final bool isBestSeller;
   final VoidCallback onAddToCart;
@@ -20,13 +21,16 @@ class ProductGridCard extends StatelessWidget {
     this.isFavorite = false,
     required this.onAddToCart,
     required this.onFavoriteToggle,
+    required this.productSlug,
   });
 
   @override
   Widget build(BuildContext context) {
     return InkWell(
       onTap: (){
-        AppRoutes.navigateTo(context, AppRoutes.productScreen);
+        AppRoutes.navigateTo(context, AppRoutes.productDetailScreen,arguments: {
+          'slug': productSlug,
+        }, );
       },
       child: Container(
         decoration: BoxDecoration(
@@ -34,7 +38,7 @@ class ProductGridCard extends StatelessWidget {
           borderRadius: BorderRadius.circular(16),
           boxShadow: [
             BoxShadow(
-              color: Colors.grey.withOpacity(0.1),
+              color: Colors.grey.withValues(alpha: 0.1),
               spreadRadius: 1,
               blurRadius: 5,
               offset: const Offset(0, 3),

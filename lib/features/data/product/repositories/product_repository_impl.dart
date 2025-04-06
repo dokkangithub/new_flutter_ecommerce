@@ -8,6 +8,11 @@ class ProductRepositoryImpl implements ProductRepository {
   ProductRepositoryImpl(this.remoteDataSource);
 
   @override
+  Future<ProductsResponse> getAllProducts(int page, {String? name}) async {
+    return await remoteDataSource.getAllProducts(page, name: name);
+  }
+
+  @override
   Future<ProductsResponse> getFeaturedProducts(int page) async {
     return await remoteDataSource.getFeaturedProducts(page);
   }
@@ -73,10 +78,6 @@ class ProductRepositoryImpl implements ProductRepository {
     return await remoteDataSource.getDigitalProducts(page);
   }
 
-  @override
-  Future<Product> getProductDetails(int id) async {
-    return await remoteDataSource.getProductDetails(id);
-  }
 
   @override
   Future<Product> getDigitalProductDetails(int id) async {

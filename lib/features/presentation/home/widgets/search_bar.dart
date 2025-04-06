@@ -21,6 +21,7 @@ class _CustomSearchBarState extends State<CustomSearchBar> {
           child: CustomTextFormField(
             controller: searchController,
             hint: 'search for yours',
+              isReadOnly:true,
           ),
         ),
         const SizedBox(width: 12),

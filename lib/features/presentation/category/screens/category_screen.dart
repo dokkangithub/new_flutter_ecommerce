@@ -72,7 +72,7 @@ class _CategoryScreenState extends State<CategoryScreen> {
                     categoryName: category.name ?? 'Unknown',
                     itemCount: category.productCount ?? 0,
                     icon: Icons.category,
-                    imageUrl: category.icon,
+                    imageUrl: category.icon, categoryId: category.id??0,
                   );
                 },
               ),

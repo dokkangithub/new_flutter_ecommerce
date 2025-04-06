@@ -1,9 +1,11 @@
 import 'package:flutter/material.dart';
+import 'package:laravel_ecommerce/core/utils/enums/products_type.dart';
 import 'package:laravel_ecommerce/features/presentation/category/screens/category_screen.dart';
 import 'package:laravel_ecommerce/features/presentation/profile/screens/profile_screen.dart';
 import 'package:laravel_ecommerce/features/presentation/wishlist/screens/wishlist_screen.dart';
 import '../../../features/domain/product/entities/product.dart';
-import '../../../features/presentation/all products/screens/all_products.dart';
+import '../../../features/presentation/all products/screens/all_category_products.dart';
+import '../../../features/presentation/all products/screens/all_products_by_type_screen.dart';
 import '../../../features/presentation/auth/screens/forgot_password_screen.dart';
 import '../../../features/presentation/auth/screens/login_screen.dart';
 import '../../../features/presentation/auth/screens/reset_password_screen.dart';
@@ -30,8 +32,9 @@ class AppRoutes {
   static const String profileScreen = '/profile';
   static const String mainLayoutScreen = '/mainLayout';
   static const String cartScreen = '/cart';
-  static const String productScreen = '/product';
-  static const String allProductsScreen = '/all-product';
+  static const String productDetailScreen = '/product-details';
+  static const String allCategoryProductsScreen = '/all-category-product';
+  static const String allProductsByTypeScreen = '/allProductsByType';
 
   static Route<dynamic> generateRoute(RouteSettings settings) {
     Widget page;
@@ -78,15 +81,27 @@ class AppRoutes {
       case cartScreen:
         page = CartScreen();
         break;
-      case productScreen:
-        page = ProductDetailScreen();
-        break;
-      case allProductsScreen:
+      case productDetailScreen:
         final args = settings.arguments as Map<String, dynamic>?;
-        page = AllProductsScreen(
-          initialCategoryName: args?['initialCategoryName'] as String?,
-          initialProducts: args?['initialProducts'] as List<Product>?,
+        page = ProductDetailScreen(slug: args?['slug'] as String,);
+        break;
+      case allCategoryProductsScreen:
+        final args = settings.arguments as Map<String, dynamic>?;
+        page = AllCategoryProductsScreen(
+          selectedCategoryId: args?['categoryId'] as int,
+          selectedCategoryName: args?['categoryName'] as String,
         );
+        break;
+      case AppRoutes.allProductsByTypeScreen:
+        final args = settings.arguments as Map<String, dynamic>?;
+        if (args == null || args['productType'] == null || args['title'] == null) {
+          page = const Scaffold(body: Center(child: Text('Invalid product type')));
+        } else {
+          page = AllProductsByTypeScreen(
+            productType: args['productType'] as ProductType,
+            title: args['title'] as String,
+          );
+        }
         break;
       default:
         page = Scaffold(

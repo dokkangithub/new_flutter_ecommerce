@@ -1,51 +1,44 @@
 import 'package:flutter/material.dart';
-
+import 'package:laravel_ecommerce/features/domain/product/usecases/get_all_products_use_case.dart';
+import '../../../../core/utils/enums/loading_state.dart';
 import '../../../domain/product/entities/product.dart';
 import '../../../domain/product/usecases/get_best_selling_products_use_case.dart';
 import '../../../domain/product/usecases/get_featured_products_use_case.dart';
 import '../../../domain/product/usecases/get_flash_deal_products_use_case.dart';
 import '../../../domain/product/usecases/get_new_added_products_use_case.dart';
 import '../../../domain/product/usecases/get_todays_deal_products_use_case.dart';
-// Add new imports
 import '../../../domain/product/usecases/get_category_products_use_case.dart';
 import '../../../domain/product/usecases/get_brand_products_use_case.dart';
 import '../../../domain/product/usecases/get_digital_products_use_case.dart';
 import '../../../domain/product/usecases/get_filtered_products_use_case.dart';
-import '../../../domain/product/usecases/get_product_details_use_case.dart';
 import '../../../domain/product/usecases/get_related_products_use_case.dart';
 import '../../../domain/product/usecases/get_shop_products_use_case.dart';
 import '../../../domain/product/usecases/get_top_from_this_seller_products_use_case.dart';
 import '../../../domain/product/usecases/get_variant_wise_info_use_case.dart';
 
-enum HomeLoadingState { loading, loaded, error }
 
 class HomeProvider extends ChangeNotifier {
-  // Existing use cases
+  final GetAllProductsUseCase getAllProductsUseCase;
   final GetFeaturedProductsUseCase getFeaturedProductsUseCase;
   final GetBestSellingProductsUseCase getBestSellingProductsUseCase;
   final GetNewAddedProductsUseCase getNewAddedProductsUseCase;
   final GetTodaysDealProductsUseCase getTodaysDealProductsUseCase;
   final GetFlashDealProductsUseCase getFlashDealProductsUseCase;
-
-  // New use cases
   final GetCategoryProductsUseCase getCategoryProductsUseCase;
   final GetBrandProductsUseCase getBrandProductsUseCase;
   final GetDigitalProductsUseCase getDigitalProductsUseCase;
   final GetFilteredProductsUseCase getFilteredProductsUseCase;
-  final GetProductDetailsUseCase getProductDetailsUseCase;
   final GetRelatedProductsUseCase getRelatedProductsUseCase;
   final GetShopProductsUseCase getShopProductsUseCase;
   final GetTopFromThisSellerProductsUseCase getTopFromThisSellerProductsUseCase;
   final GetVariantWiseInfoUseCase getVariantWiseInfoUseCase;
 
-  // Existing product data
+  List<Product> allProducts = [];
   List<Product> featuredProducts = [];
   List<Product> bestSellingProducts = [];
   List<Product> newProducts = [];
   List<Product> todaysDealProducts = [];
   List<Product> flashDealProducts = [];
-
-  // New product data
   List<Product> categoryProducts = [];
   List<Product> brandProducts = [];
   List<Product> digitalProducts = [];
@@ -56,15 +49,14 @@ class HomeProvider extends ChangeNotifier {
   List<Product> topFromThisSellerProducts = [];
   dynamic variantInfo;
 
-  // Existing pagination metadata
+  int allProductsPage = 1;
   int featuredProductsPage = 1;
   int bestSellingProductsPage = 1;
   int newProductsPage = 1;
   bool hasMoreFeaturedProducts = true;
   bool hasMoreBestSellingProducts = true;
+  bool hasMoreAllProducts = true;
   bool hasMoreNewProducts = true;
-
-  // New pagination metadata
   int categoryProductsPage = 1;
   int brandProductsPage = 1;
   int digitalProductsPage = 1;
@@ -76,43 +68,38 @@ class HomeProvider extends ChangeNotifier {
   bool hasMoreFilteredProducts = true;
   bool hasMoreShopProducts = true;
 
-  // Existing loading states
-  HomeLoadingState featuredProductsState = HomeLoadingState.loading;
-  HomeLoadingState bestSellingProductsState = HomeLoadingState.loading;
-  HomeLoadingState newProductsState = HomeLoadingState.loading;
-  HomeLoadingState todaysDealProductsState = HomeLoadingState.loading;
-  HomeLoadingState flashDealProductsState = HomeLoadingState.loading;
+  LoadingState allProductsState = LoadingState.loading;
+  LoadingState featuredProductsState = LoadingState.loading;
+  LoadingState bestSellingProductsState = LoadingState.loading;
+  LoadingState newProductsState = LoadingState.loading;
+  LoadingState todaysDealProductsState = LoadingState.loading;
+  LoadingState flashDealProductsState = LoadingState.loading;
+  LoadingState categoryProductsState = LoadingState.loading;
+  LoadingState brandProductsState = LoadingState.loading;
+  LoadingState digitalProductsState = LoadingState.loading;
+  LoadingState filteredProductsState = LoadingState.loading;
+  LoadingState relatedProductsState = LoadingState.loading;
+  LoadingState shopProductsState = LoadingState.loading;
+  LoadingState topFromThisSellerProductsState = LoadingState.loading;
+  LoadingState variantInfoState = LoadingState.loading;
 
-  // New loading states
-  HomeLoadingState categoryProductsState = HomeLoadingState.loading;
-  HomeLoadingState brandProductsState = HomeLoadingState.loading;
-  HomeLoadingState digitalProductsState = HomeLoadingState.loading;
-  HomeLoadingState filteredProductsState = HomeLoadingState.loading;
-  HomeLoadingState productDetailsState = HomeLoadingState.loading;
-  HomeLoadingState relatedProductsState = HomeLoadingState.loading;
-  HomeLoadingState shopProductsState = HomeLoadingState.loading;
-  HomeLoadingState topFromThisSellerProductsState = HomeLoadingState.loading;
-  HomeLoadingState variantInfoState = HomeLoadingState.loading;
-
-  // Existing error messages
+  String allProductsError = '';
   String featuredProductsError = '';
   String bestSellingProductsError = '';
   String newProductsError = '';
   String todaysDealProductsError = '';
   String flashDealProductsError = '';
-
-  // New error messages
   String categoryProductsError = '';
   String brandProductsError = '';
   String digitalProductsError = '';
   String filteredProductsError = '';
-  String productDetailsError = '';
   String relatedProductsError = '';
   String shopProductsError = '';
   String topFromThisSellerProductsError = '';
   String variantInfoError = '';
 
   HomeProvider({
+    required this.getAllProductsUseCase,
     required this.getFeaturedProductsUseCase,
     required this.getBestSellingProductsUseCase,
     required this.getNewAddedProductsUseCase,
@@ -122,7 +109,6 @@ class HomeProvider extends ChangeNotifier {
     required this.getBrandProductsUseCase,
     required this.getDigitalProductsUseCase,
     required this.getFilteredProductsUseCase,
-    required this.getProductDetailsUseCase,
     required this.getRelatedProductsUseCase,
     required this.getShopProductsUseCase,
     required this.getTopFromThisSellerProductsUseCase,
@@ -132,6 +118,7 @@ class HomeProvider extends ChangeNotifier {
   // Existing initialization method
   Future<void> initHomeData() async {
     await Future.wait([
+      fetchAllProducts(),
       fetchFeaturedProducts(),
       fetchBestSellingProducts(),
       fetchNewProducts(),
@@ -139,12 +126,48 @@ class HomeProvider extends ChangeNotifier {
     ]);
   }
 
-
   void setInitialProducts(List<Product> products) {
     filteredProducts = products;
-    filteredProductsState = HomeLoadingState.loaded;
-    hasMoreFilteredProducts = false; // Assuming initial list is complete
+    filteredProductsState = LoadingState.loaded;
+    hasMoreFilteredProducts = false;
     notifyListeners();
+  }
+
+  // Featured Products methods
+  Future<void> fetchAllProducts({bool refresh = false}) async {
+    try {
+      if (refresh) {
+        allProductsPage = 1;
+        hasMoreAllProducts = true;
+        allProducts = [];
+      }
+
+      if (!hasMoreAllProducts) return;
+
+      allProductsState = LoadingState.loading;
+      notifyListeners();
+
+      final response = await getAllProductsUseCase(allProductsPage);
+
+      if (refresh) {
+        allProducts = response.data;
+      } else {
+        allProducts.addAll(response.data);
+      }
+
+      hasMoreAllProducts =
+          response.meta.currentPage < response.meta.lastPage;
+      if (hasMoreAllProducts) {
+        allProductsPage++;
+      }
+
+      allProductsState = LoadingState.loaded;
+    } catch (e) {
+      allProductsState = LoadingState.error;
+      allProductsError = e.toString();
+    } finally {
+      notifyListeners();
+    }
   }
 
   // Featured Products methods
@@ -158,7 +181,7 @@ class HomeProvider extends ChangeNotifier {
 
       if (!hasMoreFeaturedProducts) return;
 
-      featuredProductsState = HomeLoadingState.loading;
+      featuredProductsState = LoadingState.loading;
       notifyListeners();
 
       final response = await getFeaturedProductsUseCase(featuredProductsPage);
@@ -169,14 +192,15 @@ class HomeProvider extends ChangeNotifier {
         featuredProducts.addAll(response.data);
       }
 
-      hasMoreFeaturedProducts = response.meta.currentPage < response.meta.lastPage;
+      hasMoreFeaturedProducts =
+          response.meta.currentPage < response.meta.lastPage;
       if (hasMoreFeaturedProducts) {
         featuredProductsPage++;
       }
 
-      featuredProductsState = HomeLoadingState.loaded;
+      featuredProductsState = LoadingState.loaded;
     } catch (e) {
-      featuredProductsState = HomeLoadingState.error;
+      featuredProductsState = LoadingState.error;
       featuredProductsError = e.toString();
     } finally {
       notifyListeners();
@@ -194,10 +218,12 @@ class HomeProvider extends ChangeNotifier {
 
       if (!hasMoreBestSellingProducts) return;
 
-      bestSellingProductsState = HomeLoadingState.loading;
+      bestSellingProductsState = LoadingState.loading;
       notifyListeners();
 
-      final response = await getBestSellingProductsUseCase(bestSellingProductsPage);
+      final response = await getBestSellingProductsUseCase(
+        bestSellingProductsPage,
+      );
 
       if (refresh) {
         bestSellingProducts = response.data;
@@ -205,14 +231,15 @@ class HomeProvider extends ChangeNotifier {
         bestSellingProducts.addAll(response.data);
       }
 
-      hasMoreBestSellingProducts = response.meta.currentPage < response.meta.lastPage;
+      hasMoreBestSellingProducts =
+          response.meta.currentPage < response.meta.lastPage;
       if (hasMoreBestSellingProducts) {
         bestSellingProductsPage++;
       }
 
-      bestSellingProductsState = HomeLoadingState.loaded;
+      bestSellingProductsState = LoadingState.loaded;
     } catch (e) {
-      bestSellingProductsState = HomeLoadingState.error;
+      bestSellingProductsState = LoadingState.error;
       bestSellingProductsError = e.toString();
     } finally {
       notifyListeners();
@@ -230,7 +257,7 @@ class HomeProvider extends ChangeNotifier {
 
       if (!hasMoreNewProducts) return;
 
-      newProductsState = HomeLoadingState.loading;
+      newProductsState = LoadingState.loading;
       notifyListeners();
 
       final response = await getNewAddedProductsUseCase(newProductsPage);
@@ -246,9 +273,9 @@ class HomeProvider extends ChangeNotifier {
         newProductsPage++;
       }
 
-      newProductsState = HomeLoadingState.loaded;
+      newProductsState = LoadingState.loaded;
     } catch (e) {
-      newProductsState = HomeLoadingState.error;
+      newProductsState = LoadingState.error;
       newProductsError = e.toString();
     } finally {
       notifyListeners();
@@ -258,15 +285,15 @@ class HomeProvider extends ChangeNotifier {
   // Today's Deal Products methods
   Future<void> fetchTodaysDealProducts() async {
     try {
-      todaysDealProductsState = HomeLoadingState.loading;
+      todaysDealProductsState = LoadingState.loading;
       notifyListeners();
 
       final response = await getTodaysDealProductsUseCase();
       todaysDealProducts = response.data;
 
-      todaysDealProductsState = HomeLoadingState.loaded;
+      todaysDealProductsState = LoadingState.loaded;
     } catch (e) {
-      todaysDealProductsState = HomeLoadingState.error;
+      todaysDealProductsState = LoadingState.error;
       todaysDealProductsError = e.toString();
     } finally {
       notifyListeners();
@@ -276,24 +303,27 @@ class HomeProvider extends ChangeNotifier {
   // Flash Deal Products methods
   Future<void> fetchFlashDealProducts(int dealId) async {
     try {
-      flashDealProductsState = HomeLoadingState.loading;
+      flashDealProductsState = LoadingState.loading;
       notifyListeners();
 
       final response = await getFlashDealProductsUseCase(dealId);
       flashDealProducts = response.data;
 
-      flashDealProductsState = HomeLoadingState.loaded;
+      flashDealProductsState = LoadingState.loaded;
     } catch (e) {
-      flashDealProductsState = HomeLoadingState.error;
+      flashDealProductsState = LoadingState.error;
       flashDealProductsError = e.toString();
     } finally {
       notifyListeners();
     }
   }
 
-
   // New method for Category Products
-  Future<void> fetchCategoryProducts(int categoryId, {bool refresh = false, String? name}) async {
+  Future<void> fetchCategoryProducts(
+    int categoryId, {
+    bool refresh = false,
+    String? name,
+  }) async {
     try {
       if (refresh) {
         categoryProductsPage = 1;
@@ -303,10 +333,14 @@ class HomeProvider extends ChangeNotifier {
 
       if (!hasMoreCategoryProducts) return;
 
-      categoryProductsState = HomeLoadingState.loading;
+      categoryProductsState = LoadingState.loading;
       notifyListeners();
 
-      final response = await getCategoryProductsUseCase(categoryId, categoryProductsPage, name: name);
+      final response = await getCategoryProductsUseCase(
+        categoryId,
+        categoryProductsPage,
+        name: name,
+      );
 
       if (refresh) {
         categoryProducts = response.data;
@@ -314,14 +348,15 @@ class HomeProvider extends ChangeNotifier {
         categoryProducts.addAll(response.data);
       }
 
-      hasMoreCategoryProducts = response.meta.currentPage < response.meta.lastPage;
+      hasMoreCategoryProducts =
+          response.meta.currentPage < response.meta.lastPage;
       if (hasMoreCategoryProducts) {
         categoryProductsPage++;
       }
 
-      categoryProductsState = HomeLoadingState.loaded;
+      categoryProductsState = LoadingState.loaded;
     } catch (e) {
-      categoryProductsState = HomeLoadingState.error;
+      categoryProductsState = LoadingState.error;
       categoryProductsError = e.toString();
     } finally {
       notifyListeners();
@@ -329,7 +364,11 @@ class HomeProvider extends ChangeNotifier {
   }
 
   // New method for Brand Products
-  Future<void> fetchBrandProducts(int brandId, {bool refresh = false, String? name}) async {
+  Future<void> fetchBrandProducts(
+    int brandId, {
+    bool refresh = false,
+    String? name,
+  }) async {
     try {
       if (refresh) {
         brandProductsPage = 1;
@@ -339,10 +378,14 @@ class HomeProvider extends ChangeNotifier {
 
       if (!hasMoreBrandProducts) return;
 
-      brandProductsState = HomeLoadingState.loading;
+      brandProductsState = LoadingState.loading;
       notifyListeners();
 
-      final response = await getBrandProductsUseCase(brandId, brandProductsPage, name: name);
+      final response = await getBrandProductsUseCase(
+        brandId,
+        brandProductsPage,
+        name: name,
+      );
 
       if (refresh) {
         brandProducts = response.data;
@@ -355,9 +398,9 @@ class HomeProvider extends ChangeNotifier {
         brandProductsPage++;
       }
 
-      brandProductsState = HomeLoadingState.loaded;
+      brandProductsState = LoadingState.loaded;
     } catch (e) {
-      brandProductsState = HomeLoadingState.error;
+      brandProductsState = LoadingState.error;
       brandProductsError = e.toString();
     } finally {
       notifyListeners();
@@ -375,7 +418,7 @@ class HomeProvider extends ChangeNotifier {
 
       if (!hasMoreDigitalProducts) return;
 
-      digitalProductsState = HomeLoadingState.loading;
+      digitalProductsState = LoadingState.loading;
       notifyListeners();
 
       final response = await getDigitalProductsUseCase(digitalProductsPage);
@@ -386,14 +429,15 @@ class HomeProvider extends ChangeNotifier {
         digitalProducts.addAll(response.data);
       }
 
-      hasMoreDigitalProducts = response.meta.currentPage < response.meta.lastPage;
+      hasMoreDigitalProducts =
+          response.meta.currentPage < response.meta.lastPage;
       if (hasMoreDigitalProducts) {
         digitalProductsPage++;
       }
 
-      digitalProductsState = HomeLoadingState.loaded;
+      digitalProductsState = LoadingState.loaded;
     } catch (e) {
-      digitalProductsState = HomeLoadingState.error;
+      digitalProductsState = LoadingState.error;
       digitalProductsError = e.toString();
     } finally {
       notifyListeners();
@@ -419,7 +463,7 @@ class HomeProvider extends ChangeNotifier {
 
       if (!hasMoreFilteredProducts) return;
 
-      filteredProductsState = HomeLoadingState.loading;
+      filteredProductsState = LoadingState.loading;
       notifyListeners();
 
       final response = await getFilteredProductsUseCase(
@@ -438,50 +482,34 @@ class HomeProvider extends ChangeNotifier {
         filteredProducts.addAll(response.data);
       }
 
-      hasMoreFilteredProducts = response.meta.currentPage < response.meta.lastPage;
+      hasMoreFilteredProducts =
+          response.meta.currentPage < response.meta.lastPage;
       if (hasMoreFilteredProducts) {
         filteredProductsPage++;
       }
 
-      filteredProductsState = HomeLoadingState.loaded;
+      filteredProductsState = LoadingState.loaded;
     } catch (e) {
-      filteredProductsState = HomeLoadingState.error;
+      filteredProductsState = LoadingState.error;
       filteredProductsError = e.toString();
     } finally {
       notifyListeners();
     }
   }
 
-  // New method for Product Details
-  Future<void> fetchProductDetails(int productId) async {
-    try {
-      productDetailsState = HomeLoadingState.loading;
-      notifyListeners();
-
-      final product = await getProductDetailsUseCase(productId);
-      selectedProduct = product;
-
-      productDetailsState = HomeLoadingState.loaded;
-    } catch (e) {
-      productDetailsState = HomeLoadingState.error;
-      productDetailsError = e.toString();
-    } finally {
-      notifyListeners();
-    }
-  }
 
   // New method for Related Products
   Future<void> fetchRelatedProducts(int productId) async {
     try {
-      relatedProductsState = HomeLoadingState.loading;
+      relatedProductsState = LoadingState.loading;
       notifyListeners();
 
       final response = await getRelatedProductsUseCase(productId);
       relatedProducts = response.data;
 
-      relatedProductsState = HomeLoadingState.loaded;
+      relatedProductsState = LoadingState.loaded;
     } catch (e) {
-      relatedProductsState = HomeLoadingState.error;
+      relatedProductsState = LoadingState.error;
       relatedProductsError = e.toString();
     } finally {
       notifyListeners();
@@ -489,7 +517,11 @@ class HomeProvider extends ChangeNotifier {
   }
 
   // New method for Shop Products
-  Future<void> fetchShopProducts(int shopId, {bool refresh = false, String? name}) async {
+  Future<void> fetchShopProducts(
+    int shopId, {
+    bool refresh = false,
+    String? name,
+  }) async {
     try {
       if (refresh) {
         shopProductsPage = 1;
@@ -499,10 +531,14 @@ class HomeProvider extends ChangeNotifier {
 
       if (!hasMoreShopProducts) return;
 
-      shopProductsState = HomeLoadingState.loading;
+      shopProductsState = LoadingState.loading;
       notifyListeners();
 
-      final response = await getShopProductsUseCase(shopId, shopProductsPage, name: name);
+      final response = await getShopProductsUseCase(
+        shopId,
+        shopProductsPage,
+        name: name,
+      );
 
       if (refresh) {
         shopProducts = response.data;
@@ -515,9 +551,9 @@ class HomeProvider extends ChangeNotifier {
         shopProductsPage++;
       }
 
-      shopProductsState = HomeLoadingState.loaded;
+      shopProductsState = LoadingState.loaded;
     } catch (e) {
-      shopProductsState = HomeLoadingState.error;
+      shopProductsState = LoadingState.error;
       shopProductsError = e.toString();
     } finally {
       notifyListeners();
@@ -527,15 +563,15 @@ class HomeProvider extends ChangeNotifier {
   // New method for Top From This Seller Products
   Future<void> fetchTopFromThisSellerProducts(int sellerId) async {
     try {
-      topFromThisSellerProductsState = HomeLoadingState.loading;
+      topFromThisSellerProductsState = LoadingState.loading;
       notifyListeners();
 
       final response = await getTopFromThisSellerProductsUseCase(sellerId);
       topFromThisSellerProducts = response.data;
 
-      topFromThisSellerProductsState = HomeLoadingState.loaded;
+      topFromThisSellerProductsState = LoadingState.loaded;
     } catch (e) {
-      topFromThisSellerProductsState = HomeLoadingState.error;
+      topFromThisSellerProductsState = LoadingState.error;
       topFromThisSellerProductsError = e.toString();
     } finally {
       notifyListeners();
@@ -543,16 +579,24 @@ class HomeProvider extends ChangeNotifier {
   }
 
   // New method for Variant Wise Info
-  Future<void> fetchVariantWiseInfo(int productId, {String? color, String? variants}) async {
+  Future<void> fetchVariantWiseInfo(
+    int productId, {
+    String? color,
+    String? variants,
+  }) async {
     try {
-      variantInfoState = HomeLoadingState.loading;
+      variantInfoState = LoadingState.loading;
       notifyListeners();
 
-      variantInfo = await getVariantWiseInfoUseCase(productId, color: color, variants: variants);
+      variantInfo = await getVariantWiseInfoUseCase(
+        productId,
+        color: color,
+        variants: variants,
+      );
 
-      variantInfoState = HomeLoadingState.loaded;
+      variantInfoState = LoadingState.loaded;
     } catch (e) {
-      variantInfoState = HomeLoadingState.error;
+      variantInfoState = LoadingState.error;
       variantInfoError = e.toString();
     } finally {
       notifyListeners();
@@ -562,40 +606,39 @@ class HomeProvider extends ChangeNotifier {
   // Update the refresh method to include all refreshable sections
   Future<void> refreshHomeData() async {
     await Future.wait([
+      fetchAllProducts(refresh: true),
       fetchFeaturedProducts(refresh: true),
       fetchBestSellingProducts(refresh: true),
       fetchNewProducts(refresh: true),
       fetchTodaysDealProducts(),
       fetchDigitalProducts(refresh: true),
-      // Note: Category, Brand, Shop, Filtered products need specific IDs so they're not included here
     ]);
   }
 
   // Updated helper to check if any section is loading
   bool get isAnyLoading {
-    return
-      featuredProductsState == HomeLoadingState.loading ||
-          bestSellingProductsState == HomeLoadingState.loading ||
-          newProductsState == HomeLoadingState.loading ||
-          todaysDealProductsState == HomeLoadingState.loading ||
-          flashDealProductsState == HomeLoadingState.loading ||
-          categoryProductsState == HomeLoadingState.loading ||
-          brandProductsState == HomeLoadingState.loading ||
-          digitalProductsState == HomeLoadingState.loading ||
-          filteredProductsState == HomeLoadingState.loading ||
-          productDetailsState == HomeLoadingState.loading ||
-          relatedProductsState == HomeLoadingState.loading ||
-          shopProductsState == HomeLoadingState.loading ||
-          topFromThisSellerProductsState == HomeLoadingState.loading ||
-          variantInfoState == HomeLoadingState.loading;
+    return allProductsState == LoadingState.loading ||
+        featuredProductsState == LoadingState.loading ||
+        bestSellingProductsState == LoadingState.loading ||
+        newProductsState == LoadingState.loading ||
+        todaysDealProductsState == LoadingState.loading ||
+        flashDealProductsState == LoadingState.loading ||
+        categoryProductsState == LoadingState.loading ||
+        brandProductsState == LoadingState.loading ||
+        digitalProductsState == LoadingState.loading ||
+        filteredProductsState == LoadingState.loading ||
+        relatedProductsState == LoadingState.loading ||
+        shopProductsState == LoadingState.loading ||
+        topFromThisSellerProductsState == LoadingState.loading ||
+        variantInfoState == LoadingState.loading;
   }
 
   // Updated helper to check if main sections are loaded
   bool get isAllLoaded {
-    return
-      featuredProductsState == HomeLoadingState.loaded &&
-          bestSellingProductsState == HomeLoadingState.loaded &&
-          newProductsState == HomeLoadingState.loaded &&
-          todaysDealProductsState == HomeLoadingState.loaded;
+    return allProductsState == LoadingState.loaded &&
+        featuredProductsState == LoadingState.loaded &&
+        bestSellingProductsState == LoadingState.loaded &&
+        newProductsState == LoadingState.loaded &&
+        todaysDealProductsState == LoadingState.loaded;
   }
 }

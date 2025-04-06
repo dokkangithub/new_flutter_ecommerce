@@ -100,7 +100,7 @@ class _CartScreenState extends State<CartScreen> {
                     setState(() {
                       cartItems[index]['quantity'] = newQuantity;
                     });
-                  },
+                  }, productSlug: 'slug',
                 );
               },
             ),

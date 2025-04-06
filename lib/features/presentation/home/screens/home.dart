@@ -11,9 +11,10 @@ import 'package:laravel_ecommerce/features/presentation/category/controller/prov
 import 'package:laravel_ecommerce/features/presentation/home/controller/home_provider.dart';
 import 'package:laravel_ecommerce/features/presentation/home/widgets/category_card.dart';
 import 'package:laravel_ecommerce/features/presentation/home/widgets/search_bar.dart';
+import '../../../../core/utils/enums/loading_state.dart';
+import '../../../../core/utils/enums/products_type.dart';
 import '../../../../core/utils/shimmer/category_shimmer.dart';
 import '../../../../core/utils/shimmer/product_shimmer.dart';
-import '../../../domain/product/entities/product.dart';
 import '../../main layout/controller/layout_provider.dart';
 import '../widgets/banners_widget.dart';
 
@@ -35,7 +36,10 @@ class _HomeScreenState extends State<HomeScreen> {
 
   void _loadInitialData() {
     final homeProvider = Provider.of<HomeProvider>(context, listen: false);
-    final categoryProvider = Provider.of<CategoryProvider>(context, listen: false);
+    final categoryProvider = Provider.of<CategoryProvider>(
+      context,
+      listen: false,
+    );
 
     homeProvider.initHomeData();
     categoryProvider.getCategories();
@@ -46,7 +50,10 @@ class _HomeScreenState extends State<HomeScreen> {
     return RefreshIndicator(
       onRefresh: () async {
         final homeProvider = Provider.of<HomeProvider>(context, listen: false);
-        final categoryProvider = Provider.of<CategoryProvider>(context, listen: false);
+        final categoryProvider = Provider.of<CategoryProvider>(
+          context,
+          listen: false,
+        );
 
         await Future.wait([
           homeProvider.refreshHomeData(),
@@ -80,10 +87,12 @@ class _HomeScreenState extends State<HomeScreen> {
   Widget _buildCategories() {
     return Consumer<CategoryProvider>(
       builder: (context, categoryProvider, child) {
-        if (categoryProvider.featuredCategoriesState == CategoryLoadingState.loading) {
+        if (categoryProvider.featuredCategoriesState ==
+            CategoryLoadingState.loading) {
           return const CategoryShimmer();
         }
-        if (categoryProvider.featuredCategoriesState == CategoryLoadingState.error) {
+        if (categoryProvider.featuredCategoriesState ==
+            CategoryLoadingState.error) {
           return _buildErrorState("Couldn't load categories");
         }
         final categories = categoryProvider.categoriesResponse?.data ?? [];
@@ -95,26 +104,35 @@ class _HomeScreenState extends State<HomeScreen> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              SeeAllWidget(title: 'CATEGORIES', onTap: () {
-                Provider.of<LayoutProvider>(context,listen: false).currentIndex=1;
-              },),
+              SeeAllWidget(
+                title: 'CATEGORIES',
+                onTap: () {
+                  Provider.of<LayoutProvider>(context, listen: false)
+                      .currentIndex = 1;
+                },
+              ),
               const SizedBox(height: 12),
               Expanded(
                 child: ListView.builder(
                   scrollDirection: Axis.horizontal,
                   itemCount: categories.length,
-                  itemBuilder: (context, index) => CategoryCard(
-                    imageUrl: categories[index].banner ?? 'https://via.placeholder.com/150',
-                    name: categories[index].name ?? 'Category',
-                    onTap: () {
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        SnackBar(
-                          content: Text('${categories[index].name} selected'),
-                          duration: const Duration(seconds: 1),
-                        ),
-                      );
-                    },
-                  ),
+                  itemBuilder:
+                      (context, index) => CategoryCard(
+                        imageUrl:
+                            categories[index].banner ??
+                            'https://via.placeholder.com/150',
+                        name: categories[index].name ?? 'Category',
+                        onTap: () {
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            SnackBar(
+                              content: Text(
+                                '${categories[index].name} selected',
+                              ),
+                              duration: const Duration(seconds: 1),
+                            ),
+                          );
+                        },
+                      ),
                 ),
               ),
             ],
@@ -127,10 +145,10 @@ class _HomeScreenState extends State<HomeScreen> {
   Widget _buildBestSellingProducts() {
     return Consumer<HomeProvider>(
       builder: (context, homeProvider, child) {
-        if (homeProvider.bestSellingProductsState == HomeLoadingState.loading) {
+        if (homeProvider.bestSellingProductsState == LoadingState.loading) {
           return const ProductShimmer();
         }
-        if (homeProvider.bestSellingProductsState == HomeLoadingState.error) {
+        if (homeProvider.bestSellingProductsState == LoadingState.error) {
           return _buildErrorState("Couldn't load best selling products");
         }
         final products = homeProvider.bestSellingProducts;
@@ -144,10 +162,10 @@ class _HomeScreenState extends State<HomeScreen> {
               onTap: () {
                 AppRoutes.navigateTo(
                   context,
-                  AppRoutes.allProductsScreen,
+                  AppRoutes.allProductsByTypeScreen,
                   arguments: {
-                    'initialCategoryName': 'Best Seller',
-                    'initialProducts': products,
+                    'productType': ProductType.bestSelling,
+                    'title': 'best_selling_products',
                   },
                 );
               },
@@ -158,14 +176,16 @@ class _HomeScreenState extends State<HomeScreen> {
               child: ListView.builder(
                 scrollDirection: Axis.horizontal,
                 itemCount: products.length,
-                itemBuilder: (context, index) => ProductCard(
-                  imageUrl: products[index].thumbnailImage,
-                  productName: products[index].name,
-                  price: products[index].mainPrice.toString(),
-                  isBestSeller: true,
-                  onAddToCart: () {},
-                  onFavoriteToggle: () {},
-                ),
+                itemBuilder:
+                    (context, index) => ProductCard(
+                      imageUrl: products[index].thumbnailImage,
+                      productName: products[index].name,
+                      price: products[index].mainPrice.toString(),
+                      isBestSeller: true,
+                      onAddToCart: () {},
+                      onFavoriteToggle: () {},
+                      productSlug: products[index].slug,
+                    ),
               ),
             ),
           ],
@@ -177,10 +197,10 @@ class _HomeScreenState extends State<HomeScreen> {
   Widget _buildFeaturedProducts() {
     return Consumer<HomeProvider>(
       builder: (context, homeProvider, child) {
-        if (homeProvider.featuredProductsState == HomeLoadingState.loading) {
+        if (homeProvider.featuredProductsState == LoadingState.loading) {
           return const ProductShimmer();
         }
-        if (homeProvider.featuredProductsState == HomeLoadingState.error) {
+        if (homeProvider.featuredProductsState == LoadingState.error) {
           return _buildErrorState("Couldn't load featured products");
         }
         final products = homeProvider.featuredProducts;
@@ -189,21 +209,32 @@ class _HomeScreenState extends State<HomeScreen> {
         }
         return Column(
           children: [
-            SeeAllWidget(title: 'TOP RATED', onTap: () {  },),
+            SeeAllWidget(title: 'Today Deal', onTap: () {
+              AppRoutes.navigateTo(
+                context,
+                AppRoutes.allProductsByTypeScreen,
+                arguments: {
+                  'productType': ProductType.todaysDeal,
+                  'title': 'Today Deal products',
+                },
+              );
+            }),
             const SizedBox(height: 10),
             SizedBox(
               height: 240,
               child: ListView.builder(
                 scrollDirection: Axis.horizontal,
                 itemCount: products.length,
-                itemBuilder: (context, index) => ProductCard(
-                  imageUrl: products[index].thumbnailImage,
-                  productName: products[index].name,
-                  price: products[index].mainPrice.toString(),
-                  isBestSeller: true,
-                  onAddToCart: () {},
-                  onFavoriteToggle: () {},
-                ),
+                itemBuilder:
+                    (context, index) => ProductCard(
+                      imageUrl: products[index].thumbnailImage,
+                      productName: products[index].name,
+                      productSlug: products[index].slug,
+                      price: products[index].mainPrice.toString(),
+                      isBestSeller: true,
+                      onAddToCart: () {},
+                      onFavoriteToggle: () {},
+                    ),
               ),
             ),
           ],
@@ -215,10 +246,10 @@ class _HomeScreenState extends State<HomeScreen> {
   Widget _buildNewProducts() {
     return Consumer<HomeProvider>(
       builder: (context, homeProvider, child) {
-        if (homeProvider.newProductsState == HomeLoadingState.loading) {
+        if (homeProvider.newProductsState == LoadingState.loading) {
           return const ProductShimmer();
         }
-        if (homeProvider.newProductsState == HomeLoadingState.error) {
+        if (homeProvider.newProductsState == LoadingState.error) {
           return _buildErrorState("Couldn't load new products");
         }
         final products = homeProvider.newProducts;
@@ -228,7 +259,16 @@ class _HomeScreenState extends State<HomeScreen> {
         return Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            SeeAllWidget(title: 'POPULAR', onTap: () {  },),
+            SeeAllWidget(title: 'New Arrival', onTap: () {
+              AppRoutes.navigateTo(
+                context,
+                AppRoutes.allProductsByTypeScreen,
+                arguments: {
+                  'productType': ProductType.newArrival,
+                  'title': 'New Arrival products',
+                },
+              );
+            }),
             const SizedBox(height: 12),
             CarouselSlider.builder(
               itemCount: products.length,
@@ -246,6 +286,7 @@ class _HomeScreenState extends State<HomeScreen> {
                 return Padding(
                   padding: const EdgeInsets.symmetric(horizontal: 8.0),
                   child: ProductItemInRow1(
+                    productSlug: products[index].slug,
                     imageUrl: product.thumbnailImage,
                     productName: product.name,
                     price: product.mainPrice.toString(),
@@ -267,27 +308,26 @@ class _HomeScreenState extends State<HomeScreen> {
   Widget _buildAllProducts() {
     return Consumer<HomeProvider>(
       builder: (context, homeProvider, child) {
-        final allProducts = <Product>{
-          ...homeProvider.featuredProducts,
-          ...homeProvider.bestSellingProducts,
-          ...homeProvider.newProducts,
-        }.toList();
+        final allProducts = homeProvider.allProducts;
         if (allProducts.isEmpty) {
           return _buildEmptyState("No products available");
         }
         return Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            SeeAllWidget(title: 'ALL PRODUCTS', onTap: () {
-              AppRoutes.navigateTo(
-                context,
-                AppRoutes.allProductsScreen,
-                arguments: {
-                  'initialCategoryName': 'All Products',
-                  'initialProducts': allProducts,
-                },
-              );
-            },),
+            SeeAllWidget(
+              title: 'ALL PRODUCTS',
+                onTap: () {
+                  AppRoutes.navigateTo(
+                    context,
+                    AppRoutes.allProductsByTypeScreen,
+                    arguments: {
+                      'productType': ProductType.all,
+                      'title': 'ALL PRODUCTS',
+                    },
+                  );
+                }
+            ),
             const SizedBox(height: 12),
             GridView.builder(
               physics: const NeverScrollableScrollPhysics(),
@@ -302,6 +342,7 @@ class _HomeScreenState extends State<HomeScreen> {
               itemBuilder: (context, index) {
                 final product = allProducts[index];
                 return ProductGridCard(
+                  productSlug: product.slug,
                   imageUrl: product.thumbnailImage,
                   productName: product.name,
                   price: product.mainPrice.toString(),
@@ -340,4 +381,5 @@ class _HomeScreenState extends State<HomeScreen> {
   Widget _buildEmptyState(String message) {
     return SizedBox.shrink();
   }
+
 }
