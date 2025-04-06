@@ -21,7 +21,7 @@ class LaravelApiEndPoint {
   static const brandProducts = '/products/brand/';
   static const filteredProducts = '/products/search';
   static const digitalProducts = '/products/digital';
-  static const productDetails = '/products/';
+  static const productDetails = '/products';
   static const relatedProducts = '/products/related/';
   static const topFromSellerProducts = '/products/top-from-seller/';
   static const variantWiseInfo = '/products/variant/price';
@@ -30,5 +30,7 @@ class LaravelApiEndPoint {
   static const String topCategories = '/categories/top';
   static const String filterPageCategories = '/filter/categories';
   static const sliders = '/sliders';
+  static const String productReviews = '/reviews/product';
+  static const String submitReview = '/reviews/submit';
 
 }

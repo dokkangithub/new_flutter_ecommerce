@@ -8,19 +8,19 @@ class ProductDetails {
   final String shopLogo;
   final List<Photo> photos;
   final String thumbnailImage;
-  final String price;
+  final String price; // Using mainPrice from response
   final double calculablePrice;
   final String currencySymbol;
   final int currentStock;
   final String unit;
-  final int rating;
+  final double rating; // Changed to double to match response (0 could be 0.0)
   final int ratingCount;
   final String description;
   final bool hasDiscount;
   final String discount;
   final String strokedPrice;
   final Brand brand;
-  final List<String> colors; // Added colors field
+  final List<String> colors;
 
   ProductDetails({
     required this.id,
@@ -44,7 +44,7 @@ class ProductDetails {
     required this.discount,
     required this.strokedPrice,
     required this.brand,
-    required this.colors, // Added to constructor
+    required this.colors,
   });
 }
 
@@ -74,64 +74,12 @@ class Brand {
 
 class ProductResponse {
   final List<ProductDetails> data;
-  final Links links;
-  final Meta meta;
   final bool success;
   final int status;
 
   ProductResponse({
     required this.data,
-    required this.links,
-    required this.meta,
     required this.success,
     required this.status,
-  });
-}
-
-class Links {
-  final String? first;
-  final String? last;
-  final String? prev;
-  final String? next;
-
-  Links({
-    this.first,
-    this.last,
-    this.prev,
-    this.next,
-  });
-}
-
-class MetaLink {
-  final String? url;
-  final String label;
-  final bool active;
-
-  MetaLink({
-    this.url,
-    required this.label,
-    required this.active,
-  });
-}
-
-class Meta {
-  final int currentPage;
-  final int from;
-  final int lastPage;
-  final List<MetaLink> links;
-  final String path;
-  final int perPage;
-  final int to;
-  final int total;
-
-  Meta({
-    required this.currentPage,
-    required this.from,
-    required this.lastPage,
-    required this.links,
-    required this.path,
-    required this.perPage,
-    required this.to,
-    required this.total,
   });
 }

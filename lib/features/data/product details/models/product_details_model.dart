@@ -17,7 +17,7 @@ class ProductDetailsModel {
   final List<String> tags;
   final String priceHighLow;
   final List<dynamic> choiceOptions;
-  final List<dynamic> colors;
+  final List<String> colors; // Changed to List<String> to match response
   final bool hasVariation;
   final bool hasDiscount;
   final String discount;
@@ -27,7 +27,7 @@ class ProductDetailsModel {
   final String currencySymbol;
   final int currentStock;
   final String unit;
-  final int rating;
+  final double rating; // Changed to double
   final int ratingCount;
   final int earnPoint;
   final String description;
@@ -98,17 +98,17 @@ class ProductDetailsModel {
       tags: (json['tags'] as List?)?.map((tag) => tag.toString()).toList() ?? [],
       priceHighLow: json['price_high_low'] ?? '',
       choiceOptions: json['choice_options'] ?? [],
-      colors: json['colors'] ?? [],
+      colors: (json['colors'] as List?)?.map((color) => color.toString()).toList() ?? [],
       hasVariation: json['has_variation'] ?? false,
       hasDiscount: json['has_discount'] ?? false,
       discount: json['discount'] ?? '',
       strokedPrice: json['stroked_price'] ?? '',
       mainPrice: json['main_price'] ?? '',
-      calculablePrice: (json['calculable_price'] ?? 0).toDouble(),
+      calculablePrice: (json['calculable_price'] as num?)?.toDouble() ?? 0.0,
       currencySymbol: json['currency_symbol'] ?? '',
       currentStock: json['current_stock'] ?? 0,
       unit: json['unit'] ?? '',
-      rating: json['rating'] ?? 0,
+      rating: (json['rating'] as num?)?.toDouble() ?? 0.0,
       ratingCount: json['rating_count'] ?? 0,
       earnPoint: json['earn_point'] ?? 0,
       description: json['description'] ?? '',
@@ -119,47 +119,6 @@ class ProductDetailsModel {
       wholesale: json['wholesale'] ?? [],
       estShippingTime: json['est_shipping_time'] ?? 0,
     );
-  }
-
-  Map<String, dynamic> toJson() {
-    return {
-      'id': id,
-      'slug': slug,
-      'name': name,
-      'main_category_name': mainCategoryName,
-      'main_category_id': mainCategoryId,
-      'added_by': addedBy,
-      'seller_id': sellerId,
-      'shop_id': shopId,
-      'shop_slug': shopSlug,
-      'shop_name': shopName,
-      'shop_logo': shopLogo,
-      'photos': photos.map((photo) => photo.toJson()).toList(),
-      'thumbnail_image': thumbnailImage,
-      'tags': tags,
-      'price_high_low': priceHighLow,
-      'choice_options': choiceOptions,
-      'colors': colors,
-      'has_variation': hasVariation,
-      'has_discount': hasDiscount,
-      'discount': discount,
-      'stroked_price': strokedPrice,
-      'main_price': mainPrice,
-      'calculable_price': calculablePrice,
-      'currency_symbol': currencySymbol,
-      'current_stock': currentStock,
-      'unit': unit,
-      'rating': rating,
-      'rating_count': ratingCount,
-      'earn_point': earnPoint,
-      'description': description,
-      'downloads': downloads,
-      'video_link': videoLink,
-      'brand': brand.toJson(),
-      'link': link,
-      'wholesale': wholesale,
-      'est_shipping_time': estShippingTime,
-    };
   }
 
   ProductDetails toEntity() {
@@ -185,9 +144,10 @@ class ProductDetailsModel {
       discount: discount,
       strokedPrice: strokedPrice,
       brand: brand.toEntity(),
-      colors: colors.map((color) => color.toString()).toList(), // Convert List<dynamic> to List<String>
+      colors: colors,
     );
-  }}
+  }
+}
 
 class PhotoModel {
   final String variant;
@@ -203,13 +163,6 @@ class PhotoModel {
       variant: json['variant'] ?? '',
       path: json['path'] ?? '',
     );
-  }
-
-  Map<String, dynamic> toJson() {
-    return {
-      'variant': variant,
-      'path': path,
-    };
   }
 
   Photo toEntity() {
@@ -242,15 +195,6 @@ class BrandModel {
     );
   }
 
-  Map<String, dynamic> toJson() {
-    return {
-      'id': id,
-      'name': name,
-      'slug': slug,
-      'logo': logo,
-    };
-  }
-
   Brand toEntity() {
     return Brand(
       id: id,
@@ -263,15 +207,11 @@ class BrandModel {
 
 class ProductResponseModel {
   final List<ProductDetailsModel> data;
-  final LinkModel links;
-  final MetaModel meta;
   final bool success;
   final int status;
 
   ProductResponseModel({
     required this.data,
-    required this.links,
-    required this.meta,
     required this.success,
     required this.status,
   });
@@ -282,172 +222,16 @@ class ProductResponseModel {
           ?.map((product) => ProductDetailsModel.fromJson(product))
           .toList() ??
           [],
-      links: LinkModel.fromJson(json['links'] ?? {}),
-      meta: MetaModel.fromJson(json['meta'] ?? {}),
       success: json['success'] ?? false,
       status: json['status'] ?? 0,
     );
   }
 
-  Map<String, dynamic> toJson() {
-    return {
-      'data': data.map((product) => product.toJson()).toList(),
-      'links': links.toJson(),
-      'meta': meta.toJson(),
-      'success': success,
-      'status': status,
-    };
-  }
-
   ProductResponse toEntity() {
     return ProductResponse(
       data: data.map((product) => product.toEntity()).toList(),
-      links: links.toEntity(),
-      meta: meta.toEntity(),
       success: success,
       status: status,
     );
   }
 }
-
-class LinkModel {
-  final String? first;
-  final String? last;
-  final String? prev;
-  final String? next;
-
-  LinkModel({
-    this.first,
-    this.last,
-    this.prev,
-    this.next,
-  });
-
-  factory LinkModel.fromJson(Map<String, dynamic> json) {
-    return LinkModel(
-      first: json['first'],
-      last: json['last'],
-      prev: json['prev'],
-      next: json['next'],
-    );
-  }
-
-  Map<String, dynamic> toJson() {
-    return {
-      'first': first,
-      'last': last,
-      'prev': prev,
-      'next': next,
-    };
-  }
-
-  Links toEntity() {
-    return Links(
-      first: first,
-      last: last,
-      prev: prev,
-      next: next,
-    );
-  }
-}
-
-class MetaLinkModel {
-  final String? url;
-  final String label;
-  final bool active;
-
-  MetaLinkModel({
-    this.url,
-    required this.label,
-    required this.active,
-  });
-
-  factory MetaLinkModel.fromJson(Map<String, dynamic> json) {
-    return MetaLinkModel(
-      url: json['url'],
-      label: json['label'] ?? '',
-      active: json['active'] ?? false,
-    );
-  }
-
-  Map<String, dynamic> toJson() {
-    return {
-      'url': url,
-      'label': label,
-      'active': active,
-    };
-  }
-
-  MetaLink toEntity() {
-    return MetaLink(
-      url: url,
-      label: label,
-      active: active,
-    );
-  }
-}
-
-class MetaModel {
-  final int currentPage;
-  final int from;
-  final int lastPage;
-  final List<MetaLinkModel> links;
-  final String path;
-  final int perPage;
-  final int to;
-  final int total;
-
-  MetaModel({
-    required this.currentPage,
-    required this.from,
-    required this.lastPage,
-    required this.links,
-    required this.path,
-    required this.perPage,
-    required this.to,
-    required this.total,
-  });
-
-  factory MetaModel.fromJson(Map<String, dynamic> json) {
-    return MetaModel(
-      currentPage: json['current_page'] ?? 0,
-      from: json['from'] ?? 0,
-      lastPage: json['last_page'] ?? 0,
-      links: (json['links'] as List?)
-          ?.map((link) => MetaLinkModel.fromJson(link))
-          .toList() ??
-          [],
-      path: json['path'] ?? '',
-      perPage: json['per_page'] ?? 0,
-      to: json['to'] ?? 0,
-      total: json['total'] ?? 0,
-    );
-  }
-
-  Map<String, dynamic> toJson() {
-    return {
-      'current_page': currentPage,
-      'from': from,
-      'last_page': lastPage,
-      'links': links.map((link) => link.toJson()).toList(),
-      'path': path,
-      'per_page': perPage,
-      'to': to,
-      'total': total,
-    };
-  }
-
-  Meta toEntity() {
-    return Meta(
-      currentPage: currentPage,
-      from: from,
-      lastPage: lastPage,
-      links: links.map((link) => link.toEntity()).toList(),
-      path: path,
-      perPage: perPage,
-      to: to,
-      total: total,
-    );
-  }
-}
-

@@ -67,6 +67,7 @@ class AuthProvider extends ChangeNotifier {
       if (result is Success<AuthResponseModel>) {
         _user = result.data;
         await SecureStorage().save(LocalStorageKey.userToken, _user!.accessToken!);
+        await SecureStorage().save(LocalStorageKey.userId, _user!.user!.id);
         isSuccess = true;
         _setRequestMessage(null);
       } else if (result is Failure<AuthResponseModel>) {
@@ -92,6 +93,8 @@ class AuthProvider extends ChangeNotifier {
       if(response.data['result']){
         _user=AuthResponseModel.fromJson(response.data);
         await SecureStorage().save(LocalStorageKey.userToken, _user!.accessToken!);
+        await SecureStorage().save(LocalStorageKey.userId, _user!.user!.id);
+
         isSuccess = true;
         _setRequestMessage(_user!.message);
       }else {
@@ -110,6 +113,8 @@ class AuthProvider extends ChangeNotifier {
     _setLoading(true);
     try {
       _user = await socialLoginUseCase(provider, token);
+
+      await SecureStorage().save(LocalStorageKey.userId, _user!.user!.id);
       await SecureStorage().save(LocalStorageKey.userToken, _user!.accessToken!);
     } catch (e) {
       print("Social Login Error: $e");
@@ -123,6 +128,7 @@ class AuthProvider extends ChangeNotifier {
       await logoutUseCase();
       _user = null;
       await SecureStorage().deleteKey(LocalStorageKey.userToken);
+      await SecureStorage().deleteKey(LocalStorageKey.userId);
     } catch (e) {
       print("Logout Error: $e");
     }

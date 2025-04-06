@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:laravel_ecommerce/core/utils/constants/app_strings.dart';
 import 'package:laravel_ecommerce/features/presentation/home/controller/home_provider.dart';
 import 'core/config/app_config.dart/app_config.dart';
 import 'core/config/routes.dart/routes.dart';
@@ -8,11 +9,19 @@ import 'package:provider/provider.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'core/providers/localization/app_localizations.dart';
 import 'core/providers/localization/language_provider.dart';
+import 'core/utils/local_storage/local_storage_keys.dart';
+import 'core/utils/local_storage/secure_storage.dart';
 import 'features/presentation/auth/controller/auth_provider.dart';
 import 'features/presentation/category/controller/provider.dart';
 import 'features/presentation/main layout/controller/layout_provider.dart';
 import 'features/presentation/product/controller/product_provider.dart';
+import 'features/presentation/review/controller/reviews_provider.dart';
 import 'features/presentation/slider/controller/provider.dart';
+
+Future<void> getInitData() async {
+  AppStrings.token = await SecureStorage().get<String>(LocalStorageKey.userToken);
+  AppStrings.userId = await SecureStorage().get<String>(LocalStorageKey.userId);
+}
 
 
 Future<void> main() async {
@@ -30,9 +39,9 @@ Future<void> main() async {
         ChangeNotifierProvider(create: (_) => sl<LayoutProvider>()),
         ChangeNotifierProvider(create: (_) => sl<ProductDetailsProvider>()),
         ChangeNotifierProvider(create: (_) => sl<LanguageProvider>()..setLocale(locale)),
-        ChangeNotifierProvider(create: (_) => sl<CategoryProvider>()),  // Add this line
+        ChangeNotifierProvider(create: (_) => sl<CategoryProvider>()),
         ChangeNotifierProvider(create: (_) => sl<SliderProvider>()),
-
+        ChangeNotifierProvider(create: (_) => sl<ReviewProvider>()),
 
       ],
       child: const MyApp(),
