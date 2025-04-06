@@ -4,8 +4,11 @@ import 'package:laravel_ecommerce/core/utils/widgets/custom_back_button.dart';
 import 'package:laravel_ecommerce/core/utils/widgets/custom_cached_image.dart';
 import 'package:provider/provider.dart';
 import '../../../../core/utils/enums/loading_state.dart';
+import '../../../../core/utils/widgets/product cards/custom_gridview_prodcut.dart';
 import '../../../domain/product details/entities/product_details.dart';
 import '../controller/product_provider.dart';
+import '../../home/controller/home_provider.dart';
+import '../../../domain/product/entities/product.dart';
 
 class ProductDetailScreen extends StatefulWidget {
   final String slug;
@@ -25,11 +28,17 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
   void initState() {
     super.initState();
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      final provider = Provider.of<ProductDetailsProvider>(
+      final productProvider = Provider.of<ProductDetailsProvider>(
         context,
         listen: false,
       );
-      provider.fetchProductDetails(widget.slug);
+      productProvider.fetchProductDetails(widget.slug).then((_) {
+        // After fetching product details, fetch related products
+        if (productProvider.selectedProduct != null) {
+          final homeProvider = Provider.of<HomeProvider>(context, listen: false);
+          homeProvider.fetchRelatedProducts(productProvider.selectedProduct!.id);
+        }
+      });
     });
   }
 
@@ -43,23 +52,23 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
   Widget build(BuildContext context) {
     final screenHeight = MediaQuery.sizeOf(context).height;
 
-    return Consumer<ProductDetailsProvider>(
-      builder: (context, provider, child) {
-        if (provider.productDetailsState == LoadingState.loading) {
+    return Consumer2<ProductDetailsProvider, HomeProvider>(
+      builder: (context, productProvider, homeProvider, child) {
+        if (productProvider.productDetailsState == LoadingState.loading) {
           return const Scaffold(
             body: Center(child: CircularProgressIndicator()),
           );
         }
 
-        if (provider.productDetailsState == LoadingState.error) {
+        if (productProvider.productDetailsState == LoadingState.error) {
           return Scaffold(
             body: Center(
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  Text('Error: ${provider.productDetailsError}'),
+                  Text('Error: ${productProvider.productDetailsError}'),
                   ElevatedButton(
-                    onPressed: () => provider.fetchProductDetails(widget.slug),
+                    onPressed: () => productProvider.fetchProductDetails(widget.slug),
                     child: const Text('Retry'),
                   ),
                 ],
@@ -68,13 +77,13 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
           );
         }
 
-        if (provider.selectedProduct == null) {
+        if (productProvider.selectedProduct == null) {
           return const Scaffold(
             body: Center(child: Text('No product data available')),
           );
         }
 
-        final product = provider.selectedProduct!;
+        final product = productProvider.selectedProduct!;
 
         return Scaffold(
           body: SafeArea(
@@ -111,7 +120,7 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
                               ),
                               onPressed:
                                   () =>
-                                      setState(() => isFavorite = !isFavorite),
+                                  setState(() => isFavorite = !isFavorite),
                             ),
                             Stack(
                               children: [
@@ -143,9 +152,13 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
                   ),
 
                   // Product details content
-                  _buildProductHeader(product, provider.isEditing),
+                  _buildProductHeader(product, productProvider.isEditing),
                   _buildColorVariants(product),
-                  _buildDescription(product, provider.isEditing),
+                  _buildDescription(product, productProvider.isEditing),
+
+                  // Related Products
+                  _buildRelatedProducts(homeProvider),
+
                   const SizedBox(height: 80), // Space for bottom sheet
                 ],
               ),
@@ -217,42 +230,42 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
 
   Widget _buildColorVariants(ProductDetails product) {
     final colorList =
-        product.colors.map((color) {
-          try {
-            return Color(int.parse(color.replaceAll('#', '0xff')));
-          } catch (e) {
-            return Colors.grey;
-          }
-        }).toList();
+    product.colors.map((color) {
+      try {
+        return Color(int.parse(color.replaceAll('#', '0xff')));
+      } catch (e) {
+        return Colors.grey;
+      }
+    }).toList();
 
     return product.colors.isNotEmpty
         ? Container(
-          height: 80,
-          padding: const EdgeInsets.symmetric(vertical: 16),
-          child: ListView.builder(
-            scrollDirection: Axis.horizontal,
-            itemCount: colorList.length,
-            padding: const EdgeInsets.symmetric(horizontal: 16),
-            itemBuilder: (context, index) {
-              return GestureDetector(
-                onTap: () => setState(() => selectedColorIndex = index),
-                child: Container(
-                  width: 48,
-                  height: 48,
-                  margin: const EdgeInsets.only(right: 12),
-                  decoration: BoxDecoration(
-                    color: colorList[index],
-                    shape: BoxShape.circle,
-                    border:
-                        selectedColorIndex == index
-                            ? Border.all(color: Colors.blue, width: 2)
-                            : null,
-                  ),
-                ),
-              );
-            },
-          ),
-        )
+      height: 80,
+      padding: const EdgeInsets.symmetric(vertical: 16),
+      child: ListView.builder(
+        scrollDirection: Axis.horizontal,
+        itemCount: colorList.length,
+        padding: const EdgeInsets.symmetric(horizontal: 16),
+        itemBuilder: (context, index) {
+          return GestureDetector(
+            onTap: () => setState(() => selectedColorIndex = index),
+            child: Container(
+              width: 48,
+              height: 48,
+              margin: const EdgeInsets.only(right: 12),
+              decoration: BoxDecoration(
+                color: colorList[index],
+                shape: BoxShape.circle,
+                border:
+                selectedColorIndex == index
+                    ? Border.all(color: Colors.blue, width: 2)
+                    : null,
+              ),
+            ),
+          );
+        },
+      ),
+    )
         : const SizedBox.shrink();
   }
 
@@ -283,23 +296,132 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
             else
               product.description.isNotEmpty
                   ? Html(
-                    data: product.description,
-                    style: {
-                      '*': Style(
-                        fontSize: FontSize(16.0),
-                        lineHeight: LineHeight(1.6),
-                        direction: TextDirection.rtl,
-                        textAlign: TextAlign.right,
-                        color: Colors.black87,
-                        fontFamily: 'ArabicFont',
-                      ),
-                      'li': Style(margin: Margins.only(bottom: 8.0)),
-                    },
-                  )
-                  : const Text(
-                    'لا يوجد وصف متاح',
-                    style: TextStyle(color: Colors.grey, fontSize: 14),
+                data: product.description,
+                style: {
+                  '*': Style(
+                    fontSize: FontSize(16.0),
+                    lineHeight: LineHeight(1.6),
+                    direction: TextDirection.rtl,
+                    textAlign: TextAlign.right,
+                    color: Colors.black87,
+                    fontFamily: 'ArabicFont',
                   ),
+                  'li': Style(margin: Margins.only(bottom: 8.0)),
+                },
+              )
+                  : const Text(
+                'لا يوجد وصف متاح',
+                style: TextStyle(color: Colors.grey, fontSize: 14),
+              ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildRelatedProducts(HomeProvider provider) {
+    return Padding(
+      padding: const EdgeInsets.all(16.0),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          const Padding(
+            padding: EdgeInsets.only(bottom: 12.0),
+            child: Text(
+              'منتجات ذات صلة',
+              style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+            ),
+          ),
+          if (provider.relatedProductsState == LoadingState.loading)
+            const Center(child: CircularProgressIndicator())
+          else if (provider.relatedProductsState == LoadingState.error)
+            Center(child: Text('Error: ${provider.relatedProductsError}'))
+          else if (provider.relatedProducts.isEmpty)
+              const Center(child: Text('لا توجد منتجات ذات صلة'))
+            else
+              GridView.builder(
+                shrinkWrap: true,
+                physics: const NeverScrollableScrollPhysics(),
+                gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                  crossAxisCount: 2,
+                  childAspectRatio: 0.7,
+                  crossAxisSpacing: 10,
+                  mainAxisSpacing: 10,
+                ),
+                itemCount: provider.relatedProducts.length,
+                itemBuilder: (context, index) {
+                  final product = provider.relatedProducts[index];
+                  return ProductGridCard(
+                    productSlug: product.slug,
+                    imageUrl: product.thumbnailImage,
+                    productName: product.name,
+                    price: product.mainPrice.toString(),
+                    isBestSeller: product.hasDiscount,
+                    onAddToCart: () {},
+                    onFavoriteToggle: () {},
+                  );
+                },
+              ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildProductCard(Product product) {
+    return GestureDetector(
+      onTap: () {
+        Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (context) => ProductDetailScreen(slug: product.slug),
+          ),
+        );
+      },
+      child: Card(
+        elevation: 2,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            // Product image
+            Expanded(
+              child: ClipRRect(
+                borderRadius: const BorderRadius.vertical(top: Radius.circular(8)),
+                child: CustomImage(
+                  imageUrl: product.thumbnailImage,
+                  fit: BoxFit.cover,
+                  width: double.infinity,
+                ),
+              ),
+            ),
+
+            // Product info
+            Padding(
+              padding: const EdgeInsets.all(8.0),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    product.name,
+                    style: const TextStyle(
+                      fontSize: 14,
+                      fontWeight: FontWeight.bold,
+                    ),
+                    maxLines: 2,
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                  const SizedBox(height: 4),
+                  Text(
+                    '${product.mainPrice} ريال',
+                    style: const TextStyle(
+                      fontSize: 14,
+                      color: Colors.blue,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                ],
+              ),
+            ),
           ],
         ),
       ),
