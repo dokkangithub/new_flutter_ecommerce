@@ -1,6 +1,7 @@
 import 'dart:io';
 import 'package:dio/dio.dart';
 import 'package:laravel_ecommerce/core/api/api_exceptions.dart' show UserNotFoundException;
+import 'package:laravel_ecommerce/core/utils/constants/app_strings.dart';
 import 'package:talker_dio_logger/talker_dio_logger.dart';
 import 'package:talker/talker.dart';
 import '../config/app_config.dart/app_config.dart';
@@ -11,7 +12,6 @@ class LaravelApiProvider implements ApiProvider {
   late final Dio _dio;
   final AppConfig _appConfig = AppConfig();
   String _languageCode = 'en';
-  // Initialize Talker instance
   final Talker _talker = Talker();
 
   LaravelApiProvider() {
@@ -24,6 +24,7 @@ class LaravelApiProvider implements ApiProvider {
           'Accept': 'application/json',
           'Content-Type': 'application/json',
           'System-Key': '123456',
+          'Authorization': AppStrings.token,
           'App-Language': 'en'
         },
       ),
@@ -76,7 +77,6 @@ class LaravelApiProvider implements ApiProvider {
       );
     } catch (e) {
       final exception = _handleDioError(e);
-      // Log the exception using Talker
       _talker.error('GET Request Error: ${exception.toString()}', exception);
       throw exception;
     }

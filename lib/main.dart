@@ -29,7 +29,7 @@ Future<void> main() async {
   setupDependencies();
 
   Locale locale = await sl<LanguageProvider>().getLocale();
-
+  await getInitData();
 
   runApp(
     MultiProvider(

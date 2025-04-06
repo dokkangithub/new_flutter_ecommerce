@@ -1,112 +1,104 @@
 import 'package:flutter/material.dart';
-import 'package:provider/provider.dart';
-import '../../../../core/utils/enums/loading_state.dart';
-import '../../product/controller/product_provider.dart';
-import '../controller/reviews_provider.dart';
 import 'package:flutter_rating_bar/flutter_rating_bar.dart';
+import 'package:provider/provider.dart';
 
-class ProductReviews extends StatefulWidget {
-  const ProductReviews({super.key});
+import '../../../../core/utils/enums/loading_state.dart';
+import '../controller/reviews_provider.dart';
+
+class AllReviewsScreen extends StatefulWidget {
+  final int productId;
+
+  const AllReviewsScreen({Key? key, required this.productId}) : super(key: key);
 
   @override
-  State<ProductReviews> createState() => _ProductReviewsState();
+  State<AllReviewsScreen> createState() => _AllReviewsScreenState();
 }
 
-class _ProductReviewsState extends State<ProductReviews> {
-  final TextEditingController _reviewController = TextEditingController();
-  double _rating = 0.0;
+class _AllReviewsScreenState extends State<AllReviewsScreen> {
   final ScrollController _scrollController = ScrollController();
 
   @override
   void initState() {
     super.initState();
-    final productProvider = Provider.of<ProductDetailsProvider>(context, listen: false);
-    if (productProvider.selectedProduct != null) {
-      Provider.of<ReviewProvider>(context, listen: false)
-          .fetchReviews(productProvider.selectedProduct!.id);
-    }
 
     _scrollController.addListener(() {
-      if (_scrollController.position.pixels == _scrollController.position.maxScrollExtent) {
-        final productProvider = Provider.of<ProductDetailsProvider>(context, listen: false);
-        if (productProvider.selectedProduct != null) {
-          Provider.of<ReviewProvider>(context, listen: false)
-              .loadMoreReviews(productProvider.selectedProduct!.id);
-        }
+      if (_scrollController.position.pixels >= _scrollController.position.maxScrollExtent * 0.9) {
+        Provider.of<ReviewProvider>(context, listen: false)
+            .loadMoreReviews(widget.productId);
       }
     });
   }
 
   @override
   void dispose() {
-    _reviewController.dispose();
     _scrollController.dispose();
     super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
-    return Consumer2<ProductDetailsProvider, ReviewProvider>(
-      builder: (context, productProvider, reviewProvider, child) {
-        final product = productProvider.selectedProduct;
+    return Scaffold(
+      appBar: AppBar(
+        title: const Text('All Reviews'),
+      ),
+      body: Consumer<ReviewProvider>(
+        builder: (context, reviewProvider, child) {
+          if (reviewProvider.reviewState == LoadingState.loading) {
+            return const Center(child: CircularProgressIndicator());
+          }
 
-        if (product == null) {
-          return const Center(child: Text('No product selected'));
-        }
+          return ListView.builder(
+            controller: _scrollController,
+            padding: const EdgeInsets.all(16),
+            itemCount: reviewProvider.reviews.length + (reviewProvider.isLoadingMore ? 1 : 0),
+            itemBuilder: (context, index) {
+              if (index == reviewProvider.reviews.length) {
+                return const Center(
+                  child: Padding(
+                    padding: EdgeInsets.all(16.0),
+                    child: CircularProgressIndicator(),
+                  ),
+                );
+              }
 
-        return Scaffold(
-          appBar: AppBar(
-            title: const Text('Reviews'),
-          ),
-          body: Column(
-            children: [
-              // Product Rating Summary
-              Padding(
-                padding: const EdgeInsets.all(16.0),
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    Text(
-                      product.rating.toStringAsFixed(1),
-                      style: const TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
-                    ),
-                    const SizedBox(width: 8),
-                    RatingBarIndicator(
-                      rating: product.rating,
-                      itemBuilder: (context, _) => const Icon(
-                        Icons.star,
-                        color: Colors.amber,
+              final review = reviewProvider.reviews[index];
+              return Card(
+                margin: const EdgeInsets.only(bottom: 16),
+                child: Padding(
+                  padding: const EdgeInsets.all(16.0),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Row(
+                        children: [
+                          CircleAvatar(
+                            backgroundImage: NetworkImage(review.avatar),
+                            radius: 24,
+                          ),
+                          const SizedBox(width: 16),
+                          Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                review.userName,
+                                style: const TextStyle(
+                                  fontWeight: FontWeight.bold,
+                                  fontSize: 16,
+                                ),
+                              ),
+                              Text(
+                                review.time,
+                                style: TextStyle(
+                                  color: Colors.grey[600],
+                                  fontSize: 12,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ],
                       ),
-                      itemCount: 5,
-                      itemSize: 20.0,
-                    ),
-                    const SizedBox(width: 8),
-                    Text('(${product.ratingCount} reviews)'),
-                  ],
-                ),
-              ),
-
-              // Reviews List
-              Expanded(
-                child: reviewProvider.reviewState == LoadingState.loading
-                    ? const Center(child: CircularProgressIndicator())
-                    : reviewProvider.reviews.isEmpty
-                    ? const Center(child: Text('No reviews yet'))
-                    : ListView.builder(
-                  controller: _scrollController,
-                  itemCount: reviewProvider.reviews.length + (reviewProvider.isLoadingMore ? 1 : 0),
-                  itemBuilder: (context, index) {
-                    if (index == reviewProvider.reviews.length) {
-                      return const Center(child: CircularProgressIndicator());
-                    }
-                    final review = reviewProvider.reviews[index];
-                    return ListTile(
-                      leading: CircleAvatar(
-                        backgroundImage: NetworkImage(review.avatar),
-                      ),
-                      title: Text(review.userName),
-                      subtitle: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
+                      const SizedBox(height: 12),
+                      Row(
                         children: [
                           RatingBarIndicator(
                             rating: review.rating,
@@ -115,54 +107,76 @@ class _ProductReviewsState extends State<ProductReviews> {
                               color: Colors.amber,
                             ),
                             itemCount: 5,
-                            itemSize: 15.0,
+                            itemSize: 20.0,
                           ),
-                          Text(review.comment),
-                          Text(review.time),
+                          const SizedBox(width: 8),
+                          Text(
+                            review.rating.toString(),
+                            style: TextStyle(
+                              color: Colors.grey[700],
+                              fontSize: 16,
+                            ),
+                          ),
                         ],
                       ),
-                    );
-                  },
+                      const SizedBox(height: 12),
+                      Text(
+                        review.comment,
+                        style: const TextStyle(fontSize: 16),
+                      ),
+                    ],
+                  ),
                 ),
-              ),
-            ],
-          ),
-          floatingActionButton: FloatingActionButton(
-            onPressed: () => _showReviewDialog(context, product.id),
-            child: const Icon(Icons.add),
-          ),
-        );
-      },
+              );
+            },
+          );
+        },
+      ),
+      floatingActionButton: FloatingActionButton(
+        onPressed: () => _showReviewDialog(context, widget.productId),
+        child: const Icon(Icons.rate_review),
+      ),
     );
   }
 
   void _showReviewDialog(BuildContext context, int productId) {
+    final TextEditingController reviewController = TextEditingController();
+    double rating = 0.0;
+
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
-        title: const Text('Add Review'),
+        title: const Text('Write a Review'),
         content: SingleChildScrollView(
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
+              const Text('Rate this product'),
+              const SizedBox(height: 8),
               RatingBar.builder(
                 initialRating: 0,
                 minRating: 1,
                 direction: Axis.horizontal,
-                allowHalfRating: false,
+                allowHalfRating: true,
                 itemCount: 5,
+                itemPadding: const EdgeInsets.symmetric(horizontal: 4.0),
                 itemBuilder: (context, _) => const Icon(
                   Icons.star,
                   color: Colors.amber,
                 ),
-                onRatingUpdate: (rating) {
-                  _rating = rating;
+                onRatingUpdate: (newRating) {
+                  rating = newRating;
                 },
               ),
+              const SizedBox(height: 16),
               TextField(
-                controller: _reviewController,
-                decoration: const InputDecoration(labelText: 'Your Review'),
-                maxLines: 3,
+                controller: reviewController,
+                decoration: const InputDecoration(
+                  labelText: 'Your Review',
+                  hintText: 'Share your experience with this product',
+                  border: OutlineInputBorder(),
+                ),
+                maxLines: 5,
               ),
             ],
           ),
@@ -172,16 +186,27 @@ class _ProductReviewsState extends State<ProductReviews> {
             onPressed: () => Navigator.pop(context),
             child: const Text('Cancel'),
           ),
-          TextButton(
+          ElevatedButton(
             onPressed: () async {
-              if (_rating > 0 && _reviewController.text.isNotEmpty) {
+              if (rating > 0 && reviewController.text.isNotEmpty) {
                 final success = await Provider.of<ReviewProvider>(context, listen: false)
-                    .submitNewReview(productId, _rating, _reviewController.text);
+                    .submitNewReview(productId, rating, reviewController.text);
                 if (success) {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(content: Text('Review submitted successfully!')),
+                  );
                   Navigator.pop(context);
-                  _reviewController.clear();
-                  _rating = 0.0;
+                } else {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(content: Text('Failed to submit review. Please try again.')),
+                  );
                 }
+              } else {
+                ScaffoldMessenger.of(context).showSnackBar(
+                  const SnackBar(
+                    content: Text('Please rate the product and write a review'),
+                  ),
+                );
               }
             },
             child: const Text('Submit'),
@@ -190,4 +215,5 @@ class _ProductReviewsState extends State<ProductReviews> {
       ),
     );
   }
+
 }

@@ -1,11 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_html/flutter_html.dart';
-import 'package:laravel_ecommerce/core/utils/extension/text_style_extension.dart';
+import 'package:laravel_ecommerce/core/utils/widgets/custom_back_button.dart';
 import 'package:laravel_ecommerce/core/utils/widgets/custom_cached_image.dart';
 import 'package:provider/provider.dart';
 import '../../../../core/utils/enums/loading_state.dart';
 import '../../../domain/product details/entities/product_details.dart';
-import '../../review/screens/products_review_screen.dart';
 import '../controller/product_provider.dart';
 
 class ProductDetailScreen extends StatefulWidget {
@@ -21,7 +20,6 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
   int selectedColorIndex = 0;
   bool isFavorite = false;
   final ScrollController _scrollController = ScrollController();
-  double _appBarOpacity = 0.0;
 
   @override
   void initState() {
@@ -32,12 +30,6 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
         listen: false,
       );
       provider.fetchProductDetails(widget.slug);
-    });
-
-    _scrollController.addListener(() {
-      setState(() {
-        _appBarOpacity = (_scrollController.offset / 100).clamp(0.0, 1.0);
-      });
     });
   }
 
@@ -83,92 +75,81 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
         }
 
         final product = provider.selectedProduct!;
+
         return Scaffold(
-          body: CustomScrollView(
-            controller: _scrollController,
-            slivers: [
-              SliverAppBar(
-                expandedHeight: screenHeight * 0.5,
-                floating: false,
-                pinned: true,
-                stretch: true, // Enable stretch effect for the image
-                flexibleSpace: FlexibleSpaceBar(
-                  stretchModes: const [StretchMode.zoomBackground], // Zoom the image while stretching
-                  background: Stack(
-                    fit: StackFit.expand,
-                    children: [
-                      _buildProductImage(product), // Your product image
-                      // Add a gradient overlay to make the title/icons more visible when collapsed
-                      Container(
-                        decoration: BoxDecoration(
-                          gradient: LinearGradient(
-                            begin: Alignment.topCenter,
-                            end: Alignment.bottomCenter,
-                            colors: [
-                              Colors.black.withOpacity(0.3),
-                              Colors.transparent,
-                            ],
-                          ),
-                        ),
-                      ),
-                    ],
-                  ),
-                  title: Text(
-                    product.name,
-                    style: const TextStyle(
-                      color: Colors.white,
-                      fontSize: 18,
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-                  centerTitle: true, // Center the title
-                ),
-                leading: IconButton(
-                  icon: const Icon(Icons.arrow_back, color: Colors.white),
-                  onPressed: () => Navigator.pop(context),
-                ),
-                actions: [
-                  IconButton(
-                    icon: Icon(
-                      isFavorite ? Icons.favorite : Icons.favorite_border,
-                      color: isFavorite ? Colors.red : Colors.white,
-                    ),
-                    onPressed: () => setState(() => isFavorite = !isFavorite),
-                  ),
+          body: SafeArea(
+            child: SingleChildScrollView(
+              controller: _scrollController,
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  // Image with overlay icons
                   Stack(
                     children: [
-                      IconButton(
-                        icon: const Icon(Icons.shopping_cart_outlined, color: Colors.white),
-                        onPressed: () {},
+                      // Product image
+                      Container(
+                        height: screenHeight * 0.4,
+                        width: double.infinity,
+                        child: _buildProductImage(product),
                       ),
+
+                      // Back button
+                      Positioned(top: 16, left: 16, child: CustomBackButton()),
+
+                      // Favorite and cart icons
                       Positioned(
-                        right: 8,
-                        top: 8,
-                        child: Container(
-                          width: 8,
-                          height: 8,
-                          decoration: const BoxDecoration(
-                            color: Colors.red,
-                            shape: BoxShape.circle,
-                          ),
+                        top: 16,
+                        right: 16,
+                        child: Row(
+                          children: [
+                            IconButton(
+                              icon: Icon(
+                                isFavorite
+                                    ? Icons.favorite
+                                    : Icons.favorite_border,
+                                color: isFavorite ? Colors.red : Colors.white,
+                              ),
+                              onPressed:
+                                  () =>
+                                      setState(() => isFavorite = !isFavorite),
+                            ),
+                            Stack(
+                              children: [
+                                IconButton(
+                                  icon: const Icon(
+                                    Icons.shopping_cart_outlined,
+                                    color: Colors.white,
+                                  ),
+                                  onPressed: () {},
+                                ),
+                                Positioned(
+                                  right: 8,
+                                  top: 8,
+                                  child: Container(
+                                    width: 8,
+                                    height: 8,
+                                    decoration: const BoxDecoration(
+                                      color: Colors.red,
+                                      shape: BoxShape.circle,
+                                    ),
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ],
                         ),
                       ),
                     ],
                   ),
+
+                  // Product details content
+                  _buildProductHeader(product, provider.isEditing),
+                  _buildColorVariants(product),
+                  _buildDescription(product, provider.isEditing),
+                  const SizedBox(height: 80), // Space for bottom sheet
                 ],
-                backgroundColor: Colors.blue, // Match the background color in the screenshot
               ),
-              SliverToBoxAdapter(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    _buildProductHeader(product, provider.isEditing),
-                    _buildColorVariants(product),
-                    _buildDescription(product, provider.isEditing),
-                    ProductReviews()
-                  ],
-                ),
-              ),            ],
+            ),
           ),
           bottomSheet: Container(
             padding: const EdgeInsets.all(16.0),
@@ -176,29 +157,28 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
             child: Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                // Price
                 Text(
-                  '${product.price} ريال', // Assuming price is in Saudi Riyal (ريال) as per the screenshot
+                  '${product.price} ريال',
                   style: const TextStyle(
                     fontSize: 18,
                     fontWeight: FontWeight.bold,
                     color: Colors.black,
                   ),
                 ),
-                // Add to Cart Button
                 ElevatedButton(
-                  onPressed: () {
-
-                  },
+                  onPressed: () {},
                   style: ElevatedButton.styleFrom(
                     backgroundColor: Colors.blue,
-                    padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 16),
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 32,
+                      vertical: 16,
+                    ),
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(8),
                     ),
                   ),
                   child: const Text(
-                    'أضف إلى السلة', // Match the Arabic text in the screenshot
+                    'أضف إلى السلة',
                     style: TextStyle(
                       fontSize: 16,
                       fontWeight: FontWeight.bold,
@@ -223,7 +203,14 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
       padding: const EdgeInsets.all(16.0),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
-        children: [Text(product.name, style: context.titleMedium)],
+        children: [
+          Text(
+            product.name,
+            style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+            textAlign: TextAlign.right,
+          ),
+          const SizedBox(height: 8),
+        ],
       ),
     );
   }
@@ -266,7 +253,7 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
             },
           ),
         )
-        : SizedBox.shrink();
+        : const SizedBox.shrink();
   }
 
   Widget _buildDescription(ProductDetails product, bool isEditing) {
@@ -281,6 +268,12 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
+            const Text(
+              'وصف المنتج',
+              style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+              textAlign: TextAlign.right,
+            ),
+            const SizedBox(height: 8),
             if (isEditing)
               TextField(
                 controller: descriptionController,
@@ -290,29 +283,26 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
             else
               product.description.isNotEmpty
                   ? Html(
-                data: product.description,
-                style: {
-                  '*': Style(
-                    fontSize: FontSize(16.0), // Slightly larger font for readability
-                    lineHeight: LineHeight(1.6), // Match the spacing in the screenshot
-                    direction: TextDirection.rtl,
-                    textAlign: TextAlign.right,
-                    color: Colors.black87,
-                    fontFamily: 'ArabicFont', // Use an Arabic font if available
-                  ),
-                  'li': Style(
-                    margin: Margins.only(bottom: 8.0), // Space between bullet points
-                  ),
-                },
-              )
+                    data: product.description,
+                    style: {
+                      '*': Style(
+                        fontSize: FontSize(16.0),
+                        lineHeight: LineHeight(1.6),
+                        direction: TextDirection.rtl,
+                        textAlign: TextAlign.right,
+                        color: Colors.black87,
+                        fontFamily: 'ArabicFont',
+                      ),
+                      'li': Style(margin: Margins.only(bottom: 8.0)),
+                    },
+                  )
                   : const Text(
-                'لا يوجد وصف متاح',
-                style: TextStyle(color: Colors.grey, fontSize: 14),
-              ),
+                    'لا يوجد وصف متاح',
+                    style: TextStyle(color: Colors.grey, fontSize: 14),
+                  ),
           ],
         ),
       ),
     );
   }
-
 }

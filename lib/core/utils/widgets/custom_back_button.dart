@@ -9,7 +9,7 @@ class CustomBackButton extends StatelessWidget {
   Widget build(BuildContext context) {
     return Row(
       children: [
-        SizedBox(width: 10),
+        SizedBox(width: 15),
         InkWell(
           onTap: () {
             Navigator.pop(context);
@@ -17,8 +17,8 @@ class CustomBackButton extends StatelessWidget {
           child: SvgPicture.asset(
             AppIcons.backButton,
             fit: BoxFit.cover,
-            height: 50,
-            width: 50,
+            height: 40,
+            width: 40,
           )
 
         ),
