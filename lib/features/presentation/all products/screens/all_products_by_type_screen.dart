@@ -253,8 +253,7 @@ class _AllProductsByTypeScreenState extends State<AllProductsByTypeScreen> {
           productName: product.name,
           price: product.mainPrice.toString(),
           isBestSeller: product.hasDiscount,
-          onAddToCart: () {},
-          onFavoriteToggle: () {},
+          productId: product.id,
         );
       },
     );

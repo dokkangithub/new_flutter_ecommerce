@@ -1,4 +1,3 @@
-// lib/features/presentation/cart/provider/brand_provider.dart
 import 'package:flutter/material.dart';
 import '../../../domain/cart/entities/cart.dart';
 import '../../../../core/utils/enums/loading_state.dart';

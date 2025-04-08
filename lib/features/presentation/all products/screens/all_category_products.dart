@@ -299,8 +299,7 @@ class _AllCategoryProductsScreenState extends State<AllCategoryProductsScreen> {
           productSlug: product.slug,
           price: product.mainPrice.toString(),
           isBestSeller: product.hasDiscount,
-          onAddToCart: () {},
-          onFavoriteToggle: () {},
+          productId: product.id,
         );
       },
     );

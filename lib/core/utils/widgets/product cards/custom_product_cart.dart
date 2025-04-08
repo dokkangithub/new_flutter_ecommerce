@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:laravel_ecommerce/core/config/themes.dart/theme.dart';
 import 'package:laravel_ecommerce/core/utils/extension/text_style_extension.dart';
-
 import '../../../config/routes.dart/routes.dart';
 
 class ProductItemInCart extends StatelessWidget {
@@ -10,23 +9,22 @@ class ProductItemInCart extends StatelessWidget {
   final String productSlug;
   final Function? onDelete;
   final bool isFavorite;
-  final VoidCallback? onFavoriteToggle;
   final Function(int)? onQuantityChanged;
 
   const ProductItemInCart({
     super.key,
     required this.item,
     required this.index,
+    required this.productSlug,
     this.onDelete,
     this.isFavorite = false,
-    this.onFavoriteToggle,
-    this.onQuantityChanged, required this.productSlug,
+    this.onQuantityChanged,
   });
 
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: const EdgeInsets.only(bottom: 10.0),
+      padding: const EdgeInsets.only(top: 10.0), // Adjusted 'custom' to 'top'
       child: Dismissible(
         key: Key(item['name']),
         direction: DismissDirection.endToStart,
@@ -51,15 +49,17 @@ class ProductItemInCart extends StatelessWidget {
           child: Row(
             children: [
               _quantityButtonsWidget(context),
-              SizedBox(width: 8),
-              InkWell(
-                onTap: (){
-                  AppRoutes.navigateTo(context, AppRoutes.productDetailScreen,arguments: {
-                    'slug': productSlug,
-                  }, );
-                },
-                child: Expanded(
-                  flex: 5,
+              const SizedBox(width: 8),
+              Expanded( // Moved Expanded here, direct child of Row
+                flex: 5,
+                child: InkWell(
+                  onTap: () {
+                    AppRoutes.navigateTo(
+                      context,
+                      AppRoutes.productDetailScreen,
+                      arguments: {'slug': productSlug},
+                    );
+                  },
                   child: Container(
                     decoration: BoxDecoration(
                       color: Colors.white,
@@ -73,16 +73,14 @@ class ProductItemInCart extends StatelessWidget {
                         ),
                       ],
                     ),
-                    child: Expanded(
-                      child: Padding(
-                        padding: const EdgeInsets.all(10.0),
-                        child: Row(
-                          spacing: 15,
-                          children: [
-                            _productImage(),
-                            _productDetails(context),
-                          ],
-                        ),
+                    child: Padding(
+                      padding: const EdgeInsets.all(10.0),
+                      child: Row(
+                        children: [
+                          _productImage(),
+                          const SizedBox(width: 15), // Replaced Row(spacing: 15)
+                          _productDetails(context),
+                        ],
                       ),
                     ),
                   ),
@@ -95,8 +93,7 @@ class ProductItemInCart extends StatelessWidget {
     );
   }
 
-
-  Widget _productImage(){
+  Widget _productImage() {
     return Container(
       width: 80,
       height: 80,
@@ -117,8 +114,7 @@ class ProductItemInCart extends StatelessWidget {
             return Icon(
               Icons.image,
               size: 40,
-              color:
-              index == 0
+              color: index == 0
                   ? Colors.blue
                   : index == 1
                   ? Colors.orange
@@ -130,7 +126,7 @@ class ProductItemInCart extends StatelessWidget {
     );
   }
 
-  Widget _productDetails(BuildContext context){
+  Widget _productDetails(BuildContext context) {
     return Expanded(
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -152,7 +148,7 @@ class ProductItemInCart extends StatelessWidget {
     );
   }
 
-  Widget _quantityButtonsWidget(BuildContext context){
+  Widget _quantityButtonsWidget(BuildContext context) {
     return Expanded(
       flex: 1,
       child: Container(
@@ -167,11 +163,8 @@ class ProductItemInCart extends StatelessWidget {
               child: _buildQuantityButton(
                 icon: Icons.remove,
                 onPressed: () {
-                  if ((item['quantity'] as int) > 1 &&
-                      onQuantityChanged != null) {
-                    onQuantityChanged!(
-                      (item['quantity'] as int) - 1,
-                    );
+                  if ((item['quantity'] as int) > 1 && onQuantityChanged != null) {
+                    onQuantityChanged!((item['quantity'] as int) - 1);
                   }
                 },
                 enabled: (item['quantity'] as int) > 1,
@@ -190,9 +183,7 @@ class ProductItemInCart extends StatelessWidget {
                 icon: Icons.add,
                 onPressed: () {
                   if (onQuantityChanged != null) {
-                    onQuantityChanged!(
-                      (item['quantity'] as int) + 1,
-                    );
+                    onQuantityChanged!((item['quantity'] as int) + 1);
                   }
                 },
               ),
@@ -209,9 +200,12 @@ class ProductItemInCart extends StatelessWidget {
     bool enabled = true,
   }) {
     return InkWell(
-        onTap: enabled ? onPressed : null,
-        child: Icon(icon, size: 24, color: enabled?AppTheme.white:AppTheme.lightDividerColor));
+      onTap: enabled ? onPressed : null,
+      child: Icon(
+        icon,
+        size: 24,
+        color: enabled ? AppTheme.white : AppTheme.lightDividerColor,
+      ),
+    );
   }
-
-
 }

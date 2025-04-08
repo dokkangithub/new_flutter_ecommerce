@@ -1,6 +1,10 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 
+import '../../../../core/utils/enums/loading_state.dart';
 import '../../../../core/utils/widgets/product cards/custom_product_row.dart';
+import '../controller/wishlist_provider.dart';
+
 class WishlistScreen extends StatefulWidget {
   const WishlistScreen({super.key});
 
@@ -9,72 +13,13 @@ class WishlistScreen extends StatefulWidget {
 }
 
 class _WishlistScreenState extends State<WishlistScreen> {
-  // In a real app, you would probably use a state management solution
-  // like Provider, Bloc, GetX, etc. to manage this data
-  List<ProductModel> _wishlistItems = [];
-  bool _isLoading = true;
-
   @override
   void initState() {
     super.initState();
-    _fetchWishlistItems();
-  }
-
-  // Mock function to fetch wishlist items
-  Future<void> _fetchWishlistItems() async {
-    // Simulate API call delay
-    await Future.delayed(const Duration(seconds: 1));
-
-    // In a real app, you would fetch this data from your API or local storage
-    setState(() {
-      _wishlistItems = [
-        ProductModel(
-          id: '1',
-          name: 'Leather Jacket',
-          price: 199.99,
-          originalPrice: 249.99,
-          imageUrl: 'https://img.freepik.com/free-vector/modern-sale-banner-with-product-description_1361-1259.jpg?t=st=1742030631~exp=1742034231~hmac=f721b974be505f9239d492d2bdb472910a5877f607a0fb6c6fa1e069eabe8ea7&w=996',
-          isBestSeller: true,
-        ),
-        ProductModel(
-          id: '2',
-          name: 'Running Shoes',
-          price: 89.99,
-          originalPrice: 120.00,
-          imageUrl: 'https://img.freepik.com/free-vector/modern-sale-banner-with-product-description_1361-1259.jpg?t=st=1742030631~exp=1742034231~hmac=f721b974be505f9239d492d2bdb472910a5877f607a0fb6c6fa1e069eabe8ea7&w=996',
-          isBestSeller: false,
-        ),
-        ProductModel(
-          id: '3',
-          name: 'Smart Watch',
-          price: 299.99,
-          originalPrice: 0,
-          imageUrl: 'https://img.freepik.com/free-vector/modern-sale-banner-with-product-description_1361-1259.jpg?t=st=1742030631~exp=1742034231~hmac=f721b974be505f9239d492d2bdb472910a5877f607a0fb6c6fa1e069eabe8ea7&w=996',
-          isBestSeller: true,
-        ),
-      ];
-      _isLoading = false;
+    // Fetch wishlist items when the screen loads
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      Provider.of<WishlistProvider>(context, listen: false).fetchWishlist();
     });
-  }
-
-  // Function to toggle favorite status (remove from wishlist)
-  void _toggleFavorite(String productId) {
-    setState(() {
-      _wishlistItems.removeWhere((product) => product.id == productId);
-    });
-
-    // In a real app, you would call your API to update the wishlist
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text('Item removed from wishlist')),
-    );
-  }
-
-  // Function to add item to cart
-  void _addToCart(String productId) {
-    // In a real app, you would add the item to the cart here
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text('Item added to cart')),
-    );
   }
 
   @override
@@ -83,46 +28,91 @@ class _WishlistScreenState extends State<WishlistScreen> {
       appBar: AppBar(
         title: const Text('My Wishlist'),
         actions: [
-          IconButton(
-            icon: const Icon(Icons.delete_outline),
-            onPressed: _wishlistItems.isEmpty
-                ? null
-                : () {
-              // Show confirmation dialog before clearing wishlist
-              showDialog(
-                context: context,
-                builder: (context) => AlertDialog(
-                  title: const Text('Clear Wishlist'),
-                  content: const Text('Are you sure you want to remove all items from your wishlist?'),
-                  actions: [
-                    TextButton(
-                      onPressed: () => Navigator.pop(context),
-                      child: const Text('CANCEL'),
+          Consumer<WishlistProvider>(
+            builder: (context, provider, child) {
+              return IconButton(
+                icon: const Icon(Icons.delete_outline),
+                onPressed: provider.wishlistItems.isEmpty
+                    ? null
+                    : () {
+                  // Show confirmation dialog before clearing wishlist
+                  showDialog(
+                    context: context,
+                    builder: (context) => AlertDialog(
+                      title: const Text('Clear Wishlist'),
+                      content: const Text(
+                          'Are you sure you want to remove all items from your wishlist?'),
+                      actions: [
+                        TextButton(
+                          onPressed: () => Navigator.pop(context),
+                          child: const Text('CANCEL'),
+                        ),
+                        TextButton(
+                          onPressed: () {
+                            // Clear wishlist functionality
+                            // This would need to be added to the provider
+                            for (var item in provider.wishlistItems) {
+                              provider.removeFromWishlist(item.slug);
+                            }
+                            Navigator.pop(context);
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              const SnackBar(
+                                  content: Text('Wishlist cleared')),
+                            );
+                          },
+                          child: const Text('CLEAR'),
+                        ),
+                      ],
                     ),
-                    TextButton(
-                      onPressed: () {
-                        setState(() {
-                          _wishlistItems.clear();
-                        });
-                        Navigator.pop(context);
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          const SnackBar(content: Text('Wishlist cleared')),
-                        );
-                      },
-                      child: const Text('CLEAR'),
-                    ),
-                  ],
-                ),
+                  );
+                },
               );
             },
           ),
         ],
       ),
-      body: _isLoading
-          ? const Center(child: CircularProgressIndicator())
-          : _wishlistItems.isEmpty
-          ? _buildEmptyWishlist()
-          : _buildWishlistContent(),
+      body: Consumer<WishlistProvider>(
+        builder: (context, provider, child) {
+          if (provider.wishlistState == LoadingState.loading) {
+            return const Center(child: CircularProgressIndicator());
+          } else if (provider.wishlistState == LoadingState.error) {
+            return Center(
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Icon(Icons.error_outline, size: 80, color: Colors.red[300]),
+                  const SizedBox(height: 16),
+                  Text(
+                    'Something went wrong',
+                    style: TextStyle(
+                      fontSize: 18,
+                      fontWeight: FontWeight.bold,
+                      color: Colors.grey[700],
+                    ),
+                  ),
+                  const SizedBox(height: 8),
+                  Text(
+                    provider.wishlistError,
+                    style: TextStyle(
+                      fontSize: 14,
+                      color: Colors.grey[600],
+                    ),
+                  ),
+                  const SizedBox(height: 24),
+                  ElevatedButton(
+                    onPressed: () => provider.fetchWishlist(),
+                    child: const Text('RETRY'),
+                  ),
+                ],
+              ),
+            );
+          } else if (provider.wishlistItems.isEmpty) {
+            return _buildEmptyWishlist();
+          } else {
+            return _buildWishlistContent(provider);
+          }
+        },
+      ),
     );
   }
 
@@ -166,14 +156,14 @@ class _WishlistScreenState extends State<WishlistScreen> {
     );
   }
 
-  Widget _buildWishlistContent() {
+  Widget _buildWishlistContent(WishlistProvider provider) {
     return Padding(
       padding: const EdgeInsets.all(16.0),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(
-            '${_wishlistItems.length} item${_wishlistItems.length > 1 ? 's' : ''}',
+            '${provider.wishlistItems.length} item${provider.wishlistItems.length > 1 ? 's' : ''}',
             style: TextStyle(
               fontSize: 14,
               color: Colors.grey[600],
@@ -182,22 +172,20 @@ class _WishlistScreenState extends State<WishlistScreen> {
           const SizedBox(height: 16),
           Expanded(
             child: ListView.separated(
-              itemCount: _wishlistItems.length,
+              itemCount: provider.wishlistItems.length,
               separatorBuilder: (context, index) => const SizedBox(height: 16),
               itemBuilder: (context, index) {
-                final product = _wishlistItems[index];
+                final product = provider.wishlistItems[index];
                 return SizedBox(
                   height: 150, // Adjust the height as needed
                   child: ProductItemInRow1(
-                    imageUrl: product.imageUrl,
+                    imageUrl: product.thumbnailImage,
                     productName: product.name,
-                    price: product.price.toString(),
-                    originalPrice: product.originalPrice.toString(),
-                    isBestSeller: product.isBestSeller,
-                    productSlug: 'slug',
-                    isFavorite: true, // Always true in wishlist
-                    onFavoriteToggle: () => _toggleFavorite(product.id),
-                    onAddToCart: () => _addToCart(product.id),
+                    price: product.price,
+                    originalPrice: '', // This might need to be added to your model
+                    isBestSeller: false, // This might need to be added to your model
+                    productSlug: product.slug,
+                    isFavorite: true, productId: product.id, // Always true in wishlist
                   ),
                 );
               },
@@ -207,24 +195,4 @@ class _WishlistScreenState extends State<WishlistScreen> {
       ),
     );
   }
-}
-
-// Assuming you have a Product model class like this
-// If not, you'll need to create one or modify the code to match your data structure
-class ProductModel {
-  final String id;
-  final String name;
-  final double price;
-  final double originalPrice;
-  final String imageUrl;
-  final bool isBestSeller;
-
-  ProductModel({
-    required this.id,
-    required this.name,
-    required this.price,
-    this.originalPrice = 0,
-    required this.imageUrl,
-    this.isBestSeller = false,
-  });
 }

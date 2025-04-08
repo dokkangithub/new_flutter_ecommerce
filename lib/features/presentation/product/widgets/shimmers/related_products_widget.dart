@@ -55,8 +55,7 @@ class RelatedProductsWidget extends StatelessWidget {
                     productName: product.name,
                     price: product.mainPrice.toString(),
                     isBestSeller: product.hasDiscount,
-                    onAddToCart: () {},
-                    onFavoriteToggle: () {},
+                    productId: product.id,
                   );
                 },
               ),

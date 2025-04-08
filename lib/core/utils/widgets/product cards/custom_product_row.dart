@@ -2,7 +2,10 @@ import 'package:flutter/material.dart';
 import 'package:laravel_ecommerce/core/utils/extension/responsive_extension.dart';
 import 'package:laravel_ecommerce/core/utils/extension/text_style_extension.dart';
 import 'package:laravel_ecommerce/core/utils/widgets/custom_cached_image.dart';
+import 'package:provider/provider.dart';
 
+import '../../../../features/presentation/cart/controller/cart_provider.dart';
+import '../../../../features/presentation/wishlist/controller/wishlist_provider.dart';
 import '../../../config/routes.dart/routes.dart';
 
 class ProductItemInRow1 extends StatelessWidget {
@@ -13,8 +16,8 @@ class ProductItemInRow1 extends StatelessWidget {
   final String originalPrice;
   final bool isBestSeller;
   final bool isFavorite;
-  final VoidCallback onFavoriteToggle;
-  final VoidCallback onAddToCart;
+  final int productId;
+
 
   const ProductItemInRow1({
     super.key,
@@ -24,8 +27,7 @@ class ProductItemInRow1 extends StatelessWidget {
     this.originalPrice = '0',
     this.isBestSeller = false,
     this.isFavorite = false,
-    required this.onFavoriteToggle,
-    required this.onAddToCart, required this.productSlug,
+   required this.productSlug, required this.productId,
   });
 
   @override
@@ -117,7 +119,16 @@ class ProductItemInRow1 extends StatelessWidget {
                       Spacer(),
                       // Add to cart button
                       GestureDetector(
-                        onTap: onAddToCart,
+                        onTap: (){
+                          Provider.of<CartProvider>(context, listen: false).addToCart(
+                            productId,
+                            "", // variant - adjust if needed
+                            1,  // default quantity
+                          );
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            SnackBar(content: Text('$productName added to cart')),
+                          );
+                        },
                         child: Container(
                           height: 40,
                           width: 40,
@@ -169,7 +180,15 @@ class ProductItemInRow1 extends StatelessWidget {
                   ),
                 ),
                 child: InkWell(
-                  onTap: onFavoriteToggle,
+                  onTap: () {
+                    final wishlistProvider = Provider.of<WishlistProvider>(context, listen: false);
+                    final isCurrentlyInWishlist = wishlistProvider.wishlistStatus[productSlug] ?? false;
+
+                    if (isCurrentlyInWishlist) {
+                      wishlistProvider.removeFromWishlist(productSlug);
+                    } else {
+                      wishlistProvider.addToWishlist(productSlug);
+                    }},
                   child: Icon(
                     isFavorite ? Icons.favorite : Icons.favorite_border,
                     color: isFavorite ? Colors.red : Colors.black54,
