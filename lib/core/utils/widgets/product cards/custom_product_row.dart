@@ -1,24 +1,19 @@
 import 'package:flutter/material.dart';
-import 'package:laravel_ecommerce/core/utils/extension/responsive_extension.dart';
 import 'package:laravel_ecommerce/core/utils/extension/text_style_extension.dart';
 import 'package:laravel_ecommerce/core/utils/widgets/custom_cached_image.dart';
 import 'package:provider/provider.dart';
-
-import '../../../../features/presentation/cart/controller/cart_provider.dart';
 import '../../../../features/presentation/wishlist/controller/wishlist_provider.dart';
 import '../../../config/routes.dart/routes.dart';
 import '../../helpers.dart';
 
-class ProductItemInRow1 extends StatelessWidget {
+class ProductItemInRow1 extends StatefulWidget {
   final String imageUrl;
   final String productName;
   final String productSlug;
   final String price;
   final String originalPrice;
   final bool isBestSeller;
-  final bool isFavorite;
   final int productId;
-
 
   const ProductItemInRow1({
     super.key,
@@ -27,17 +22,33 @@ class ProductItemInRow1 extends StatelessWidget {
     required this.price,
     this.originalPrice = '0',
     this.isBestSeller = false,
-    this.isFavorite = false,
-   required this.productSlug, required this.productId,
+    required this.productSlug,
+    required this.productId,
   });
+
+  @override
+  _ProductItemInRow1State createState() => _ProductItemInRow1State();
+}
+
+class _ProductItemInRow1State extends State<ProductItemInRow1> {
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      final wishlistProvider = Provider.of<WishlistProvider>(context, listen: false);
+      if (!wishlistProvider.wishlistStatus.containsKey(widget.productSlug)) {
+        wishlistProvider.isInWishlist(widget.productSlug);
+      }
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
     return InkWell(
-      onTap: (){
-        AppRoutes.navigateTo(context, AppRoutes.productDetailScreen,arguments: {
-          'slug': productSlug,
-        }, );
+      onTap: () {
+        AppRoutes.navigateTo(context, AppRoutes.productDetailScreen, arguments: {
+          'slug': widget.productSlug,
+        });
       },
       child: Container(
         width: MediaQuery.sizeOf(context).width,
@@ -66,7 +77,7 @@ class ProductItemInRow1 extends StatelessWidget {
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
                       // Best seller tag (conditionally shown)
-                      if (isBestSeller)
+                      if (widget.isBestSeller)
                         Container(
                           padding: const EdgeInsets.symmetric(
                             horizontal: 8,
@@ -87,7 +98,7 @@ class ProductItemInRow1 extends StatelessWidget {
 
                       // Product name
                       Text(
-                        productName,
+                        widget.productName,
                         style: const TextStyle(
                           fontSize: 16,
                           fontWeight: FontWeight.bold,
@@ -99,7 +110,7 @@ class ProductItemInRow1 extends StatelessWidget {
 
                       // Price display
                       Text(
-                        '\$${price.toString()}',
+                        '\$${widget.price}',
                         style: const TextStyle(
                           fontSize: 18,
                           fontWeight: FontWeight.bold,
@@ -108,30 +119,27 @@ class ProductItemInRow1 extends StatelessWidget {
                       ),
 
                       // Original price (strikethrough) if present
-                      //if (originalPrice > 0)
+                      if (widget.originalPrice != '0')
                         Text(
-                          '\$${originalPrice.toString()}',
+                          '\$${widget.originalPrice}',
                           style: TextStyle(
                             fontSize: 14,
                             color: Colors.grey.shade400,
                             decoration: TextDecoration.lineThrough,
                           ),
                         ),
-                      Spacer(),
+                      const Spacer(),
                       // Add to cart button
                       GestureDetector(
                         onTap: () => AppFunctions.addProductToCart(
                           context: context,
-                          productId: productId,
-                          productName: productName,
-                          // Optionally pass variant or quantity if needed
-                          // variant: "someVariant",
-                          // quantity: 2,
+                          productId: widget.productId,
+                          productName: widget.productName,
                         ),
                         child: Container(
                           height: 40,
                           width: 40,
-                          decoration: BoxDecoration(
+                          decoration: const BoxDecoration(
                             color: Colors.blue,
                             borderRadius: BorderRadius.only(
                               topRight: Radius.circular(15),
@@ -158,34 +166,39 @@ class ProductItemInRow1 extends StatelessWidget {
                       topRight: Radius.circular(16),
                       bottomRight: Radius.circular(16),
                     ),
-                    child: CustomImage(imageUrl: imageUrl),
+                    child: CustomImage(imageUrl: widget.imageUrl),
                   ),
                 ),
               ],
             ),
 
-            // Favorite icon overlay
+            // Favorite icon overlay with Consumer
             Positioned(
               top: 0,
               right: 0,
-              child: Container(
-                width: 40,
-                height: 40,
-                decoration: BoxDecoration(
-                  color: Colors.white.withValues(alpha: 0.8),
-                  borderRadius: BorderRadius.only(
-                    topRight: Radius.circular(15),
-                    bottomLeft: Radius.circular(15),
-                  ),
-                ),
-                child: InkWell(
-                  onTap: ()=>AppFunctions.toggleWishlistStatus(context, productSlug),
-                  child: Icon(
-                    isFavorite ? Icons.favorite : Icons.favorite_border,
-                    color: isFavorite ? Colors.red : Colors.black54,
-                    size: 20,
-                  ),
-                ),
+              child: Consumer<WishlistProvider>(
+                builder: (context, wishlistProvider, child) {
+                  final isFavorite = wishlistProvider.wishlistStatus[widget.productSlug] ?? false;
+                  return Container(
+                    width: 40,
+                    height: 40,
+                    decoration: BoxDecoration(
+                      color: Colors.white.withValues(alpha: 0.8),
+                      borderRadius: const BorderRadius.only(
+                        topRight: Radius.circular(15),
+                        bottomLeft: Radius.circular(15),
+                      ),
+                    ),
+                    child: InkWell(
+                      onTap: () => AppFunctions.toggleWishlistStatus(context, widget.productSlug),
+                      child: Icon(
+                        isFavorite ? Icons.favorite : Icons.favorite_border,
+                        color: isFavorite ? Colors.red : Colors.black54,
+                        size: 20,
+                      ),
+                    ),
+                  );
+                },
               ),
             ),
           ],

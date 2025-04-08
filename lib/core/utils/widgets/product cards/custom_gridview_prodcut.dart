@@ -3,8 +3,6 @@ import 'package:laravel_ecommerce/core/config/routes.dart/routes.dart';
 import 'package:laravel_ecommerce/core/utils/extension/text_style_extension.dart';
 import 'package:laravel_ecommerce/core/utils/helpers.dart';
 import 'package:provider/provider.dart';
-
-import '../../../../features/presentation/cart/controller/cart_provider.dart';
 import '../../../../features/presentation/wishlist/controller/wishlist_provider.dart';
 
 class ProductGridCard extends StatelessWidget {
@@ -13,7 +11,6 @@ class ProductGridCard extends StatelessWidget {
   final String productSlug;
   final String price;
   final bool isBestSeller;
-  final bool isFavorite;
   final int productId;
 
   const ProductGridCard({
@@ -22,13 +19,23 @@ class ProductGridCard extends StatelessWidget {
     required this.productName,
     required this.price,
     this.isBestSeller = false,
-    this.isFavorite = false,
     required this.productSlug,
     required this.productId,
   });
 
   @override
   Widget build(BuildContext context) {
+    // Access the WishlistProvider once for async operations
+    final wishlistProvider = Provider.of<WishlistProvider>(context, listen: false);
+
+    // Create a ValueNotifier to manage the wishlist status locally
+    final ValueNotifier<bool> isInWishlistNotifier = ValueNotifier<bool>(false);
+
+    // Check initial wishlist status asynchronously
+    wishlistProvider.isInWishlist(productSlug).then((isInWishlist) {
+      isInWishlistNotifier.value = isInWishlist;
+    });
+
     return InkWell(
       onTap: () {
         AppRoutes.navigateTo(
@@ -72,7 +79,17 @@ class ProductGridCard extends StatelessWidget {
                   top: 8,
                   right: 8,
                   child: GestureDetector(
-                    onTap: ()=>AppFunctions.toggleWishlistStatus(context, productSlug),
+                    onTap: () async {
+                      // Toggle wishlist status
+                      if (isInWishlistNotifier.value) {
+                        await wishlistProvider.removeFromWishlist(productSlug);
+                      } else {
+                        await wishlistProvider.addToWishlist(productSlug);
+                      }
+                      // Update the notifier with the latest status
+                      isInWishlistNotifier.value =
+                          wishlistProvider.wishlistStatus[productSlug] ?? false;
+                    },
                     child: Container(
                       padding: const EdgeInsets.all(6),
                       decoration: BoxDecoration(
@@ -86,10 +103,15 @@ class ProductGridCard extends StatelessWidget {
                           ),
                         ],
                       ),
-                      child: Icon(
-                        isFavorite ? Icons.favorite : Icons.favorite_border,
-                        size: 20,
-                        color: isFavorite ? Colors.red : Colors.grey,
+                      child: ValueListenableBuilder<bool>(
+                        valueListenable: isInWishlistNotifier,
+                        builder: (context, isInWishlist, child) {
+                          return Icon(
+                            isInWishlist ? Icons.favorite : Icons.favorite_border,
+                            size: 20,
+                            color: isInWishlist ? Colors.red : Colors.grey,
+                          );
+                        },
                       ),
                     ),
                   ),
@@ -149,9 +171,6 @@ class ProductGridCard extends StatelessWidget {
                           context: context,
                           productId: productId,
                           productName: productName,
-                          // Optionally pass variant or quantity if needed
-                          // variant: "someVariant",
-                          // quantity: 2,
                         ),
                         borderRadius: BorderRadius.circular(8),
                         child: Padding(

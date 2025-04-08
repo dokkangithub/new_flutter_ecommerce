@@ -16,7 +16,6 @@ class _WishlistScreenState extends State<WishlistScreen> {
   @override
   void initState() {
     super.initState();
-    // Fetch wishlist items when the screen loads
     WidgetsBinding.instance.addPostFrameCallback((_) {
       Provider.of<WishlistProvider>(context, listen: false).fetchWishlist();
     });
@@ -35,7 +34,6 @@ class _WishlistScreenState extends State<WishlistScreen> {
                 onPressed: provider.wishlistItems.isEmpty
                     ? null
                     : () {
-                  // Show confirmation dialog before clearing wishlist
                   showDialog(
                     context: context,
                     builder: (context) => AlertDialog(
@@ -49,8 +47,6 @@ class _WishlistScreenState extends State<WishlistScreen> {
                         ),
                         TextButton(
                           onPressed: () {
-                            // Clear wishlist functionality
-                            // This would need to be added to the provider
                             for (var item in provider.wishlistItems) {
                               provider.removeFromWishlist(item.slug);
                             }
@@ -75,7 +71,8 @@ class _WishlistScreenState extends State<WishlistScreen> {
         builder: (context, provider, child) {
           if (provider.wishlistState == LoadingState.loading) {
             return const Center(child: CircularProgressIndicator());
-          } else if (provider.wishlistState == LoadingState.error) {
+          }
+          else if (provider.wishlistState == LoadingState.error) {
             return Center(
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
@@ -106,9 +103,11 @@ class _WishlistScreenState extends State<WishlistScreen> {
                 ],
               ),
             );
-          } else if (provider.wishlistItems.isEmpty) {
+          }
+          else if (provider.wishlistItems.isEmpty) {
             return _buildEmptyWishlist();
-          } else {
+          }
+          else {
             return _buildWishlistContent(provider);
           }
         },
@@ -185,7 +184,7 @@ class _WishlistScreenState extends State<WishlistScreen> {
                     originalPrice: '', // This might need to be added to your model
                     isBestSeller: false, // This might need to be added to your model
                     productSlug: product.slug,
-                    isFavorite: true, productId: product.id, // Always true in wishlist
+                    productId: product.id,
                   ),
                 );
               },

@@ -182,7 +182,8 @@ class _HomeScreenState extends State<HomeScreen> {
                       productName: products[index].name,
                       price: products[index].mainPrice.toString(),
                       isBestSeller: true,
-                      productSlug: products[index].slug, productId: products[index].id,
+                      productSlug: products[index].slug,
+                      productId: products[index].id,
                     ),
               ),
             ),
@@ -207,16 +208,19 @@ class _HomeScreenState extends State<HomeScreen> {
         }
         return Column(
           children: [
-            SeeAllWidget(title: 'Today Deal', onTap: () {
-              AppRoutes.navigateTo(
-                context,
-                AppRoutes.allProductsByTypeScreen,
-                arguments: {
-                  'productType': ProductType.todaysDeal,
-                  'title': 'Today Deal products',
-                },
-              );
-            }),
+            SeeAllWidget(
+              title: 'Today Deal',
+              onTap: () {
+                AppRoutes.navigateTo(
+                  context,
+                  AppRoutes.allProductsByTypeScreen,
+                  arguments: {
+                    'productType': ProductType.todaysDeal,
+                    'title': 'Today Deal products',
+                  },
+                );
+              },
+            ),
             const SizedBox(height: 10),
             SizedBox(
               height: 240,
@@ -229,7 +233,8 @@ class _HomeScreenState extends State<HomeScreen> {
                       productName: products[index].name,
                       productSlug: products[index].slug,
                       price: products[index].mainPrice.toString(),
-                      isBestSeller: true, productId: products[index].id,
+                      isBestSeller: true,
+                      productId: products[index].id,
                     ),
               ),
             ),
@@ -255,16 +260,19 @@ class _HomeScreenState extends State<HomeScreen> {
         return Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            SeeAllWidget(title: 'New Arrival', onTap: () {
-              AppRoutes.navigateTo(
-                context,
-                AppRoutes.allProductsByTypeScreen,
-                arguments: {
-                  'productType': ProductType.newArrival,
-                  'title': 'New Arrival products',
-                },
-              );
-            }),
+            SeeAllWidget(
+              title: 'New Arrival',
+              onTap: () {
+                AppRoutes.navigateTo(
+                  context,
+                  AppRoutes.allProductsByTypeScreen,
+                  arguments: {
+                    'productType': ProductType.newArrival,
+                    'title': 'New Arrival products',
+                  },
+                );
+              },
+            ),
             const SizedBox(height: 12),
             CarouselSlider.builder(
               itemCount: products.length,
@@ -288,7 +296,7 @@ class _HomeScreenState extends State<HomeScreen> {
                     price: product.mainPrice.toString(),
                     originalPrice: product.discount.toString(),
                     isBestSeller: product.hasDiscount,
-                    isFavorite: false, productId: product.id,
+                    productId: product.id,
                   ),
                 );
               },
@@ -311,16 +319,16 @@ class _HomeScreenState extends State<HomeScreen> {
           children: [
             SeeAllWidget(
               title: 'ALL PRODUCTS',
-                onTap: () {
-                  AppRoutes.navigateTo(
-                    context,
-                    AppRoutes.allProductsByTypeScreen,
-                    arguments: {
-                      'productType': ProductType.all,
-                      'title': 'ALL PRODUCTS',
-                    },
-                  );
-                }
+              onTap: () {
+                AppRoutes.navigateTo(
+                  context,
+                  AppRoutes.allProductsByTypeScreen,
+                  arguments: {
+                    'productType': ProductType.all,
+                    'title': 'ALL PRODUCTS',
+                  },
+                );
+              },
             ),
             const SizedBox(height: 12),
             GridView.builder(
@@ -374,5 +382,4 @@ class _HomeScreenState extends State<HomeScreen> {
   Widget _buildEmptyState(String message) {
     return SizedBox.shrink();
   }
-
 }

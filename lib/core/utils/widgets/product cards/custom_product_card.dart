@@ -3,8 +3,6 @@ import 'package:laravel_ecommerce/core/utils/extension/responsive_extension.dart
 import 'package:laravel_ecommerce/core/utils/extension/text_style_extension.dart';
 import 'package:laravel_ecommerce/core/utils/widgets/custom_cached_image.dart';
 import 'package:provider/provider.dart';
-
-import '../../../../features/presentation/cart/controller/cart_provider.dart';
 import '../../../../features/presentation/wishlist/controller/wishlist_provider.dart';
 import '../../../config/routes.dart/routes.dart';
 import '../../helpers.dart';
@@ -15,7 +13,6 @@ class ProductCard extends StatelessWidget {
   final String productSlug;
   final String price;
   final bool isBestSeller;
-  final bool isFavorite;
   final int productId;
 
   const ProductCard({
@@ -24,17 +21,30 @@ class ProductCard extends StatelessWidget {
     required this.productName,
     required this.price,
     this.isBestSeller = false,
-    this.isFavorite = false,
- required this.productSlug, required this.productId,
+    required this.productSlug,
+    required this.productId,
   });
 
   @override
   Widget build(BuildContext context) {
+    // Access the WishlistProvider once for async operations
+    final wishlistProvider = Provider.of<WishlistProvider>(context, listen: false);
+
+    // Create a ValueNotifier to manage the wishlist status locally
+    final ValueNotifier<bool> isInWishlistNotifier = ValueNotifier<bool>(false);
+
+    // Check initial wishlist status asynchronously
+    wishlistProvider.isInWishlist(productSlug).then((isInWishlist) {
+      isInWishlistNotifier.value = isInWishlist;
+    });
+
     return InkWell(
-      onTap: (){
-        AppRoutes.navigateTo(context, AppRoutes.productDetailScreen,arguments: {
-          'slug': productSlug,
-        }, );
+      onTap: () {
+        AppRoutes.navigateTo(
+          context,
+          AppRoutes.productDetailScreen,
+          arguments: {'slug': productSlug},
+        );
       },
       child: Container(
         width: context.responsive(180),
@@ -115,14 +125,11 @@ class ProductCard extends StatelessWidget {
                 ),
                 child: IconButton(
                   icon: const Icon(Icons.add, color: Colors.white),
-                  onPressed:() => AppFunctions.addProductToCart(
-                context: context,
-                productId: productId,
-                productName: productName,
-                // Optionally pass variant or quantity if needed
-                // variant: "someVariant",
-                // quantity: 2,
-              ),
+                  onPressed: () => AppFunctions.addProductToCart(
+                    context: context,
+                    productId: productId,
+                    productName: productName,
+                  ),
                   padding: EdgeInsets.zero,
                 ),
               ),
@@ -144,15 +151,48 @@ class ProductCard extends StatelessWidget {
                   ),
                 ),
                 child: InkWell(
-                  onTap: ()=>AppFunctions.toggleWishlistStatus(context, productSlug),
-                  child: Icon(
-                    isFavorite ? Icons.favorite : Icons.favorite_border,
-                    color: isFavorite ? Colors.red : Colors.black54,
-                    size: 22,
+                  onTap: () async {
+                    // Toggle wishlist status
+                    if (isInWishlistNotifier.value) {
+                      await wishlistProvider.removeFromWishlist(productSlug);
+                    } else {
+                      await wishlistProvider.addToWishlist(productSlug);
+                    }
+                    // Update the notifier with the latest status
+                    isInWishlistNotifier.value =
+                        wishlistProvider.wishlistStatus[productSlug] ?? false;
+                  },
+                  child: ValueListenableBuilder<bool>(
+                    valueListenable: isInWishlistNotifier,
+                    builder: (context, isInWishlist, child) {
+                      return Icon(
+                        isInWishlist ? Icons.favorite : Icons.favorite_border,
+                        color: isInWishlist ? Colors.red : Colors.black54,
+                        size: 22,
+                      );
+                    },
                   ),
                 ),
               ),
             ),
+
+            // Best Seller badge (if applicable)
+            if (isBestSeller)
+              Positioned(
+                top: 8,
+                right: 8,
+                child: Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                  decoration: BoxDecoration(
+                    color: Colors.blue,
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                  child: Text(
+                    'BEST SELLER',
+                    style: context.bodySmall.copyWith(color: Colors.white),
+                  ),
+                ),
+              ),
           ],
         ),
       ),
