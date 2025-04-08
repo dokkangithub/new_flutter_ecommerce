@@ -171,29 +171,19 @@ class _CartScreenState extends State<CartScreen> {
                   itemCount: cartProvider.cartItems.length,
                   itemBuilder: (context, index) {
                     final item = cartProvider.cartItems[index];
-                    final itemMap = {
-                      'name': item.productName,
-                      'price': item.price,
-                      'image': item.thumbnailImage,
-                      'quantity': item.quantity,
-                      'id': item.id,
-                      'variant': item.variant,
-                      'currency_symbol': item.currencySymbol,
-                    };
-
+                    print('111111ee${cartProvider.cartItems.length}');
                     return ProductItemInCart(
-                      item: itemMap,
+                      item: item,
                       index: index,
-                      productSlug: 'slug', // You might need to add productSlug to your CartItem model
                       onDelete: () {
                         cartProvider.deleteCartItem(item.id);
                       },
                       onQuantityChanged: (newQuantity) {
-                        // Get all cart IDs and quantities to update
+                        // Create a list of all cart IDs
                         final cartIds = cartProvider.cartItems.map((i) => i.id.toString()).join(',');
 
-                        // Create a new quantities string with the updated quantity
-                        final List<int> quantities = cartProvider.cartItems.map((i) =>
+                        // Create updated quantities list
+                        final quantities = cartProvider.cartItems.map((i) =>
                         i.id == item.id ? newQuantity : i.quantity
                         ).toList();
 
@@ -211,6 +201,17 @@ class _CartScreenState extends State<CartScreen> {
               if (cartProvider.cartSummary != null)
                 Container(
                   padding: const EdgeInsets.all(20.0),
+                  decoration: BoxDecoration(
+                    color: Colors.white,
+                    boxShadow: [
+                      BoxShadow(
+                        color: Colors.grey.withOpacity(0.1),
+                        spreadRadius: 1,
+                        blurRadius: 5,
+                        offset: const Offset(0, -3),
+                      ),
+                    ],
+                  ),
                   child: Column(
                     children: [
                       Row(

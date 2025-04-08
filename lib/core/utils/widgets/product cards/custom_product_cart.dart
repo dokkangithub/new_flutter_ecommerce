@@ -1,12 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:laravel_ecommerce/core/config/themes.dart/theme.dart';
 import 'package:laravel_ecommerce/core/utils/extension/text_style_extension.dart';
+import '../../../../features/domain/cart/entities/cart.dart';
 import '../../../config/routes.dart/routes.dart';
 
 class ProductItemInCart extends StatelessWidget {
-  final Map<String, dynamic> item;
+  final CartItem item;
   final int index;
-  final String productSlug;
   final Function? onDelete;
   final bool isFavorite;
   final Function(int)? onQuantityChanged;
@@ -15,7 +15,6 @@ class ProductItemInCart extends StatelessWidget {
     super.key,
     required this.item,
     required this.index,
-    required this.productSlug,
     this.onDelete,
     this.isFavorite = false,
     this.onQuantityChanged,
@@ -24,9 +23,9 @@ class ProductItemInCart extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: const EdgeInsets.only(top: 10.0), // Adjusted 'custom' to 'top'
+      padding: const EdgeInsets.only(top: 10.0),
       child: Dismissible(
-        key: Key(item['name']),
+        key: Key(item.id.toString()),
         direction: DismissDirection.endToStart,
         background: Container(
           decoration: BoxDecoration(
@@ -50,10 +49,12 @@ class ProductItemInCart extends StatelessWidget {
             children: [
               _quantityButtonsWidget(context),
               const SizedBox(width: 8),
-              Expanded( // Moved Expanded here, direct child of Row
+              Expanded(
                 flex: 5,
                 child: InkWell(
                   onTap: () {
+                    // Generate slug from product name if needed
+                    final productSlug = item.productName.toLowerCase().replaceAll(' ', '-');
                     AppRoutes.navigateTo(
                       context,
                       AppRoutes.productDetailScreen,
@@ -78,7 +79,7 @@ class ProductItemInCart extends StatelessWidget {
                       child: Row(
                         children: [
                           _productImage(),
-                          const SizedBox(width: 15), // Replaced Row(spacing: 15)
+                          const SizedBox(width: 15),
                           _productDetails(context),
                         ],
                       ),
@@ -102,27 +103,45 @@ class ProductItemInCart extends StatelessWidget {
         borderRadius: BorderRadius.circular(10),
       ),
       child: Center(
-        child: Image.asset(
-          index == 0
-              ? 'assets/blue_shoe.png'
-              : index == 1
-              ? 'assets/orange_shoe.png'
-              : 'assets/purple_shoe.png',
+        child: item.thumbnailImage.isNotEmpty
+            ? Image.network(
+          item.thumbnailImage,
           width: 60,
           height: 60,
+          fit: BoxFit.contain,
           errorBuilder: (context, error, stackTrace) {
-            return Icon(
-              Icons.image,
-              size: 40,
-              color: index == 0
-                  ? Colors.blue
-                  : index == 1
-                  ? Colors.orange
-                  : Colors.purple,
+            return _defaultImagePlaceholder();
+          },
+          loadingBuilder: (context, child, loadingProgress) {
+            if (loadingProgress == null) return child;
+            return Center(
+              child: CircularProgressIndicator(
+                value: loadingProgress.expectedTotalBytes != null
+                    ? loadingProgress.cumulativeBytesLoaded /
+                    loadingProgress.expectedTotalBytes!
+                    : null,
+                strokeWidth: 2,
+              ),
             );
           },
-        ),
+        )
+            : _defaultImagePlaceholder(),
       ),
+    );
+  }
+
+  Widget _defaultImagePlaceholder() {
+    // Use a color based on the product index for variety
+    Color iconColor = index % 3 == 0
+        ? Colors.blue
+        : index % 3 == 1
+        ? Colors.orange
+        : Colors.purple;
+
+    return Icon(
+      Icons.image,
+      size: 40,
+      color: iconColor,
     );
   }
 
@@ -133,15 +152,28 @@ class ProductItemInCart extends StatelessWidget {
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
           Text(
-            item['name'],
+            item.productName,
             style: context.titleMedium,
             maxLines: 1,
             overflow: TextOverflow.ellipsis,
           ),
           const SizedBox(height: 5),
+          // Display variant if available
+          if (item.variant.isNotEmpty)
+            Padding(
+              padding: const EdgeInsets.only(bottom: 5.0),
+              child: Text(
+                'Variant: ${item.variant}',
+                style: context.bodySmall?.copyWith(color: Colors.grey),
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+              ),
+            ),
           Text(
-            '\$${item['price'].toStringAsFixed(2)}',
-            style: context.titleMedium,
+            '${item.currencySymbol}${item.price.toStringAsFixed(2)}',
+            style: context.titleMedium?.copyWith(
+              fontWeight: FontWeight.bold,
+            ),
           ),
         ],
       ),
@@ -163,18 +195,20 @@ class ProductItemInCart extends StatelessWidget {
               child: _buildQuantityButton(
                 icon: Icons.remove,
                 onPressed: () {
-                  if ((item['quantity'] as int) > 1 && onQuantityChanged != null) {
-                    onQuantityChanged!((item['quantity'] as int) - 1);
+                  if (item.quantity > 1 && onQuantityChanged != null) {
+                    onQuantityChanged!(item.quantity - 1);
                   }
                 },
-                enabled: (item['quantity'] as int) > 1,
+                enabled: item.quantity > 1,
               ),
             ),
             // Quantity display
             Expanded(
-              child: Text(
-                '${item['quantity']}',
-                style: context.titleSmall.copyWith(color: AppTheme.white),
+              child: Center(
+                child: Text(
+                  '${item.quantity}',
+                  style: context.titleSmall.copyWith(color: AppTheme.white),
+                ),
               ),
             ),
             // Plus button
@@ -183,7 +217,7 @@ class ProductItemInCart extends StatelessWidget {
                 icon: Icons.add,
                 onPressed: () {
                   if (onQuantityChanged != null) {
-                    onQuantityChanged!((item['quantity'] as int) + 1);
+                    onQuantityChanged!(item.quantity + 1);
                   }
                 },
               ),

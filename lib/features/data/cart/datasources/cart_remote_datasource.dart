@@ -36,13 +36,6 @@ class CartRemoteDataSourceImpl implements CartRemoteDataSource {
     };
   }
 
-  Future<Map<String, String>> _getHeaders() async {
-    return {
-      if (AppStrings.token != null)
-        'Authorization': 'Bearer ${AppStrings.token}',
-      'App-Language': 'en',
-    };
-  }
 
   @override
   Future<List<CartItemModel>> getCartItems() async {

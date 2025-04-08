@@ -24,7 +24,7 @@ class LaravelApiProvider implements ApiProvider {
           'Accept': 'application/json',
           'Content-Type': 'application/json',
           'System-Key': '123456',
-          'Authorization': AppStrings.token,
+          if (AppStrings.userId != null)'Authorization': AppStrings.token,
           'App-Language': 'en'
         },
       ),
