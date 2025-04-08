@@ -7,6 +7,7 @@ import 'package:provider/provider.dart';
 import '../../../../features/presentation/cart/controller/cart_provider.dart';
 import '../../../../features/presentation/wishlist/controller/wishlist_provider.dart';
 import '../../../config/routes.dart/routes.dart';
+import '../../helpers.dart';
 
 class ProductItemInRow1 extends StatelessWidget {
   final String imageUrl;
@@ -119,16 +120,14 @@ class ProductItemInRow1 extends StatelessWidget {
                       Spacer(),
                       // Add to cart button
                       GestureDetector(
-                        onTap: (){
-                          Provider.of<CartProvider>(context, listen: false).addToCart(
-                            productId,
-                            "", // variant - adjust if needed
-                            1,  // default quantity
-                          );
-                          ScaffoldMessenger.of(context).showSnackBar(
-                            SnackBar(content: Text('$productName added to cart')),
-                          );
-                        },
+                        onTap: () => AppFunctions.addProductToCart(
+                          context: context,
+                          productId: productId,
+                          productName: productName,
+                          // Optionally pass variant or quantity if needed
+                          // variant: "someVariant",
+                          // quantity: 2,
+                        ),
                         child: Container(
                           height: 40,
                           width: 40,
@@ -180,15 +179,7 @@ class ProductItemInRow1 extends StatelessWidget {
                   ),
                 ),
                 child: InkWell(
-                  onTap: () {
-                    final wishlistProvider = Provider.of<WishlistProvider>(context, listen: false);
-                    final isCurrentlyInWishlist = wishlistProvider.wishlistStatus[productSlug] ?? false;
-
-                    if (isCurrentlyInWishlist) {
-                      wishlistProvider.removeFromWishlist(productSlug);
-                    } else {
-                      wishlistProvider.addToWishlist(productSlug);
-                    }},
+                  onTap: ()=>AppFunctions.toggleWishlistStatus(context, productSlug),
                   child: Icon(
                     isFavorite ? Icons.favorite : Icons.favorite_border,
                     color: isFavorite ? Colors.red : Colors.black54,

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:laravel_ecommerce/core/config/routes.dart/routes.dart';
 import 'package:laravel_ecommerce/core/utils/extension/text_style_extension.dart';
+import 'package:laravel_ecommerce/core/utils/helpers.dart';
 import 'package:provider/provider.dart';
 
 import '../../../../features/presentation/cart/controller/cart_provider.dart';
@@ -22,16 +23,19 @@ class ProductGridCard extends StatelessWidget {
     required this.price,
     this.isBestSeller = false,
     this.isFavorite = false,
-    required this.productSlug, required this.productId,
+    required this.productSlug,
+    required this.productId,
   });
 
   @override
   Widget build(BuildContext context) {
     return InkWell(
-      onTap: (){
-        AppRoutes.navigateTo(context, AppRoutes.productDetailScreen,arguments: {
-          'slug': productSlug,
-        }, );
+      onTap: () {
+        AppRoutes.navigateTo(
+          context,
+          AppRoutes.productDetailScreen,
+          arguments: {'slug': productSlug},
+        );
       },
       child: Container(
         decoration: BoxDecoration(
@@ -68,15 +72,7 @@ class ProductGridCard extends StatelessWidget {
                   top: 8,
                   right: 8,
                   child: GestureDetector(
-                    onTap: () {
-    final wishlistProvider = Provider.of<WishlistProvider>(context, listen: false);
-    final isCurrentlyInWishlist = wishlistProvider.wishlistStatus[productSlug] ?? false;
-
-    if (isCurrentlyInWishlist) {
-    wishlistProvider.removeFromWishlist(productSlug);
-    } else {
-    wishlistProvider.addToWishlist(productSlug);
-    }},
+                    onTap: ()=>AppFunctions.toggleWishlistStatus(context, productSlug),
                     child: Container(
                       padding: const EdgeInsets.all(6),
                       decoration: BoxDecoration(
@@ -149,16 +145,14 @@ class ProductGridCard extends StatelessWidget {
                     child: Material(
                       color: Colors.transparent,
                       child: InkWell(
-                        onTap: (){
-                          Provider.of<CartProvider>(context, listen: false).addToCart(
-                            productId,
-                            "", // variant - adjust if needed
-                            1,  // default quantity
-                          );
-                          ScaffoldMessenger.of(context).showSnackBar(
-                            SnackBar(content: Text('$productName added to cart')),
-                          );
-                        },
+                        onTap: () => AppFunctions.addProductToCart(
+                          context: context,
+                          productId: productId,
+                          productName: productName,
+                          // Optionally pass variant or quantity if needed
+                          // variant: "someVariant",
+                          // quantity: 2,
+                        ),
                         borderRadius: BorderRadius.circular(8),
                         child: Padding(
                           padding: const EdgeInsets.symmetric(vertical: 8),

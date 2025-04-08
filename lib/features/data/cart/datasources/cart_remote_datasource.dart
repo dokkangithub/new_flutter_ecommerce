@@ -43,12 +43,39 @@ class CartRemoteDataSourceImpl implements CartRemoteDataSource {
       LaravelApiEndPoint.cart,
       data: await _getUserParams(),
     );
+
     if (response.data != null && response.data['data'] is List) {
-      return (response.data['data'] as List)
-          .map((item) => CartItemModel.fromJson(item))
-          .toList();
+      // Extract all cart items from all groups
+      List<CartItemModel> allItems = [];
+      final groups = response.data['data'] as List;
+
+      for (var group in groups) {
+        if (group['cart_items'] is List) {
+          final items = (group['cart_items'] as List)
+              .map((item) => CartItemModel.fromJson(item))
+              .toList();
+          allItems.addAll(items);
+        }
+      }
+
+      return allItems;
     }
+
     throw Exception('Invalid cart response format');
+  }
+
+  @override
+  Future<CartSummaryModel> getCartSummary() async {
+    final response = await apiProvider.post(
+      LaravelApiEndPoint.cartSummary,
+      data: await _getUserParams(),
+    );
+
+    if (response.data != null) {
+      return CartSummaryModel.fromJson(response.data);
+    }
+
+    throw Exception('Invalid cart summary response');
   }
 
   @override
@@ -57,9 +84,11 @@ class CartRemoteDataSourceImpl implements CartRemoteDataSource {
       LaravelApiEndPoint.cartCount,
       data: await _getUserParams(),
     );
+
     if (response.data != null) {
       return CartCountModel.fromJson(response.data);
     }
+
     throw Exception('Invalid cart count response');
   }
 
@@ -112,15 +141,4 @@ class CartRemoteDataSourceImpl implements CartRemoteDataSource {
     throw Exception('Failed to add to cart');
   }
 
-  @override
-  Future<CartSummaryModel> getCartSummary() async {
-    final response = await apiProvider.post(
-      LaravelApiEndPoint.cartSummary,
-      data: await _getUserParams(),
-    );
-    if (response.data != null) {
-      return CartSummaryModel.fromJson(response.data);
-    }
-    throw Exception('Invalid cart summary response');
-  }
 }

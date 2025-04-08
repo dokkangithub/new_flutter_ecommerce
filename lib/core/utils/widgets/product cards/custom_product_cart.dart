@@ -4,6 +4,7 @@ import 'package:laravel_ecommerce/core/utils/extension/text_style_extension.dart
 import '../../../../features/domain/cart/entities/cart.dart';
 import '../../../config/routes.dart/routes.dart';
 
+
 class ProductItemInCart extends StatelessWidget {
   final CartItem item;
   final int index;
@@ -53,12 +54,10 @@ class ProductItemInCart extends StatelessWidget {
                 flex: 5,
                 child: InkWell(
                   onTap: () {
-                    // Generate slug from product name if needed
-                    final productSlug = item.productName.toLowerCase().replaceAll(' ', '-');
                     AppRoutes.navigateTo(
                       context,
                       AppRoutes.productDetailScreen,
-                      arguments: {'slug': productSlug},
+                      arguments: {'slug': item.productSlug},
                     );
                   },
                   child: Container(
@@ -67,7 +66,7 @@ class ProductItemInCart extends StatelessWidget {
                       borderRadius: BorderRadius.circular(15),
                       boxShadow: [
                         BoxShadow(
-                          color: Colors.grey.withOpacity(0.1),
+                          color: Colors.grey.withValues(alpha: 0.1),
                           spreadRadius: 1,
                           blurRadius: 2,
                           offset: const Offset(0, 1),
@@ -103,15 +102,11 @@ class ProductItemInCart extends StatelessWidget {
         borderRadius: BorderRadius.circular(10),
       ),
       child: Center(
-        child: item.thumbnailImage.isNotEmpty
-            ? Image.network(
+        child: Image.network(
           item.thumbnailImage,
           width: 60,
           height: 60,
           fit: BoxFit.contain,
-          errorBuilder: (context, error, stackTrace) {
-            return _defaultImagePlaceholder();
-          },
           loadingBuilder: (context, child, loadingProgress) {
             if (loadingProgress == null) return child;
             return Center(
@@ -124,24 +119,8 @@ class ProductItemInCart extends StatelessWidget {
               ),
             );
           },
-        )
-            : _defaultImagePlaceholder(),
+        ),
       ),
-    );
-  }
-
-  Widget _defaultImagePlaceholder() {
-    // Use a color based on the product index for variety
-    Color iconColor = index % 3 == 0
-        ? Colors.blue
-        : index % 3 == 1
-        ? Colors.orange
-        : Colors.purple;
-
-    return Icon(
-      Icons.image,
-      size: 40,
-      color: iconColor,
     );
   }
 
@@ -170,8 +149,8 @@ class ProductItemInCart extends StatelessWidget {
               ),
             ),
           Text(
-            '${item.currencySymbol}${item.price.toStringAsFixed(2)}',
-            style: context.titleMedium?.copyWith(
+            '${item.currencySymbol}${item.mainPrice}',
+            style: context.titleMedium.copyWith(
               fontWeight: FontWeight.bold,
             ),
           ),
@@ -195,11 +174,11 @@ class ProductItemInCart extends StatelessWidget {
               child: _buildQuantityButton(
                 icon: Icons.remove,
                 onPressed: () {
-                  if (item.quantity > 1 && onQuantityChanged != null) {
+                  if (item.quantity > item.lowerLimit && onQuantityChanged != null) {
                     onQuantityChanged!(item.quantity - 1);
                   }
                 },
-                enabled: item.quantity > 1,
+                enabled: item.quantity > item.lowerLimit,
               ),
             ),
             // Quantity display
@@ -216,10 +195,11 @@ class ProductItemInCart extends StatelessWidget {
               child: _buildQuantityButton(
                 icon: Icons.add,
                 onPressed: () {
-                  if (onQuantityChanged != null) {
+                  if (item.quantity < item.upperLimit && onQuantityChanged != null) {
                     onQuantityChanged!(item.quantity + 1);
                   }
                 },
+                enabled: item.quantity < item.upperLimit,
               ),
             ),
           ],

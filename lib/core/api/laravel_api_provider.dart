@@ -20,13 +20,13 @@ class LaravelApiProvider implements ApiProvider {
         baseUrl: _appConfig.apiBaseUrl ?? '',
         connectTimeout: Duration(milliseconds: _appConfig.connectTimeout),
         receiveTimeout: Duration(milliseconds: _appConfig.receiveTimeout),
-        headers: {
-          'Accept': 'application/json',
-          'Content-Type': 'application/json',
-          'System-Key': '123456',
-          if (AppStrings.userId != null)'Authorization': AppStrings.token,
-          'App-Language': 'en'
-        },
+          headers: {
+            'Accept': 'application/json',
+            'Content-Type': 'application/json',
+            'System-Key': '123456',
+            if (AppStrings.userId != null) 'Authorization': 'Bearer ${AppStrings.token}',
+            'App-Language': 'en',
+          }
       ),
     );
 

@@ -47,23 +47,29 @@ class _CartScreenState extends State<CartScreen> {
                   onPressed: () {
                     showDialog(
                       context: context,
-                      builder: (context) => AlertDialog(
-                        title: const Text('Clear Cart'),
-                        content: const Text('Are you sure you want to remove all items from your cart?'),
-                        actions: [
-                          TextButton(
-                            onPressed: () => Navigator.pop(context),
-                            child: const Text('Cancel'),
+                      builder:
+                          (context) => AlertDialog(
+                            title: const Text('Clear Cart'),
+                            content: const Text(
+                              'Are you sure you want to remove all items from your cart?',
+                            ),
+                            actions: [
+                              TextButton(
+                                onPressed: () => Navigator.pop(context),
+                                child: const Text('Cancel'),
+                              ),
+                              TextButton(
+                                onPressed: () {
+                                  cartProvider.clearCart();
+                                  Navigator.pop(context);
+                                },
+                                child: const Text(
+                                  'Clear',
+                                  style: TextStyle(color: Colors.red),
+                                ),
+                              ),
+                            ],
                           ),
-                          TextButton(
-                            onPressed: () {
-                              cartProvider.clearCart();
-                              Navigator.pop(context);
-                            },
-                            child: const Text('Clear', style: TextStyle(color: Colors.red)),
-                          ),
-                        ],
-                      ),
                     );
                   },
                 );
@@ -77,9 +83,7 @@ class _CartScreenState extends State<CartScreen> {
         builder: (context, cartProvider, _) {
           // Loading state
           if (cartProvider.cartState == LoadingState.loading) {
-            return const Center(
-              child: CircularProgressIndicator(),
-            );
+            return const Center(child: CircularProgressIndicator());
           }
 
           // Error state
@@ -119,10 +123,7 @@ class _CartScreenState extends State<CartScreen> {
                   const SizedBox(height: 16),
                   const Text(
                     'Your cart is empty',
-                    style: TextStyle(
-                      fontSize: 18,
-                      fontWeight: FontWeight.bold,
-                    ),
+                    style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
                   ),
                   const SizedBox(height: 8),
                   const Text(
@@ -171,7 +172,6 @@ class _CartScreenState extends State<CartScreen> {
                   itemCount: cartProvider.cartItems.length,
                   itemBuilder: (context, index) {
                     final item = cartProvider.cartItems[index];
-                    print('111111ee${cartProvider.cartItems.length}');
                     return ProductItemInCart(
                       item: item,
                       index: index,
@@ -179,18 +179,32 @@ class _CartScreenState extends State<CartScreen> {
                         cartProvider.deleteCartItem(item.id);
                       },
                       onQuantityChanged: (newQuantity) {
-                        // Create a list of all cart IDs
-                        final cartIds = cartProvider.cartItems.map((i) => i.id.toString()).join(',');
+                        if (newQuantity >= item.lowerLimit &&
+                            newQuantity <= item.upperLimit) {
+                          // Create a list of all cart IDs
+                          final cartIds = cartProvider.cartItems
+                              .map((i) => i.id.toString())
+                              .join(',');
 
-                        // Create updated quantities list
-                        final quantities = cartProvider.cartItems.map((i) =>
-                        i.id == item.id ? newQuantity : i.quantity
-                        ).toList();
+                          // Create updated quantities list
+                          final quantities =
+                              cartProvider.cartItems
+                                  .map(
+                                    (i) =>
+                                        i.id == item.id
+                                            ? newQuantity
+                                            : i.quantity,
+                                  )
+                                  .toList();
 
-                        final quantitiesStr = quantities.join(',');
+                          final quantitiesStr = quantities.join(',');
 
-                        // Update cart quantities
-                        cartProvider.updateCartQuantities(cartIds, quantitiesStr);
+                          // Update cart quantities
+                          cartProvider.updateCartQuantities(
+                            cartIds,
+                            quantitiesStr,
+                          );
+                        }
                       },
                     );
                   },
@@ -205,7 +219,7 @@ class _CartScreenState extends State<CartScreen> {
                     color: Colors.white,
                     boxShadow: [
                       BoxShadow(
-                        color: Colors.grey.withOpacity(0.1),
+                        color: Colors.grey.withValues(alpha: 0.1),
                         spreadRadius: 1,
                         blurRadius: 5,
                         offset: const Offset(0, -3),
@@ -219,7 +233,10 @@ class _CartScreenState extends State<CartScreen> {
                         children: [
                           const Text(
                             'Subtotal',
-                            style: TextStyle(color: Colors.black54, fontSize: 16),
+                            style: TextStyle(
+                              color: Colors.black54,
+                              fontSize: 16,
+                            ),
                           ),
                           Text(
                             '${cartProvider.cartSummary!.currencySymbol}${cartProvider.cartSummary!.subtotal.toStringAsFixed(2)}',
@@ -236,7 +253,10 @@ class _CartScreenState extends State<CartScreen> {
                         children: [
                           const Text(
                             'Shipping',
-                            style: TextStyle(color: Colors.black54, fontSize: 16),
+                            style: TextStyle(
+                              color: Colors.black54,
+                              fontSize: 16,
+                            ),
                           ),
                           Text(
                             '${cartProvider.cartSummary!.currencySymbol}${cartProvider.cartSummary!.shippingCost.toStringAsFixed(2)}',
@@ -255,7 +275,10 @@ class _CartScreenState extends State<CartScreen> {
                             children: [
                               const Text(
                                 'Tax',
-                                style: TextStyle(color: Colors.black54, fontSize: 16),
+                                style: TextStyle(
+                                  color: Colors.black54,
+                                  fontSize: 16,
+                                ),
                               ),
                               Text(
                                 '${cartProvider.cartSummary!.currencySymbol}${cartProvider.cartSummary!.tax.toStringAsFixed(2)}',
@@ -269,7 +292,11 @@ class _CartScreenState extends State<CartScreen> {
                         ),
                       const Padding(
                         padding: EdgeInsets.symmetric(vertical: 10.0),
-                        child: Divider(color: Colors.grey, thickness: 1, height: 1),
+                        child: Divider(
+                          color: Colors.grey,
+                          thickness: 1,
+                          height: 1,
+                        ),
                       ),
                       Row(
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,

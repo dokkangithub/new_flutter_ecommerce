@@ -49,6 +49,16 @@ class CartProvider extends ChangeNotifier {
     }
   }
 
+  Future<void> fetchCartSummary() async {
+    try {
+      cartSummary = await getCartSummaryUseCase();
+      notifyListeners();
+    } catch (e) {
+      cartError = e.toString();
+      notifyListeners();
+    }
+  }
+
   Future<void> fetchCartCount() async {
     try {
       cartCount = await getCartCountUseCase();
@@ -107,13 +117,4 @@ class CartProvider extends ChangeNotifier {
     }
   }
 
-  Future<void> fetchCartSummary() async {
-    try {
-      cartSummary = await getCartSummaryUseCase();
-      notifyListeners();
-    } catch (e) {
-      cartError = e.toString();
-      notifyListeners();
-    }
-  }
 }

@@ -3,18 +3,28 @@ class CartItem {
   final String productName;
   final String thumbnailImage;
   final String variant;
-  final double price;
+  final String productSlug;
+  final String mainPrice;
+  final String discountedPrice;
+  final String discount;
   final String currencySymbol;
   final int quantity;
+  final int lowerLimit;  // Add this
+  final int upperLimit;  // Add this
 
   CartItem({
     required this.id,
     required this.productName,
+    required this.productSlug,
     required this.thumbnailImage,
     required this.variant,
-    required this.price,
+    required this.mainPrice,
+    required this.discountedPrice,
+    required this.discount,
     required this.currencySymbol,
     required this.quantity,
+    this.lowerLimit = 1,   // Default value
+    this.upperLimit = 10,  // Default value
   });
 }
 
@@ -24,6 +34,8 @@ class CartSummary {
   final double shippingCost;
   final double total;
   final String currencySymbol;
+  final String? couponCode;
+  final bool couponApplied;
 
   CartSummary({
     required this.subtotal,
@@ -31,5 +43,7 @@ class CartSummary {
     required this.shippingCost,
     required this.total,
     required this.currencySymbol,
+    this.couponCode,
+    this.couponApplied = false,
   });
 }
