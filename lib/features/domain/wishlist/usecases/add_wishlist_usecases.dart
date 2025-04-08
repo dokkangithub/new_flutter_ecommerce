@@ -1,3 +1,4 @@
+import '../entities/wishlist_details.dart';
 import '../repositories/wishlist_details_repository.dart';
 
 class AddToWishlistUseCase {
@@ -5,7 +6,7 @@ class AddToWishlistUseCase {
 
   AddToWishlistUseCase(this.repository);
 
-  Future<void> call(String slug) async {
-    await repository.addToWishlist(slug);
+  Future<WishlistCheck> call(String slug) async {
+    return await repository.addToWishlist(slug);
   }
 }

@@ -29,26 +29,23 @@ abstract class AppFunctions{
     );
   }
 
-  static Future<void> toggleWishlistStatus(BuildContext context, String productSlug) async {
-    try {
-      final wishlistProvider = Provider.of<WishlistProvider>(
-        context,
-        listen: false,
-      );
+  static Future<void> toggleWishlistStatus(BuildContext context, String slug) async {
+    final provider = Provider.of<WishlistProvider>(context, listen: false);
 
-      final isCurrentlyInWishlist =
-          wishlistProvider.wishlistStatus[productSlug] ?? false;
+    // Check if item is already in wishlist
+    final isInWishlist = provider.wishlistStatus[slug] ?? false;
 
-      if (isCurrentlyInWishlist) {
-        await wishlistProvider.removeFromWishlist(productSlug);
-      } else {
-        await wishlistProvider.addToWishlist(productSlug);
-      }
-    } catch (e) {
+    if (isInWishlist) {
+      await provider.removeFromWishlist(slug);
+    } else {
+      await provider.addToWishlist(slug);
+    }
+
+    // Show a snackbar with the result message
+    if (context.mounted && provider.lastActionMessage != null) {
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Error updating wishlist: $e')),
+        SnackBar(content: Text(provider.lastActionMessage!)),
       );
     }
   }
-
 }

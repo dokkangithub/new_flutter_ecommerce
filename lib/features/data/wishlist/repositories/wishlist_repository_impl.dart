@@ -20,12 +20,14 @@ class WishlistRepositoryImpl implements WishlistRepository {
   }
 
   @override
-  Future<void> addToWishlist(String slug) async {
-    await remoteDataSource.addToWishlist(slug);
+  Future<WishlistCheck> addToWishlist(String slug) async {
+    final model = await remoteDataSource.addToWishlist(slug);
+    return model.toEntity();
   }
 
   @override
-  Future<void> removeFromWishlist(String slug) async {
-    await remoteDataSource.removeFromWishlist(slug);
+  Future<WishlistCheck> removeFromWishlist(String slug) async {
+    final model = await remoteDataSource.removeFromWishlist(slug);
+    return model.toEntity();
   }
 }

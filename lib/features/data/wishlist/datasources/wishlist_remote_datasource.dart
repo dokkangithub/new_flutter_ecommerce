@@ -5,8 +5,8 @@ import '../models/wishlist_model.dart';
 abstract class WishlistRemoteDataSource {
   Future<List<WishlistItemModel>> getWishlist();
   Future<WishlistCheckModel> checkWishlist(String slug);
-  Future<void> addToWishlist(String slug);
-  Future<void> removeFromWishlist(String slug);
+  Future<WishlistCheckModel> addToWishlist(String slug);
+  Future<WishlistCheckModel> removeFromWishlist(String slug);
 }
 
 class WishlistRemoteDataSourceImpl implements WishlistRemoteDataSource {
@@ -36,12 +36,20 @@ class WishlistRemoteDataSourceImpl implements WishlistRemoteDataSource {
   }
 
   @override
-  Future<void> addToWishlist(String slug) async {
-    await apiProvider.get('${LaravelApiEndPoint.wishlistAdd}/$slug');
+  Future<WishlistCheckModel> addToWishlist(String slug) async {
+    final response = await apiProvider.get('${LaravelApiEndPoint.wishlistAdd}/$slug');
+    if (response.data != null) {
+      return WishlistCheckModel.fromJson(response.data);
+    }
+    throw Exception('Invalid add to wishlist response');
   }
 
   @override
-  Future<void> removeFromWishlist(String slug) async {
-    await apiProvider.get('${LaravelApiEndPoint.wishlistRemove}/$slug');
+  Future<WishlistCheckModel> removeFromWishlist(String slug) async {
+    final response = await apiProvider.get('${LaravelApiEndPoint.wishlistRemove}/$slug');
+    if (response.data != null) {
+      return WishlistCheckModel.fromJson(response.data);
+    }
+    throw Exception('Invalid remove from wishlist response');
   }
 }

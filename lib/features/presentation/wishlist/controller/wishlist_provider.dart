@@ -23,6 +23,7 @@ class WishlistProvider extends ChangeNotifier {
   List<WishlistItem> wishlistItems = [];
   String wishlistError = '';
   Map<String, bool> wishlistStatus = {};
+  String? lastActionMessage;
 
   Future<void> fetchWishlist() async {
     try {
@@ -53,8 +54,9 @@ class WishlistProvider extends ChangeNotifier {
 
   Future<void> addToWishlist(String slug) async {
     try {
-      await addToWishlistUseCase(slug);
-      wishlistStatus[slug] = true;
+      final result = await addToWishlistUseCase(slug);
+      wishlistStatus[slug] = result.isInWishlist;
+      lastActionMessage = result.message;
       await fetchWishlist(); // Refresh wishlist
       notifyListeners();
     } catch (e) {
@@ -65,9 +67,28 @@ class WishlistProvider extends ChangeNotifier {
 
   Future<void> removeFromWishlist(String slug) async {
     try {
-      await removeFromWishlistUseCase(slug);
-      wishlistStatus[slug] = false;
+      final result = await removeFromWishlistUseCase(slug);
+      wishlistStatus[slug] = result.isInWishlist;
+      lastActionMessage = result.message;
       await fetchWishlist(); // Refresh wishlist
+      notifyListeners();
+    } catch (e) {
+      wishlistError = e.toString();
+      notifyListeners();
+    }
+  }
+
+  // Method to clear the entire wishlist
+  Future<void> clearWishlist() async {
+    try {
+      // Create a copy to avoid modifying during iteration
+      final itemsToRemove = List<WishlistItem>.from(wishlistItems);
+
+      for (var item in itemsToRemove) {
+        await removeFromWishlist(item.slug);
+      }
+
+      lastActionMessage = "Wishlist cleared successfully";
       notifyListeners();
     } catch (e) {
       wishlistError = e.toString();
