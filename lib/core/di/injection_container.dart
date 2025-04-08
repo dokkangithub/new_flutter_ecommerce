@@ -1,12 +1,17 @@
 import 'package:laravel_ecommerce/core/api/laravel_api_provider.dart';
 import 'package:get_it/get_it.dart';
 import 'package:dio/dio.dart';
-import 'package:laravel_ecommerce/features/domain/review/entities/review.dart';
 import 'package:laravel_ecommerce/features/presentation/home/controller/home_provider.dart';
+import '../../features/data/address/datasources/address_remote_datasource.dart';
+import '../../features/data/address/repositories/address_repository_impl.dart';
 import '../../features/data/auth/datasources/auth_remote_datasource.dart';
 import '../../features/data/auth/repositories/auth_repository_impl.dart';
+import '../../features/data/brand/datasources/brand_remote_datasource.dart';
+import '../../features/data/brand/repositories/brand_repository_impl.dart';
 import '../../features/data/category/datasources/category_remote_datasource.dart';
 import '../../features/data/category/repositories/category_repository_impl.dart';
+import '../../features/data/coupon/datasources/coupon_remote_datasource.dart';
+import '../../features/data/coupon/repositories/coupon_repository_impl.dart';
 import '../../features/data/product details/datasources/product_details_remote_datasource.dart';
 import '../../features/data/product details/repositories/product_details_repository_impl.dart';
 import '../../features/data/product/datasources/product_remote_datasource.dart';
@@ -15,6 +20,24 @@ import '../../features/data/review/datasources/review_remote_datasource.dart';
 import '../../features/data/review/repositories/review_repository_impl.dart';
 import '../../features/data/slider/datasources/slider_remote_datasource.dart';
 import '../../features/data/slider/repositories/slider_repository_impl.dart';
+import '../../features/data/wishlist/datasources/wishlist_remote_datasource.dart';
+import '../../features/data/wishlist/repositories/wishlist_repository_impl.dart';
+import '../../features/data/cart/datasources/cart_remote_datasource.dart'; // Add this
+import '../../features/data/cart/repositories/cart_repository_impl.dart'; // Add this
+import '../../features/domain/address/repositories/address_repository.dart';
+import '../../features/domain/address/usecases/add_address_usecases.dart';
+import '../../features/domain/address/usecases/delete_address_usecase.dart';
+import '../../features/domain/address/usecases/get_address_usecases.dart';
+import '../../features/domain/address/usecases/get_cities_by_state_usecase.dart';
+import '../../features/domain/address/usecases/get_countries_usecase.dart';
+import '../../features/domain/address/usecases/get_home_delivery_usecases.dart';
+import '../../features/domain/address/usecases/get_shipping_cost_usecase.dart';
+import '../../features/domain/address/usecases/get_states_by_country_usecase.dart';
+import '../../features/domain/address/usecases/make_address_default_usecase.dart';
+import '../../features/domain/address/usecases/update_address_in_cart_usecase.dart';
+import '../../features/domain/address/usecases/update_address_location_usecases.dart';
+import '../../features/domain/address/usecases/update_address_usecases.dart';
+import '../../features/domain/address/usecases/update_shipping_type_in_cart_usecase.dart';
 import '../../features/domain/auth/repositories/auth_repository.dart';
 import '../../features/domain/auth/usecases/auth/confirm_code_use_case.dart';
 import '../../features/domain/auth/usecases/auth/confirm_reset_password_use_case.dart';
@@ -25,11 +48,25 @@ import '../../features/domain/auth/usecases/auth/logout_use_case.dart';
 import '../../features/domain/auth/usecases/auth/resend_code_use_case.dart';
 import '../../features/domain/auth/usecases/auth/signup_use_case.dart';
 import '../../features/domain/auth/usecases/auth/social_login_use_case.dart';
+import '../../features/domain/brand/repositories/brand_repository.dart';
+import '../../features/domain/brand/usecases/get_brands_usecases.dart';
+import '../../features/domain/brand/usecases/get_filter_brands_usecases.dart';
+import '../../features/domain/brand/usecases/get_total_brands_pages_usecases.dart';
+import '../../features/domain/cart/usecases/add_to_cart_usecases.dart';
+import '../../features/domain/cart/usecases/clear_cart_usecases.dart';
+import '../../features/domain/cart/usecases/delete_cart_item_usecases.dart';
+import '../../features/domain/cart/usecases/get_cart_count_usecases.dart';
+import '../../features/domain/cart/usecases/get_cart_items_usecases.dart';
+import '../../features/domain/cart/usecases/get_cart_summary_usecases.dart';
+import '../../features/domain/cart/usecases/update_cart_quantities_usecases.dart';
 import '../../features/domain/category/repositories/category_repository.dart';
 import '../../features/domain/category/usecases/get_categories_use_case.dart';
 import '../../features/domain/category/usecases/get_featured_categories_use_case.dart';
 import '../../features/domain/category/usecases/get_filter_page_categories_use_case.dart';
 import '../../features/domain/category/usecases/get_top_categories_use_case.dart';
+import '../../features/domain/coupon/repositories/coupon_repository.dart';
+import '../../features/domain/coupon/usecases/apply_coupon_usecases.dart';
+import '../../features/domain/coupon/usecases/remove_coupon_usecases.dart';
 import '../../features/domain/product details/repositories/product_details_repository.dart';
 import '../../features/domain/product details/usecases/get_product_details_use_case.dart';
 import '../../features/domain/product/repositories/product_repository.dart';
@@ -52,12 +89,23 @@ import '../../features/domain/review/usecases/get_product_reviews_use_case.dart'
 import '../../features/domain/review/usecases/submit_review_use_case.dart';
 import '../../features/domain/slider/repositories/slider_repository.dart';
 import '../../features/domain/slider/usecases/get_sliders_use_case.dart';
+import '../../features/domain/wishlist/repositories/wishlist_details_repository.dart';
+import '../../features/domain/wishlist/usecases/add_wishlist_usecases.dart';
+import '../../features/domain/wishlist/usecases/check_wishlist_usecases.dart';
+import '../../features/domain/wishlist/usecases/get_wishlist_usecases.dart';
+import '../../features/domain/wishlist/usecases/remove_wishlist_usecases.dart';
+import '../../features/domain/cart/repositories/cart_repository.dart';
+import '../../features/presentation/address/controller/address_provider.dart';
 import '../../features/presentation/auth/controller/auth_provider.dart';
+import '../../features/presentation/brand/controller/brand_provider.dart';
+import '../../features/presentation/cart/controller/cart_provider.dart';
 import '../../features/presentation/category/controller/provider.dart';
+import '../../features/presentation/coupon/controller/coupon_provider.dart';
 import '../../features/presentation/main layout/controller/layout_provider.dart';
 import '../../features/presentation/product/controller/product_provider.dart';
 import '../../features/presentation/review/controller/reviews_provider.dart';
 import '../../features/presentation/slider/controller/provider.dart';
+import '../../features/presentation/wishlist/controller/wishlist_provider.dart';
 import '../api/api_provider.dart';
 import '../config/app_config.dart/app_config.dart';
 import '../providers/localization/language_provider.dart';
@@ -85,40 +133,69 @@ void setupDependencies() {
 
   // Data Sources
   sl.registerLazySingleton<AuthRemoteDataSource>(
-    () => AuthRemoteDataSourceImpl(sl<LaravelApiProvider>()),
+        () => AuthRemoteDataSourceImpl(sl<LaravelApiProvider>()),
   );
   sl.registerLazySingleton<CategoryRemoteDataSource>(
-    () => CategoryRemoteDataSourceImpl(sl<ApiProvider>()),
+        () => CategoryRemoteDataSourceImpl(sl<ApiProvider>()),
   );
   sl.registerLazySingleton<ProductRemoteDataSource>(
-    () => ProductRemoteDataSourceImpl(sl<ApiProvider>()),
+        () => ProductRemoteDataSourceImpl(sl<ApiProvider>()),
   );
   sl.registerLazySingleton<ProductDetailsRemoteDataSource>(
-    () => ProductDetailsRemoteDataSourceImpl(sl<ApiProvider>()),
+        () => ProductDetailsRemoteDataSourceImpl(sl<ApiProvider>()),
   );
   sl.registerLazySingleton<SliderRemoteDataSource>(
-    () => SliderRemoteDataSourceImpl(sl()),
+        () => SliderRemoteDataSourceImpl(sl()),
   );
   sl.registerLazySingleton<ReviewRemoteDataSource>(
         () => ReviewRemoteDataSourceImpl(sl()),
   );
-
+  sl.registerLazySingleton<WishlistRemoteDataSource>(
+        () => WishlistRemoteDataSourceImpl(sl<ApiProvider>()),
+  );
+  sl.registerLazySingleton<CartRemoteDataSource>(
+        () => CartRemoteDataSourceImpl(sl<ApiProvider>(), sl<SecureStorage>()),
+  );
+  sl.registerLazySingleton<AddressRemoteDataSource>(
+        () => AddressRemoteDataSourceImpl(sl<ApiProvider>(), sl<SecureStorage>()),
+  );
+  sl.registerLazySingleton<BrandRemoteDataSource>(
+        () => BrandRemoteDataSourceImpl(sl<ApiProvider>(), sl<SecureStorage>()),
+  );
+  sl.registerLazySingleton<CouponRemoteDataSource>(
+        () => CouponRemoteDataSourceImpl(sl<ApiProvider>(), sl<SecureStorage>()),
+  );
 
   // Repositories
   sl.registerLazySingleton<AuthRepository>(
-    () => AuthRepositoryImpl(sl<AuthRemoteDataSource>())
+          () => AuthRepositoryImpl(sl<AuthRemoteDataSource>())
   );
   sl.registerLazySingleton<CategoryRepository>(
-    () => CategoryRepositoryImpl(sl<CategoryRemoteDataSource>())
+          () => CategoryRepositoryImpl(sl<CategoryRemoteDataSource>())
   );
   sl.registerLazySingleton<ProductRepository>(
-    () => ProductRepositoryImpl(sl<ProductRemoteDataSource>())
+          () => ProductRepositoryImpl(sl<ProductRemoteDataSource>())
   );
   sl.registerLazySingleton<ProductDetailsRepository>(
-    () => ProductDetailsRepositoryImpl(sl<ProductDetailsRemoteDataSource>())
+          () => ProductDetailsRepositoryImpl(sl<ProductDetailsRemoteDataSource>())
   );
   sl.registerLazySingleton<SliderRepository>(() => SliderRepositoryImpl(sl()));
   sl.registerLazySingleton<ReviewRepository>(() => ReviewRepositoryImpl(sl()));
+  sl.registerLazySingleton<WishlistRepository>(
+          () => WishlistRepositoryImpl(sl<WishlistRemoteDataSource>())
+  );
+  sl.registerLazySingleton<CartRepository>(
+          () => CartRepositoryImpl(sl<CartRemoteDataSource>())
+  );
+  sl.registerLazySingleton<AddressRepository>(
+        () => AddressRepositoryImpl(sl<AddressRemoteDataSource>()),
+  );
+  sl.registerLazySingleton<BrandRepository>(
+        () => BrandRepositoryImpl(sl<BrandRemoteDataSource>()),
+  );
+  sl.registerLazySingleton<CouponRepository>(
+        () => CouponRepositoryImpl(sl<CouponRemoteDataSource>()),
+  );
 
   // Use Cases - Auth
   sl.registerLazySingleton(() => LoginUseCase(sl()));
@@ -159,13 +236,52 @@ void setupDependencies() {
   // Use Cases - Sliders
   sl.registerLazySingleton(() => GetSlidersUseCase(sl()));
 
-  // Use Cases - reviews
+  // Use Cases - Reviews
   sl.registerLazySingleton(() => GetProductReviewsUseCase(sl()));
   sl.registerLazySingleton(() => SubmitReviewUseCase(sl()));
 
+  // Use Cases - Wishlist
+  sl.registerLazySingleton(() => GetWishlistUseCase(sl()));
+  sl.registerLazySingleton(() => CheckWishlistUseCase(sl()));
+  sl.registerLazySingleton(() => AddToWishlistUseCase(sl()));
+  sl.registerLazySingleton(() => RemoveFromWishlistUseCase(sl()));
+
+  // Use Cases - Cart
+  sl.registerLazySingleton(() => GetCartItemsUseCase(sl()));
+  sl.registerLazySingleton(() => GetCartCountUseCase(sl()));
+  sl.registerLazySingleton(() => DeleteCartItemUseCase(sl()));
+  sl.registerLazySingleton(() => ClearCartUseCase(sl()));
+  sl.registerLazySingleton(() => UpdateCartQuantitiesUseCase(sl()));
+  sl.registerLazySingleton(() => AddToCartUseCase(sl()));
+  sl.registerLazySingleton(() => GetCartSummaryUseCase(sl()));
+
+  // Use Cases - Address
+  sl.registerLazySingleton(() => GetAddressesUseCase(sl()));
+  sl.registerLazySingleton(() => GetHomeDeliveryAddressUseCase(sl()));
+  sl.registerLazySingleton(() => AddAddressUseCase(sl()));
+  sl.registerLazySingleton(() => UpdateAddressUseCase(sl()));
+  sl.registerLazySingleton(() => UpdateAddressLocationUseCase(sl()));
+  sl.registerLazySingleton(() => MakeAddressDefaultUseCase(sl()));
+  sl.registerLazySingleton(() => DeleteAddressUseCase(sl()));
+  sl.registerLazySingleton(() => GetCitiesByStateUseCase(sl()));
+  sl.registerLazySingleton(() => GetStatesByCountryUseCase(sl()));
+  sl.registerLazySingleton(() => GetCountriesUseCase(sl()));
+  sl.registerLazySingleton(() => GetShippingCostUseCase(sl()));
+  sl.registerLazySingleton(() => UpdateAddressInCartUseCase(sl()));
+  sl.registerLazySingleton(() => UpdateShippingTypeInCartUseCase(sl()));
+
+  // Use Cases - Brand
+  sl.registerLazySingleton(() => GetFilterPageBrandsUseCase(sl()));
+  sl.registerLazySingleton(() => GetBrandsUseCase(sl()));
+  sl.registerLazySingleton(() => GetTotalBrandPagesUseCase(sl()));
+
+// Use Cases - Coupon
+  sl.registerLazySingleton(() => ApplyCouponUseCase(sl()));
+  sl.registerLazySingleton(() => RemoveCouponUseCase(sl()));
+
   // Providers
   sl.registerLazySingleton(
-    () => AuthProvider(
+        () => AuthProvider(
       loginUseCase: sl(),
       signupUseCase: sl(),
       socialLoginUseCase: sl(),
@@ -181,7 +297,7 @@ void setupDependencies() {
   sl.registerFactory(() => SliderProvider(getSlidersUseCase: sl()));
 
   sl.registerLazySingleton(
-    () => CategoryProvider(
+        () => CategoryProvider(
       getCategoriesUseCase: sl(),
       getFeaturedCategoriesUseCase: sl(),
       getTopCategoriesUseCase: sl(),
@@ -189,8 +305,15 @@ void setupDependencies() {
     ),
   );
 
+  sl.registerFactory(
+        () => CouponProvider(
+      applyCouponUseCase: sl(),
+      removeCouponUseCase: sl(),
+    ),
+  );
+
   sl.registerLazySingleton(
-    () => HomeProvider(
+        () => HomeProvider(
       getAllProductsUseCase: sl(),
       getFeaturedProductsUseCase: sl(),
       getBestSellingProductsUseCase: sl(),
@@ -209,11 +332,58 @@ void setupDependencies() {
   );
 
   sl.registerFactory(
-    () => ProductDetailsProvider(getProductDetailsUseCase: sl()),
+        () => ProductDetailsProvider(getProductDetailsUseCase: sl()),
   );
 
   sl.registerFactory(
         () => ReviewProvider(getProductReviews: sl(), submitReview: sl()),
+  );
+
+  sl.registerFactory(
+        () => WishlistProvider(
+      getWishlistUseCase: sl(),
+      checkWishlistUseCase: sl(),
+      addToWishlistUseCase: sl(),
+      removeFromWishlistUseCase: sl(),
+    ),
+  );
+
+  sl.registerFactory(
+        () => CartProvider(
+      getCartItemsUseCase: sl(),
+      getCartCountUseCase: sl(),
+      deleteCartItemUseCase: sl(),
+      clearCartUseCase: sl(),
+      updateCartQuantitiesUseCase: sl(),
+      addToCartUseCase: sl(),
+      getCartSummaryUseCase: sl(),
+    ),
+  );
+
+  sl.registerFactory(
+        () => AddressProvider(
+      getAddressesUseCase: sl(),
+      getHomeDeliveryAddressUseCase: sl(),
+      addAddressUseCase: sl(),
+      updateAddressUseCase: sl(),
+      updateAddressLocationUseCase: sl(),
+      makeAddressDefaultUseCase: sl(),
+      deleteAddressUseCase: sl(),
+      getCitiesByStateUseCase: sl(),
+      getStatesByCountryUseCase: sl(),
+      getCountriesUseCase: sl(),
+      getShippingCostUseCase: sl(),
+      updateAddressInCartUseCase: sl(),
+      updateShippingTypeInCartUseCase: sl(),
+    ),
+  );
+
+  sl.registerFactory(
+        () => BrandProvider(
+      getFilterPageBrandsUseCase: sl(),
+      getBrandsUseCase: sl(),
+      getTotalBrandPagesUseCase: sl(),
+    ),
   );
 
   sl.registerLazySingleton(() => LanguageProvider());

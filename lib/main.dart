@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:laravel_ecommerce/core/utils/constants/app_strings.dart';
+import 'package:laravel_ecommerce/features/domain/coupon/entities/coupon.dart';
 import 'package:laravel_ecommerce/features/presentation/home/controller/home_provider.dart';
 import 'core/config/app_config.dart/app_config.dart';
 import 'core/config/routes.dart/routes.dart';
@@ -11,12 +12,16 @@ import 'core/providers/localization/app_localizations.dart';
 import 'core/providers/localization/language_provider.dart';
 import 'core/utils/local_storage/local_storage_keys.dart';
 import 'core/utils/local_storage/secure_storage.dart';
+import 'features/presentation/address/controller/address_provider.dart';
 import 'features/presentation/auth/controller/auth_provider.dart';
+import 'features/presentation/cart/controller/cart_provider.dart';
 import 'features/presentation/category/controller/provider.dart';
+import 'features/presentation/coupon/controller/coupon_provider.dart';
 import 'features/presentation/main layout/controller/layout_provider.dart';
 import 'features/presentation/product/controller/product_provider.dart';
 import 'features/presentation/review/controller/reviews_provider.dart';
 import 'features/presentation/slider/controller/provider.dart';
+import 'features/presentation/wishlist/controller/wishlist_provider.dart';
 
 Future<void> getInitData() async {
   AppStrings.token = await SecureStorage().get<String>(LocalStorageKey.userToken);
@@ -42,6 +47,10 @@ Future<void> main() async {
         ChangeNotifierProvider(create: (_) => sl<CategoryProvider>()),
         ChangeNotifierProvider(create: (_) => sl<SliderProvider>()),
         ChangeNotifierProvider(create: (_) => sl<ReviewProvider>()),
+        ChangeNotifierProvider(create: (_) => sl<WishlistProvider>()),
+        ChangeNotifierProvider(create: (_) => sl<CartProvider>()),
+        ChangeNotifierProvider(create: (_) => sl<AddressProvider>()),
+        ChangeNotifierProvider(create: (_) => sl<CouponProvider>()),
 
       ],
       child: const MyApp(),
