@@ -1,0 +1,84 @@
+import 'package:flutter/material.dart';
+import '../../../domain/payment/entities/payment_type.dart';
+import '../../../domain/payment/repositories/payment_repository.dart';
+import '../datasources/payment_remote_datasource.dart';
+
+class PaymentRepositoryImpl implements PaymentRepository {
+  final PaymentRemoteDataSource remoteDataSource;
+
+  PaymentRepositoryImpl({required this.remoteDataSource});
+
+  @override
+  Future<List<PaymentType>> getPaymentTypes() async {
+    try {
+      final paymentTypes = await remoteDataSource.getPaymentTypes();
+      return paymentTypes;
+    } catch (e) {
+      throw Exception('Failed to get payment types: $e');
+    }
+  }
+
+  @override
+  Future<OrderResponse> createKashierOrder({
+    required String name,
+    required String stateId,
+    required String address,
+    required String city,
+    required String phone,
+    required String paymentMethod,
+    String? additionalInfo,
+    BuildContext? context,
+  }) async {
+    try {
+      final orderResponse = await remoteDataSource.createKashierOrder(
+        name: name,
+        stateId: stateId,
+        address: address,
+        city: city,
+        phone: phone,
+        paymentMethod: paymentMethod,
+        additionalInfo: additionalInfo,
+        context: context,
+      );
+      return orderResponse;
+    } catch (e) {
+      throw Exception('Failed to create Kashier order: $e');
+    }
+  }
+
+  @override
+  Future<OrderResponse> createCashOrder({
+    required String name,
+    required String stateId,
+    required String address,
+    required String city,
+    required String phone,
+    String? additionalInfo,
+    required BuildContext context,
+  }) async {
+    try {
+      final orderResponse = await remoteDataSource.createCashOrder(
+        name: name,
+        stateId: stateId,
+        address: address,
+        city: city,
+        phone: phone,
+        additionalInfo: additionalInfo,
+        context: context,
+      );
+      return orderResponse;
+    } catch (e) {
+      throw Exception('Failed to create Cash order: $e');
+    }
+  }
+
+  @override
+  Future<Map<String, dynamic>> verifyOrderSuccess(String orderId) async {
+    try {
+      final verificationResult = await remoteDataSource.verifyOrderSuccess(orderId);
+      return verificationResult;
+    } catch (e) {
+      throw Exception('Failed to verify order: $e');
+    }
+  }
+}

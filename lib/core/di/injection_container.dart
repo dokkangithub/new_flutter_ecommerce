@@ -12,6 +12,8 @@ import '../../features/data/category/datasources/category_remote_datasource.dart
 import '../../features/data/category/repositories/category_repository_impl.dart';
 import '../../features/data/coupon/datasources/coupon_remote_datasource.dart';
 import '../../features/data/coupon/repositories/coupon_repository_impl.dart';
+import '../../features/data/payment/datasources/payment_remote_datasource.dart';
+import '../../features/data/payment/repositories/payment_repository_impl.dart';
 import '../../features/data/product details/datasources/product_details_remote_datasource.dart';
 import '../../features/data/product details/repositories/product_details_repository_impl.dart';
 import '../../features/data/product/datasources/product_remote_datasource.dart';
@@ -59,6 +61,7 @@ import '../../features/domain/cart/usecases/get_cart_count_usecases.dart';
 import '../../features/domain/cart/usecases/get_cart_items_usecases.dart';
 import '../../features/domain/cart/usecases/get_cart_summary_usecases.dart';
 import '../../features/domain/cart/usecases/update_cart_quantities_usecases.dart';
+import '../../features/domain/cart/usecases/update_shipping_type_usecase.dart';
 import '../../features/domain/category/repositories/category_repository.dart';
 import '../../features/domain/category/usecases/get_categories_use_case.dart';
 import '../../features/domain/category/usecases/get_featured_categories_use_case.dart';
@@ -67,6 +70,11 @@ import '../../features/domain/category/usecases/get_top_categories_use_case.dart
 import '../../features/domain/coupon/repositories/coupon_repository.dart';
 import '../../features/domain/coupon/usecases/apply_coupon_usecases.dart';
 import '../../features/domain/coupon/usecases/remove_coupon_usecases.dart';
+import '../../features/domain/payment/repositories/payment_repository.dart';
+import '../../features/domain/payment/usecases/create_cash_order_usecase.dart';
+import '../../features/domain/payment/usecases/create_kashier_order_usecase.dart';
+import '../../features/domain/payment/usecases/get_payment_types_usecase.dart';
+import '../../features/domain/payment/usecases/verify_order_success_usecase.dart';
 import '../../features/domain/product details/repositories/product_details_repository.dart';
 import '../../features/domain/product details/usecases/get_product_details_use_case.dart';
 import '../../features/domain/product/repositories/product_repository.dart';
@@ -102,6 +110,7 @@ import '../../features/presentation/cart/controller/cart_provider.dart';
 import '../../features/presentation/category/controller/provider.dart';
 import '../../features/presentation/coupon/controller/coupon_provider.dart';
 import '../../features/presentation/main layout/controller/layout_provider.dart';
+import '../../features/presentation/payment/controller/payment_provider.dart';
 import '../../features/presentation/product/controller/product_provider.dart';
 import '../../features/presentation/review/controller/reviews_provider.dart';
 import '../../features/presentation/slider/controller/provider.dart';
@@ -133,69 +142,76 @@ void setupDependencies() {
 
   // Data Sources
   sl.registerLazySingleton<AuthRemoteDataSource>(
-        () => AuthRemoteDataSourceImpl(sl<LaravelApiProvider>()),
+    () => AuthRemoteDataSourceImpl(sl<LaravelApiProvider>()),
   );
   sl.registerLazySingleton<CategoryRemoteDataSource>(
-        () => CategoryRemoteDataSourceImpl(sl<ApiProvider>()),
+    () => CategoryRemoteDataSourceImpl(sl<ApiProvider>()),
   );
   sl.registerLazySingleton<ProductRemoteDataSource>(
-        () => ProductRemoteDataSourceImpl(sl<ApiProvider>()),
+    () => ProductRemoteDataSourceImpl(sl<ApiProvider>()),
   );
   sl.registerLazySingleton<ProductDetailsRemoteDataSource>(
-        () => ProductDetailsRemoteDataSourceImpl(sl<ApiProvider>()),
+    () => ProductDetailsRemoteDataSourceImpl(sl<ApiProvider>()),
   );
   sl.registerLazySingleton<SliderRemoteDataSource>(
-        () => SliderRemoteDataSourceImpl(sl()),
+    () => SliderRemoteDataSourceImpl(sl<ApiProvider>()),
   );
   sl.registerLazySingleton<ReviewRemoteDataSource>(
-        () => ReviewRemoteDataSourceImpl(sl()),
+    () => ReviewRemoteDataSourceImpl(sl<ApiProvider>()),
   );
   sl.registerLazySingleton<WishlistRemoteDataSource>(
-        () => WishlistRemoteDataSourceImpl(sl<ApiProvider>()),
+    () => WishlistRemoteDataSourceImpl(sl<ApiProvider>()),
   );
   sl.registerLazySingleton<CartRemoteDataSource>(
-        () => CartRemoteDataSourceImpl(sl<ApiProvider>(), sl<SecureStorage>()),
+    () => CartRemoteDataSourceImpl(sl<ApiProvider>(), sl<SecureStorage>()),
   );
   sl.registerLazySingleton<AddressRemoteDataSource>(
-        () => AddressRemoteDataSourceImpl(sl<ApiProvider>(), sl<SecureStorage>()),
+    () => AddressRemoteDataSourceImpl(sl<ApiProvider>(), sl<SecureStorage>()),
   );
   sl.registerLazySingleton<BrandRemoteDataSource>(
-        () => BrandRemoteDataSourceImpl(sl<ApiProvider>(), sl<SecureStorage>()),
+    () => BrandRemoteDataSourceImpl(sl<ApiProvider>(), sl<SecureStorage>()),
   );
   sl.registerLazySingleton<CouponRemoteDataSource>(
-        () => CouponRemoteDataSourceImpl(sl<ApiProvider>(), sl<SecureStorage>()),
+    () => CouponRemoteDataSourceImpl(sl<ApiProvider>(), sl<SecureStorage>()),
+  );
+  sl.registerLazySingleton<PaymentRemoteDataSource>(
+    () => PaymentRemoteDataSourceImpl(sl<ApiProvider>()),
   );
 
   // Repositories
   sl.registerLazySingleton<AuthRepository>(
-          () => AuthRepositoryImpl(sl<AuthRemoteDataSource>())
+    () => AuthRepositoryImpl(sl<AuthRemoteDataSource>()),
   );
   sl.registerLazySingleton<CategoryRepository>(
-          () => CategoryRepositoryImpl(sl<CategoryRemoteDataSource>())
+    () => CategoryRepositoryImpl(sl<CategoryRemoteDataSource>()),
   );
   sl.registerLazySingleton<ProductRepository>(
-          () => ProductRepositoryImpl(sl<ProductRemoteDataSource>())
+    () => ProductRepositoryImpl(sl<ProductRemoteDataSource>()),
   );
   sl.registerLazySingleton<ProductDetailsRepository>(
-          () => ProductDetailsRepositoryImpl(sl<ProductDetailsRemoteDataSource>())
+    () => ProductDetailsRepositoryImpl(sl<ProductDetailsRemoteDataSource>()),
   );
   sl.registerLazySingleton<SliderRepository>(() => SliderRepositoryImpl(sl()));
   sl.registerLazySingleton<ReviewRepository>(() => ReviewRepositoryImpl(sl()));
   sl.registerLazySingleton<WishlistRepository>(
-          () => WishlistRepositoryImpl(sl<WishlistRemoteDataSource>())
+    () => WishlistRepositoryImpl(sl<WishlistRemoteDataSource>()),
   );
   sl.registerLazySingleton<CartRepository>(
-          () => CartRepositoryImpl(sl<CartRemoteDataSource>())
+    () => CartRepositoryImpl(sl<CartRemoteDataSource>()),
   );
   sl.registerLazySingleton<AddressRepository>(
-        () => AddressRepositoryImpl(sl<AddressRemoteDataSource>()),
+    () => AddressRepositoryImpl(sl<AddressRemoteDataSource>()),
   );
   sl.registerLazySingleton<BrandRepository>(
-        () => BrandRepositoryImpl(sl<BrandRemoteDataSource>()),
+    () => BrandRepositoryImpl(sl<BrandRemoteDataSource>()),
   );
   sl.registerLazySingleton<CouponRepository>(
-        () => CouponRepositoryImpl(sl<CouponRemoteDataSource>()),
+    () => CouponRepositoryImpl(sl<CouponRemoteDataSource>()),
   );
+  sl.registerLazySingleton<PaymentRepository>(
+    () => PaymentRepositoryImpl(remoteDataSource: sl<PaymentRemoteDataSource>()),
+  );
+
 
   // Use Cases - Auth
   sl.registerLazySingleton(() => LoginUseCase(sl()));
@@ -254,6 +270,7 @@ void setupDependencies() {
   sl.registerLazySingleton(() => UpdateCartQuantitiesUseCase(sl()));
   sl.registerLazySingleton(() => AddToCartUseCase(sl()));
   sl.registerLazySingleton(() => GetCartSummaryUseCase(sl()));
+  sl.registerLazySingleton(() => UpdateShippingTypeUseCase(sl()));
 
   // Use Cases - Address
   sl.registerLazySingleton(() => GetAddressesUseCase(sl()));
@@ -275,13 +292,19 @@ void setupDependencies() {
   sl.registerLazySingleton(() => GetBrandsUseCase(sl()));
   sl.registerLazySingleton(() => GetTotalBrandPagesUseCase(sl()));
 
-// Use Cases - Coupon
+  // Use Cases - Coupon
   sl.registerLazySingleton(() => ApplyCouponUseCase(sl()));
   sl.registerLazySingleton(() => RemoveCouponUseCase(sl()));
 
+  // Use Cases - payment
+  sl.registerLazySingleton(() => GetPaymentTypesUseCase(sl()));
+  sl.registerLazySingleton(() => CreateKashierOrderUseCase(sl()));
+  sl.registerLazySingleton(() => CreateCashOrderUseCase(sl()));
+  sl.registerLazySingleton(() => VerifyOrderSuccessUseCase(sl()));
+
   // Providers
   sl.registerLazySingleton(
-        () => AuthProvider(
+    () => AuthProvider(
       loginUseCase: sl(),
       signupUseCase: sl(),
       socialLoginUseCase: sl(),
@@ -297,7 +320,7 @@ void setupDependencies() {
   sl.registerFactory(() => SliderProvider(getSlidersUseCase: sl()));
 
   sl.registerLazySingleton(
-        () => CategoryProvider(
+    () => CategoryProvider(
       getCategoriesUseCase: sl(),
       getFeaturedCategoriesUseCase: sl(),
       getTopCategoriesUseCase: sl(),
@@ -306,14 +329,11 @@ void setupDependencies() {
   );
 
   sl.registerFactory(
-        () => CouponProvider(
-      applyCouponUseCase: sl(),
-      removeCouponUseCase: sl(),
-    ),
+    () => CouponProvider(applyCouponUseCase: sl(), removeCouponUseCase: sl()),
   );
 
   sl.registerLazySingleton(
-        () => HomeProvider(
+    () => HomeProvider(
       getAllProductsUseCase: sl(),
       getFeaturedProductsUseCase: sl(),
       getBestSellingProductsUseCase: sl(),
@@ -332,15 +352,15 @@ void setupDependencies() {
   );
 
   sl.registerFactory(
-        () => ProductDetailsProvider(getProductDetailsUseCase: sl()),
+    () => ProductDetailsProvider(getProductDetailsUseCase: sl()),
   );
 
   sl.registerFactory(
-        () => ReviewProvider(getProductReviews: sl(), submitReview: sl()),
+    () => ReviewProvider(getProductReviews: sl(), submitReview: sl()),
   );
 
   sl.registerFactory(
-        () => WishlistProvider(
+    () => WishlistProvider(
       getWishlistUseCase: sl(),
       checkWishlistUseCase: sl(),
       addToWishlistUseCase: sl(),
@@ -349,7 +369,7 @@ void setupDependencies() {
   );
 
   sl.registerFactory(
-        () => CartProvider(
+    () => CartProvider(
       getCartItemsUseCase: sl(),
       getCartCountUseCase: sl(),
       deleteCartItemUseCase: sl(),
@@ -357,11 +377,12 @@ void setupDependencies() {
       updateCartQuantitiesUseCase: sl(),
       addToCartUseCase: sl(),
       getCartSummaryUseCase: sl(),
+      updateShippingTypeUseCase: sl(),
     ),
   );
 
   sl.registerFactory(
-        () => AddressProvider(
+    () => AddressProvider(
       getAddressesUseCase: sl(),
       getHomeDeliveryAddressUseCase: sl(),
       addAddressUseCase: sl(),
@@ -379,10 +400,19 @@ void setupDependencies() {
   );
 
   sl.registerFactory(
-        () => BrandProvider(
+    () => BrandProvider(
       getFilterPageBrandsUseCase: sl(),
       getBrandsUseCase: sl(),
       getTotalBrandPagesUseCase: sl(),
+    ),
+  );
+
+  sl.registerFactory(
+    () => PaymentProvider(
+      getPaymentTypesUseCase: sl(),
+      createKashierOrderUseCase: sl(),
+      createCashOrderUseCase: sl(),
+      verifyOrderSuccessUseCase: sl(),
     ),
   );
 

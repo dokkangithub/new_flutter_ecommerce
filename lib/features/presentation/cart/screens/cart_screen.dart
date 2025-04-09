@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:laravel_ecommerce/core/config/routes.dart/routes.dart';
 import 'package:provider/provider.dart';
 import '../../../../core/utils/enums/loading_state.dart';
 import '../../../../core/utils/widgets/custom_back_button.dart';
@@ -330,8 +331,7 @@ class _CartScreenState extends State<CartScreen> {
                   height: 50,
                   child: ElevatedButton(
                     onPressed: () {
-                      // Navigate to checkout screen
-                      // Navigator.push(context, MaterialPageRoute(builder: (context) => CheckoutScreen()));
+                      AppRoutes.navigateTo(context, AppRoutes.newCheckoutScreen);
                     },
                     style: ElevatedButton.styleFrom(
                       backgroundColor: Colors.blue,

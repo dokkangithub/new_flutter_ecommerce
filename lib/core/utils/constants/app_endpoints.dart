@@ -57,20 +57,7 @@ class LaravelApiEndPoint {
   static const String brands = '/brands';
   static const String couponApply = '/coupon-apply';
   static const String couponRemove = '/coupon-remove';
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+  static const String paymentTypes = '/payment-types';
+  static const String orderStore = '/order/store';
+  static const String orderDetails = '/order-details';
 }

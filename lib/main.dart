@@ -18,6 +18,7 @@ import 'features/presentation/cart/controller/cart_provider.dart';
 import 'features/presentation/category/controller/provider.dart';
 import 'features/presentation/coupon/controller/coupon_provider.dart';
 import 'features/presentation/main layout/controller/layout_provider.dart';
+import 'features/presentation/payment/controller/payment_provider.dart';
 import 'features/presentation/product/controller/product_provider.dart';
 import 'features/presentation/review/controller/reviews_provider.dart';
 import 'features/presentation/slider/controller/provider.dart';
@@ -51,6 +52,7 @@ Future<void> main() async {
         ChangeNotifierProvider(create: (_) => sl<CartProvider>()),
         ChangeNotifierProvider(create: (_) => sl<AddressProvider>()),
         ChangeNotifierProvider(create: (_) => sl<CouponProvider>()),
+        ChangeNotifierProvider(create: (_) => sl<PaymentProvider>()),
 
       ],
       child: const MyApp(),

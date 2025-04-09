@@ -33,6 +33,7 @@ class CartSummary {
   final double tax;
   final double shippingCost;
   final double total;
+  final double discount;
   final String currencySymbol;
   final String? couponCode;
   final bool couponApplied;
@@ -43,6 +44,7 @@ class CartSummary {
     required this.shippingCost,
     required this.total,
     required this.currencySymbol,
+    this.discount = 0.0,
     this.couponCode,
     this.couponApplied = false,
   });

@@ -1,4 +1,5 @@
 import '../../../domain/cart/entities/cart.dart';
+import '../../../domain/cart/entities/shipping_update_response.dart';
 import '../../../domain/cart/repositories/cart_repository.dart';
 import '../datasources/cart_remote_datasource.dart';
 
@@ -43,6 +44,26 @@ class CartRepositoryImpl implements CartRepository {
   @override
   Future<CartSummary> getCartSummary() async {
     final model = await remoteDataSource.getCartSummary();
+    return model.toEntity();
+  }
+  
+  @override
+  Future<ShippingUpdateResponse> updateShippingTypeInCart({
+    required String address,
+    required String shippingType,
+    required int shippingId,
+    required int countryId,
+    required String cityId,
+    required String stateId,
+  }) async {
+    final model = await remoteDataSource.updateShippingTypeInCart(
+      address: address,
+      shippingType: shippingType,
+      shippingId: shippingId,
+      countryId: countryId,
+      cityId: cityId,
+      stateId: stateId,
+    );
     return model.toEntity();
   }
 }

@@ -17,7 +17,11 @@ class CouponModel {
     return CouponModel(
       success: json['result'] ?? false,
       message: json['message'] ?? '',
-      discountAmount: (json['discount_amount'] as num?)?.toDouble(),
+      // These fields might not be present in the response based on the examples
+      // but we keep them optional for compatibility with existing code
+      discountAmount: json['discount_amount'] != null 
+          ? (json['discount_amount'] as num).toDouble() 
+          : null,
       couponCode: json['coupon_code'],
     );
   }

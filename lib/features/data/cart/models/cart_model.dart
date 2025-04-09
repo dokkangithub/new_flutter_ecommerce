@@ -128,7 +128,10 @@ class CartSummaryModel {
       tax: tax,
       shippingCost: shippingCost,
       total: total,
+      discount: discount,
       currencySymbol: currencySymbol,
+      couponCode: couponCode,
+      couponApplied: couponApplied,
     );
   }
 }

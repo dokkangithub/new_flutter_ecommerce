@@ -3,7 +3,7 @@ import 'package:laravel_ecommerce/core/utils/enums/products_type.dart';
 import 'package:laravel_ecommerce/features/presentation/category/screens/category_screen.dart';
 import 'package:laravel_ecommerce/features/presentation/profile/screens/profile_screen.dart';
 import 'package:laravel_ecommerce/features/presentation/wishlist/screens/wishlist_screen.dart';
-import '../../../features/domain/product/entities/product.dart';
+import '../../../features/presentation/address/screens/address_list_screen.dart';
 import '../../../features/presentation/all products/screens/all_category_products.dart';
 import '../../../features/presentation/all products/screens/all_products_by_type_screen.dart';
 import '../../../features/presentation/auth/screens/forgot_password_screen.dart';
@@ -15,6 +15,8 @@ import '../../../features/presentation/cart/screens/cart_screen.dart';
 import '../../../features/presentation/home/screens/home.dart';
 import '../../../features/presentation/main layout/screens/main_layout_screen.dart';
 import '../../../features/presentation/onboarding/onboarding_screen.dart';
+import '../../../features/presentation/payment/screens/new_checkout_screen.dart';
+import '../../../features/presentation/payment/screens/success_screen.dart';
 import '../../../features/presentation/product/screens/product_screen.dart';
 import '../../../features/presentation/splash/splash_screen.dart';
 
@@ -35,6 +37,10 @@ class AppRoutes {
   static const String productDetailScreen = '/product-details';
   static const String allCategoryProductsScreen = '/all-category-product';
   static const String allProductsByTypeScreen = '/allProductsByType';
+  static const String addressListScreen = '/addressListScreen';
+  static const String checkoutScreen = '/checkout';
+  static const String newCheckoutScreen = '/new-checkout';
+  static const String successScreen = '/success';
 
   static Route<dynamic> generateRoute(RouteSettings settings) {
     Widget page;
@@ -102,6 +108,15 @@ class AppRoutes {
             title: args['title'] as String,
           );
         }
+        break;
+      case addressListScreen:
+        page = const AddressListScreen();
+        break;
+      case newCheckoutScreen:
+        page = const NewCheckoutScreen();
+        break;
+      case successScreen:
+        page = const SuccessScreen();
         break;
       default:
         page = Scaffold(
