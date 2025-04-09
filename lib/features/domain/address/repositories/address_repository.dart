@@ -32,4 +32,3 @@ abstract class AddressRepository {
   Future<void> updateAddressInCart(int addressId, int pickupPointId);
   Future<void> updateShippingTypeInCart(int shippingId, String shippingType);
 }
-

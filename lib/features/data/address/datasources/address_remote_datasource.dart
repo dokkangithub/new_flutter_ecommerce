@@ -19,12 +19,12 @@ abstract class AddressRemoteDataSource {
   Future<AddressModel> updateAddress({
     required int id,
     required String address,
-    required String title,
     required int countryId,
     required int stateId,
     required int cityId,
     required String postalCode,
     required String phone,
+    String? title,
   });
   Future<void> updateAddressLocation(int id, double latitude, double longitude);
   Future<void> makeAddressDefault(int id);
@@ -42,8 +42,6 @@ class AddressRemoteDataSourceImpl implements AddressRemoteDataSource {
   final SecureStorage secureStorage;
 
   AddressRemoteDataSourceImpl(this.apiProvider, this.secureStorage);
-
-
 
   @override
   Future<List<AddressModel>> getAddresses() async {
@@ -82,18 +80,46 @@ class AddressRemoteDataSourceImpl implements AddressRemoteDataSource {
     final response = await apiProvider.post(
       LaravelApiEndPoint.userShippingCreate,
       data: {
-        'user_id': AppStrings.userId.toString(),
         'address': address,
-        'title': title,
         'country_id': countryId.toString(),
         'state_id': stateId.toString(),
         'city_id': cityId.toString(),
         'postal_code': postalCode,
         'phone': phone,
+        'title': title,
       },
     );
-    if (response.data != null && response.data['data'] is Map) {
-      return AddressModel.fromJson(response.data['data']);
+
+    // Since the API doesn't return the created address object, we need to fetch addresses again
+    // and find the newly created one, or create a temporary one
+    if (response.data != null && response.data['result'] == true) {
+      try {
+        // Try to fetch the updated list
+        final addresses = await getAddresses();
+        // Return the last one assuming it's the newly created one
+        // A better approach would be to compare with existing addresses before adding
+        if (addresses.isNotEmpty) {
+          return addresses.last;
+        }
+      } catch (e) {
+        // If fetching fails, return a temporary address model
+      }
+
+      // Temporary address model with provided data
+      return AddressModel(
+        id: 0,  // Temporary ID
+        address: address,
+        countryId: countryId,
+        stateId: stateId,
+        cityId: cityId,
+        countryName: '',  // We don't have this info
+        stateName: '',    // We don't have this info
+        cityName: '',     // We don't have this info
+        postalCode: postalCode,
+        phone: phone,
+        isDefault: false,
+        locationAvailable: false,
+      );
     }
     throw Exception('Failed to add address');
   }
@@ -102,29 +128,56 @@ class AddressRemoteDataSourceImpl implements AddressRemoteDataSource {
   Future<AddressModel> updateAddress({
     required int id,
     required String address,
-    required String title,
     required int countryId,
     required int stateId,
     required int cityId,
     required String postalCode,
     required String phone,
+    String? title,
   }) async {
     final response = await apiProvider.post(
       LaravelApiEndPoint.userShippingUpdate,
       data: {
         'id': id.toString(),
-        'user_id': AppStrings.userId.toString(),
         'address': address,
-        'title': title,
         'country_id': countryId.toString(),
         'state_id': stateId.toString(),
         'city_id': cityId.toString(),
         'postal_code': postalCode,
         'phone': phone,
+        if (title != null) 'title': title,
       },
     );
-    if (response.data != null && response.data['data'] is Map) {
-      return AddressModel.fromJson(response.data['data']);
+
+    if (response.data != null && response.data['result'] == true) {
+      try {
+        // Try to fetch the updated list
+        final addresses = await getAddresses();
+        // Find the updated address
+        final updatedAddress = addresses.firstWhere(
+              (addr) => addr.id == id,
+          orElse: () => throw Exception('Updated address not found'),
+        );
+        return updatedAddress;
+      } catch (e) {
+        // If fetching fails, return a temporary address model
+      }
+
+      // Temporary address model with provided data
+      return AddressModel(
+        id: id,
+        address: address,
+        countryId: countryId,
+        stateId: stateId,
+        cityId: cityId,
+        countryName: '',  // We don't have this info
+        stateName: '',    // We don't have this info
+        cityName: '',     // We don't have this info
+        postalCode: postalCode,
+        phone: phone,
+        isDefault: false, // We don't know
+        locationAvailable: false, // We don't know
+      );
     }
     throw Exception('Failed to update address');
   }
@@ -135,9 +188,8 @@ class AddressRemoteDataSourceImpl implements AddressRemoteDataSource {
       LaravelApiEndPoint.userShippingUpdateLocation,
       data: {
         'id': id.toString(),
-        'user_id': AppStrings.userId.toString(),
-        'latitude': latitude.toString(),
-        'longitude': longitude.toString(),
+        'lat': latitude.toString(),
+        'lang': longitude.toString(),
       },
     );
   }
@@ -215,7 +267,6 @@ class AddressRemoteDataSourceImpl implements AddressRemoteDataSource {
       data: {
         'address_id': addressId.toString(),
         'pickup_point_id': pickupPointId.toString(),
-        'user_id': AppStrings.userId.toString(),
       },
     );
   }

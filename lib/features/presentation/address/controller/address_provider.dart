@@ -244,11 +244,15 @@ extension AddressCopy on Address {
     int? countryId,
     int? stateId,
     int? cityId,
+    String? countryName,
+    String? stateName,
+    String? cityName,
     String? postalCode,
     String? phone,
     double? latitude,
     double? longitude,
     bool? isDefault,
+    bool? locationAvailable,
   }) {
     return Address(
       id: id ?? this.id,
@@ -257,11 +261,15 @@ extension AddressCopy on Address {
       countryId: countryId ?? this.countryId,
       stateId: stateId ?? this.stateId,
       cityId: cityId ?? this.cityId,
+      countryName: countryName ?? this.countryName,
+      stateName: stateName ?? this.stateName,
+      cityName: cityName ?? this.cityName,
       postalCode: postalCode ?? this.postalCode,
       phone: phone ?? this.phone,
       latitude: latitude ?? this.latitude,
       longitude: longitude ?? this.longitude,
       isDefault: isDefault ?? this.isDefault,
+      locationAvailable: locationAvailable ?? this.locationAvailable,
     );
   }
 }
