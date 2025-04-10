@@ -9,7 +9,6 @@ import '../../../domain/cart/usecases/get_cart_count_usecases.dart';
 import '../../../domain/cart/usecases/get_cart_items_usecases.dart';
 import '../../../domain/cart/usecases/get_cart_summary_usecases.dart';
 import '../../../domain/cart/usecases/update_cart_quantities_usecases.dart';
-import '../../../domain/cart/usecases/update_shipping_type_usecase.dart';
 
 class CartProvider extends ChangeNotifier {
   final GetCartItemsUseCase getCartItemsUseCase;
@@ -19,7 +18,6 @@ class CartProvider extends ChangeNotifier {
   final UpdateCartQuantitiesUseCase updateCartQuantitiesUseCase;
   final AddToCartUseCase addToCartUseCase;
   final GetCartSummaryUseCase getCartSummaryUseCase;
-  final UpdateShippingTypeUseCase updateShippingTypeUseCase;
 
   CartProvider({
     required this.getCartItemsUseCase,
@@ -29,7 +27,6 @@ class CartProvider extends ChangeNotifier {
     required this.updateCartQuantitiesUseCase,
     required this.addToCartUseCase,
     required this.getCartSummaryUseCase,
-    required this.updateShippingTypeUseCase,
   });
 
   LoadingState cartState = LoadingState.loading;
@@ -123,40 +120,4 @@ class CartProvider extends ChangeNotifier {
     }
   }
 
-  Future<bool> updateShippingType({
-    required String address,
-    required String shippingType,
-    required int shippingId,
-    required int countryId,
-    required String cityId,
-    required String stateId,
-  }) async {
-    try {
-      isUpdatingShipping = true;
-      notifyListeners();
-      
-      shippingUpdateResponse = await updateShippingTypeUseCase(
-        address: address,
-        shippingType: shippingType,
-        shippingId: shippingId,
-        countryId: countryId,
-        cityId: cityId,
-        stateId: stateId,
-      );
-      
-      // If shipping type update was successful, refresh cart summary
-      if (shippingUpdateResponse?.result == true) {
-        await fetchCartSummary();
-      }
-      
-      isUpdatingShipping = false;
-      notifyListeners();
-      return shippingUpdateResponse?.result ?? false;
-    } catch (e) {
-      isUpdatingShipping = false;
-      cartError = e.toString();
-      notifyListeners();
-      return false;
-    }
-  }
 }

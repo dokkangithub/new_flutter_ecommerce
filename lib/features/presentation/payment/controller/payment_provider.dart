@@ -5,22 +5,26 @@ import '../../../domain/payment/usecases/get_payment_types_usecase.dart';
 import '../../../domain/payment/usecases/create_kashier_order_usecase.dart';
 import '../../../domain/payment/usecases/create_cash_order_usecase.dart';
 import '../../../domain/payment/usecases/verify_order_success_usecase.dart';
+import '../../../domain/payment/usecases/update_shipping_type_usecase.dart';
 
 class PaymentProvider extends ChangeNotifier {
   final GetPaymentTypesUseCase getPaymentTypesUseCase;
   final CreateKashierOrderUseCase createKashierOrderUseCase;
   final CreateCashOrderUseCase createCashOrderUseCase;
   final VerifyOrderSuccessUseCase verifyOrderSuccessUseCase;
+  final UpdateShippingTypeUseCase updateShippingTypeUseCase;
 
   PaymentProvider({
     required this.getPaymentTypesUseCase,
     required this.createKashierOrderUseCase,
     required this.createCashOrderUseCase,
     required this.verifyOrderSuccessUseCase,
+    required this.updateShippingTypeUseCase,
   });
 
   LoadingState paymentTypesState = LoadingState.initial;
   LoadingState orderCreationState = LoadingState.initial;
+  LoadingState shippingUpdateState = LoadingState.initial;
   List<PaymentType> paymentTypes = [];
   String selectedPaymentTypeKey = '';
   String errorMessage = '';
@@ -31,11 +35,11 @@ class PaymentProvider extends ChangeNotifier {
       notifyListeners();
 
       paymentTypes = await getPaymentTypesUseCase();
-      
+
       if (paymentTypes.isNotEmpty && selectedPaymentTypeKey.isEmpty) {
         selectedPaymentTypeKey = paymentTypes.first.paymentTypeKey;
       }
-      
+
       paymentTypesState = LoadingState.loaded;
     } catch (e) {
       paymentTypesState = LoadingState.error;
@@ -93,7 +97,7 @@ class PaymentProvider extends ChangeNotifier {
       if (!response.result) {
         errorMessage = response.message;
       }
-      
+
       return response;
     } catch (e) {
       orderCreationState = LoadingState.error;
@@ -120,12 +124,47 @@ class PaymentProvider extends ChangeNotifier {
     }
   }
 
+  Future<Map<String, dynamic>> updateShippingType({
+    required String stateId,
+    required String cityId,
+    required String address,
+  }) async {
+    try {
+      shippingUpdateState = LoadingState.loading;
+      notifyListeners();
+
+      final result = await updateShippingTypeUseCase(
+        stateId: stateId,
+        cityId: cityId,
+        address: address,
+      );
+
+      shippingUpdateState = result['result'] == true ?
+      LoadingState.loaded : LoadingState.error;
+
+      if (result['result'] != true && result['message'] != null) {
+        errorMessage = result['message'].toString();
+      }
+
+      return result;
+    } catch (e) {
+      shippingUpdateState = LoadingState.error;
+      errorMessage = e.toString();
+      return {
+        'result': false,
+        'message': e.toString(),
+      };
+    } finally {
+      notifyListeners();
+    }
+  }
+
   PaymentType? getSelectedPaymentType() {
     if (selectedPaymentTypeKey.isEmpty) return null;
-    
+
     try {
       return paymentTypes.firstWhere(
-        (type) => type.paymentTypeKey == selectedPaymentTypeKey
+              (type) => type.paymentTypeKey == selectedPaymentTypeKey
       );
     } catch (e) {
       return null;
@@ -138,4 +177,9 @@ class PaymentProvider extends ChangeNotifier {
     notifyListeners();
   }
 
+  void resetShippingUpdateState() {
+    shippingUpdateState = LoadingState.initial;
+    errorMessage = '';
+    notifyListeners();
+  }
 }

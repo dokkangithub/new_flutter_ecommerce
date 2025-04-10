@@ -29,4 +29,10 @@ abstract class PaymentRepository {
   
   /// Verify order success by order ID
   Future<Map<String, dynamic>> verifyOrderSuccess(String orderId);
+
+  Future<Map<String, dynamic>> updateShippingTypeInCart({
+    required String stateId,
+    required String cityId,
+    required String address,
+  });
 }

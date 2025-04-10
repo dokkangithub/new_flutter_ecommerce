@@ -27,6 +27,13 @@ abstract class PaymentRemoteDataSource {
     required BuildContext context,
   });
   Future<Map<String, dynamic>> verifyOrderSuccess(String orderId);
+
+  // New function
+  Future<Map<String, dynamic>> updateShippingTypeInCart({
+    required String stateId,
+    required String cityId,
+    required String address,
+  });
 }
 
 class PaymentRemoteDataSourceImpl implements PaymentRemoteDataSource {
@@ -274,4 +281,42 @@ class PaymentRemoteDataSourceImpl implements PaymentRemoteDataSource {
           ),
     );
   }
+
+  @override
+  Future<Map<String, dynamic>> updateShippingTypeInCart({
+    required String stateId,
+    required String cityId,
+    required String address,
+  }) async {
+    try {
+      const String shippingType = "home_delivery";
+      const int shippingId = 123;
+
+      final data = {
+        if (AppStrings.userId == null) "temp_user_id": AppStrings.tempUserId,
+        if (AppStrings.userId != null) "user_id": AppStrings.userId.toString(),
+        "address": address,
+        "shipping_type": shippingType,
+        "shipping_id": shippingId.toString(),
+        "country_id": "64", // Hardcoded as string
+        "city_id": cityId,
+        "state_id": stateId,
+      };
+
+      print("Updating shipping type in cart");
+      print("Request Body: $data");
+
+      final response = await apiProvider.post(
+        LaravelApiEndPoint.updateShippingTypeInCart,
+        data: data,
+      );
+
+      print("Response Body: ${response.data}");
+      return response.data;
+    } catch (e) {
+      print("Error in updateShippingTypeInCart: $e");
+      return {"result": false, "message": "Failed to update shipping type: $e"};
+    }
+  }
+
 }

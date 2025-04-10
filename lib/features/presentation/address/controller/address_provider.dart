@@ -13,7 +13,6 @@ import '../../../domain/address/usecases/make_address_default_usecase.dart';
 import '../../../domain/address/usecases/update_address_in_cart_usecase.dart';
 import '../../../domain/address/usecases/update_address_location_usecases.dart';
 import '../../../domain/address/usecases/update_address_usecases.dart';
-import '../../../domain/address/usecases/update_shipping_type_in_cart_usecase.dart';
 
 class AddressProvider extends ChangeNotifier {
   final GetAddressesUseCase getAddressesUseCase;
@@ -28,7 +27,6 @@ class AddressProvider extends ChangeNotifier {
   final GetCountriesUseCase getCountriesUseCase;
   final GetShippingCostUseCase getShippingCostUseCase;
   final UpdateAddressInCartUseCase updateAddressInCartUseCase;
-  final UpdateShippingTypeInCartUseCase updateShippingTypeInCartUseCase;
 
   AddressProvider({
     required this.getAddressesUseCase,
@@ -43,7 +41,6 @@ class AddressProvider extends ChangeNotifier {
     required this.getCountriesUseCase,
     required this.getShippingCostUseCase,
     required this.updateAddressInCartUseCase,
-    required this.updateShippingTypeInCartUseCase,
   });
 
   LoadingState addressState = LoadingState.loading;
@@ -224,15 +221,6 @@ class AddressProvider extends ChangeNotifier {
     }
   }
 
-  Future<void> updateShippingTypeInCart(int shippingId, String shippingType) async {
-    try {
-      await updateShippingTypeInCartUseCase(shippingId, shippingType);
-      notifyListeners();
-    } catch (e) {
-      addressError = e.toString();
-      notifyListeners();
-    }
-  }
 }
 
 // Extension to support copyWith

@@ -21,15 +21,7 @@ abstract class CartRemoteDataSource {
   Future<CartItemModel> addToCart(int productId, String variant, int quantity);
 
   Future<CartSummaryModel> getCartSummary();
-  
-  Future<ShippingUpdateResponseModel> updateShippingTypeInCart({
-    required String address,
-    required String shippingType,
-    required int shippingId,
-    required int countryId,
-    required String cityId,
-    required String stateId,
-  });
+
 }
 
 class CartRemoteDataSourceImpl implements CartRemoteDataSource {
@@ -151,32 +143,4 @@ class CartRemoteDataSourceImpl implements CartRemoteDataSource {
     throw Exception('Failed to add to cart');
   }
 
-  @override
-  Future<ShippingUpdateResponseModel> updateShippingTypeInCart({
-    required String address,
-    required String shippingType,
-    required int shippingId,
-    required int countryId,
-    required String cityId,
-    required String stateId,
-  }) async {
-    final userParams = await _getUserParams();
-    final response = await apiProvider.post(
-      LaravelApiEndPoint.updateShippingTypeInCart,
-      data: {
-        ...userParams,
-        'address': address,
-        'shipping_type': shippingType, // This is fixed as 'home_delivery'
-        'shipping_id': shippingId, // This is fixed
-        'country_id': countryId, // This is fixed
-        'city_id': cityId,
-        'state_id': stateId,
-      },
-    );
-    
-    if (response.data != null) {
-      return ShippingUpdateResponseModel.fromJson(response.data);
-    }
-    throw Exception('Failed to update shipping type in cart');
-  }
 }

@@ -30,5 +30,4 @@ abstract class AddressRepository {
   Future<List<Location>> getCountries({String name = ''});
   Future<ShippingCost> getShippingCost(String shippingType);
   Future<void> updateAddressInCart(int addressId, int pickupPointId);
-  Future<void> updateShippingTypeInCart(int shippingId, String shippingType);
 }

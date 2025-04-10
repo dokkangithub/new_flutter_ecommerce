@@ -34,7 +34,6 @@ abstract class AddressRemoteDataSource {
   Future<List<LocationModel>> getCountries({String name = ''});
   Future<ShippingCostModel> getShippingCost(String shippingType);
   Future<void> updateAddressInCart(int addressId, int pickupPointId);
-  Future<void> updateShippingTypeInCart(int shippingId, String shippingType);
 }
 
 class AddressRemoteDataSourceImpl implements AddressRemoteDataSource {
@@ -267,17 +266,6 @@ class AddressRemoteDataSourceImpl implements AddressRemoteDataSource {
       data: {
         'address_id': addressId.toString(),
         'pickup_point_id': pickupPointId.toString(),
-      },
-    );
-  }
-
-  @override
-  Future<void> updateShippingTypeInCart(int shippingId, String shippingType) async {
-    await apiProvider.post(
-      LaravelApiEndPoint.updateShippingTypeInCart,
-      data: {
-        'shipping_id': shippingId.toString(),
-        'shipping_type': shippingType,
       },
     );
   }

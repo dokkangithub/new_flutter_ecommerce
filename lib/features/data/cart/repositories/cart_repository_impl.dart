@@ -46,24 +46,5 @@ class CartRepositoryImpl implements CartRepository {
     final model = await remoteDataSource.getCartSummary();
     return model.toEntity();
   }
-  
-  @override
-  Future<ShippingUpdateResponse> updateShippingTypeInCart({
-    required String address,
-    required String shippingType,
-    required int shippingId,
-    required int countryId,
-    required String cityId,
-    required String stateId,
-  }) async {
-    final model = await remoteDataSource.updateShippingTypeInCart(
-      address: address,
-      shippingType: shippingType,
-      shippingId: shippingId,
-      countryId: countryId,
-      cityId: cityId,
-      stateId: stateId,
-    );
-    return model.toEntity();
-  }
+
 }

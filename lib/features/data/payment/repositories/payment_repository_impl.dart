@@ -78,4 +78,22 @@ class PaymentRepositoryImpl implements PaymentRepository {
       throw Exception('Failed to verify order: $e');
     }
   }
+
+  @override
+  Future<Map<String, dynamic>> updateShippingTypeInCart({
+    required String stateId,
+    required String cityId,
+    required String address,
+  }) async {
+    try {
+      final result = await remoteDataSource.updateShippingTypeInCart(
+        stateId: stateId,
+        cityId: cityId,
+        address: address,
+      );
+      return result;
+    } catch (e) {
+      throw Exception('Failed to update shipping type in cart: $e');
+    }
+  }
 }

@@ -49,7 +49,6 @@ import '../../features/domain/address/usecases/make_address_default_usecase.dart
 import '../../features/domain/address/usecases/update_address_in_cart_usecase.dart';
 import '../../features/domain/address/usecases/update_address_location_usecases.dart';
 import '../../features/domain/address/usecases/update_address_usecases.dart';
-import '../../features/domain/address/usecases/update_shipping_type_in_cart_usecase.dart';
 import '../../features/domain/auth/repositories/auth_repository.dart';
 import '../../features/domain/auth/usecases/auth/confirm_code_use_case.dart';
 import '../../features/domain/auth/usecases/auth/confirm_reset_password_use_case.dart';
@@ -71,7 +70,6 @@ import '../../features/domain/cart/usecases/get_cart_count_usecases.dart';
 import '../../features/domain/cart/usecases/get_cart_items_usecases.dart';
 import '../../features/domain/cart/usecases/get_cart_summary_usecases.dart';
 import '../../features/domain/cart/usecases/update_cart_quantities_usecases.dart';
-import '../../features/domain/cart/usecases/update_shipping_type_usecase.dart';
 import '../../features/domain/category/repositories/category_repository.dart';
 import '../../features/domain/category/usecases/get_categories_use_case.dart';
 import '../../features/domain/category/usecases/get_featured_categories_use_case.dart';
@@ -89,6 +87,7 @@ import '../../features/domain/payment/repositories/payment_repository.dart';
 import '../../features/domain/payment/usecases/create_cash_order_usecase.dart';
 import '../../features/domain/payment/usecases/create_kashier_order_usecase.dart';
 import '../../features/domain/payment/usecases/get_payment_types_usecase.dart';
+import '../../features/domain/payment/usecases/update_shipping_type_usecase.dart';
 import '../../features/domain/payment/usecases/verify_order_success_usecase.dart';
 import '../../features/domain/product details/repositories/product_details_repository.dart';
 import '../../features/domain/product details/usecases/get_product_details_use_case.dart';
@@ -305,7 +304,6 @@ void setupDependencies() {
   sl.registerLazySingleton(() => UpdateCartQuantitiesUseCase(sl()));
   sl.registerLazySingleton(() => AddToCartUseCase(sl()));
   sl.registerLazySingleton(() => GetCartSummaryUseCase(sl()));
-  sl.registerLazySingleton(() => UpdateShippingTypeUseCase(sl()));
 
   // Use Cases - Address
   sl.registerLazySingleton(() => GetAddressesUseCase(sl()));
@@ -320,7 +318,6 @@ void setupDependencies() {
   sl.registerLazySingleton(() => GetCountriesUseCase(sl()));
   sl.registerLazySingleton(() => GetShippingCostUseCase(sl()));
   sl.registerLazySingleton(() => UpdateAddressInCartUseCase(sl()));
-  sl.registerLazySingleton(() => UpdateShippingTypeInCartUseCase(sl()));
 
   // Use Cases - Brand
   sl.registerLazySingleton(() => GetFilterPageBrandsUseCase(sl()));
@@ -336,6 +333,8 @@ void setupDependencies() {
   sl.registerLazySingleton(() => CreateKashierOrderUseCase(sl()));
   sl.registerLazySingleton(() => CreateCashOrderUseCase(sl()));
   sl.registerLazySingleton(() => VerifyOrderSuccessUseCase(sl()));
+  sl.registerLazySingleton(() => UpdateShippingTypeUseCase(sl()));
+
   
   // Use Cases - Profile
   sl.registerLazySingleton(() => GetProfileCountersUseCase(sl()));
@@ -424,7 +423,6 @@ void setupDependencies() {
       updateCartQuantitiesUseCase: sl(),
       addToCartUseCase: sl(),
       getCartSummaryUseCase: sl(),
-      updateShippingTypeUseCase: sl(),
     ),
   );
 
@@ -442,7 +440,6 @@ void setupDependencies() {
       getCountriesUseCase: sl(),
       getShippingCostUseCase: sl(),
       updateAddressInCartUseCase: sl(),
-      updateShippingTypeInCartUseCase: sl(),
     ),
   );
 
@@ -460,6 +457,7 @@ void setupDependencies() {
       createKashierOrderUseCase: sl(),
       createCashOrderUseCase: sl(),
       verifyOrderSuccessUseCase: sl(),
+      updateShippingTypeUseCase: sl(),
     ),
   );
 

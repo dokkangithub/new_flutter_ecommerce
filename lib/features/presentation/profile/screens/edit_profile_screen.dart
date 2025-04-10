@@ -217,7 +217,6 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
       if (!mounted) return;
 
       if (success) {
-        // Update name in AppStrings and SecureStorage if the name was changed
         if (_nameController.text != AppStrings.userName) {
           AppStrings.userName = _nameController.text;
           await SecureStorage().save(LocalStorageKey.userName, _nameController.text);
@@ -232,7 +231,8 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
           const SnackBar(content: Text('فشل تحديث الملف الشخصي')),
         );
       }
-    } else if (_selectedImage != null) {
+    }
+    else if (_selectedImage != null) {
       // If only image was updated and it was successful
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(

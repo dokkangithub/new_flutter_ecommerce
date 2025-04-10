@@ -109,8 +109,5 @@ class AddressRepositoryImpl implements AddressRepository {
     await remoteDataSource.updateAddressInCart(addressId, pickupPointId);
   }
 
-  @override
-  Future<void> updateShippingTypeInCart(int shippingId, String shippingType) async {
-    await remoteDataSource.updateShippingTypeInCart(shippingId, shippingType);
-  }
+
 }
