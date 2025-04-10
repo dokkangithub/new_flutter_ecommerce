@@ -1,3 +1,4 @@
+// lib/features/data/order/models/order_model.dart
 import '../../../domain/order/entities/order.dart';
 
 class OrderModel {
@@ -62,7 +63,7 @@ class OrderModel {
 
 class OrderResponse {
   final List<OrderModel> data;
-  final Map<String, String> links;
+  final Map<String, dynamic> links; // Changed from Map<String, String> to Map<String, dynamic>
   final Map<String, dynamic> meta;
   final bool success;
   final int status;
@@ -81,8 +82,9 @@ class OrderResponse {
           ?.map((order) => OrderModel.fromJson(order))
           .toList() ??
           [],
-      links: Map<String, String>.from(json['links'] ?? {}),
-      meta: json['meta'] ?? {},
+      // Fix: Safe handling for links, allowing null values
+      links: json['links'] as Map<String, dynamic>? ?? {},
+      meta: json['meta'] as Map<String, dynamic>? ?? {},
       success: json['success'] ?? false,
       status: json['status'] ?? 0,
     );

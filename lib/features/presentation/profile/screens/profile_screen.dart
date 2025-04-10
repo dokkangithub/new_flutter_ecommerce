@@ -159,7 +159,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
         } else if (label == 'Wishlist') {
           AppRoutes.navigateTo(context, AppRoutes.wishListScreen);
         } else if (label == 'Orders') {
-          AppRoutes.navigateTo(context, AppRoutes.cartScreen);
+          AppRoutes.navigateTo(context, AppRoutes.allOrdersListScreen);
         }
       },
       child: Container(
@@ -190,7 +190,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
 
   Widget _buildMenuItems(BuildContext context) {
     final isLoggedIn = AppStrings.token != null;
-    
+
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 16),
       child: Column(
@@ -300,7 +300,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
   void _showLogoutConfirmation(BuildContext context) {
     // Store the outer context to use for navigation after dialog is closed
     final navigatorContext = context;
-    
+
     showDialog(
       context: context,
       builder: (dialogContext) => AlertDialog(
@@ -315,14 +315,14 @@ class _ProfileScreenState extends State<ProfileScreen> {
             onPressed: () async {
               // Close the dialog first
               Navigator.pop(dialogContext);
-              
+
               // Perform logout
               await navigatorContext.read<AuthProvider>().logout();
-              
+
               // Clear user data
               AppStrings.userId = null;
               AppStrings.token = null;
-              
+
               // Check if context is still valid and navigate to login screen
               if (navigatorContext.mounted) {
                 // Use pushReplacement to ensure we're replacing the current route

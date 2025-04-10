@@ -41,7 +41,7 @@ class OrderRepositoryImpl implements OrderRepository {
     return {
       'orders': response.data.map((order) => order.toEntity()).toList(),
       'meta': response.meta,
-      'links': response.links,
+      'links': response.links, // This now safely handles dynamic values
     };
   }
 }

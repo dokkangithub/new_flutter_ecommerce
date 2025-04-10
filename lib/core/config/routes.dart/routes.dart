@@ -15,6 +15,8 @@ import '../../../features/presentation/cart/screens/cart_screen.dart';
 import '../../../features/presentation/home/screens/home.dart';
 import '../../../features/presentation/main layout/screens/main_layout_screen.dart';
 import '../../../features/presentation/onboarding/onboarding_screen.dart';
+import '../../../features/presentation/order/screens/order_screen.dart';
+import '../../../features/presentation/order/screens/orders_list_screen.dart';
 import '../../../features/presentation/payment/screens/checkout_screen.dart';
 import '../../../features/presentation/payment/screens/success_screen.dart';
 import '../../../features/presentation/product/screens/product_screen.dart';
@@ -41,6 +43,8 @@ class AppRoutes {
   static const String checkoutScreen = '/checkout';
   static const String newCheckoutScreen = '/new-checkout';
   static const String successScreen = '/success';
+  static const String allOrdersListScreen = '/all-orders-list';
+  static const String orderDetailsScreen = '/order-details';
 
   static Route<dynamic> generateRoute(RouteSettings settings) {
     Widget page;
@@ -117,6 +121,19 @@ class AppRoutes {
         break;
       case successScreen:
         page = const SuccessScreen();
+        break;
+      case allOrdersListScreen:
+        page = const OrdersListScreen();
+        break;
+      case AppRoutes.orderDetailsScreen:
+        final args = settings.arguments as Map<String, dynamic>?;
+        if (args == null || args['orderId'] == null) {
+          page = const Scaffold(body: Center(child: Text('Invalid order id')));
+        } else {
+          page = OrderDetailsScreen(
+            orderId: args['orderId'] as int,
+          );
+        }
         break;
       default:
         page = Scaffold(

@@ -59,15 +59,20 @@ class OrderDetailsCard extends StatelessWidget {
         Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
-            _buildStatusChip(
-              context,
-              'Payment: ${orderDetails.paymentStatusString}',
-              orderDetails.paymentStatus == 'paid' ? Colors.green : Colors.orange,
+            Flexible(
+              child: _buildStatusChip(
+                context,
+                'Payment: ${orderDetails.paymentStatusString}',
+                orderDetails.paymentStatus == 'paid' ? Colors.green : Colors.orange,
+              ),
             ),
-            _buildStatusChip(
-              context,
-              'Delivery: ${orderDetails.deliveryStatusString}',
-              orderDetails.deliveryStatus == 'confirmed' ? Colors.blue : Colors.orange,
+            SizedBox(width: 8.0), // Optional: adds spacing between chips
+            Flexible(
+              child: _buildStatusChip(
+                context,
+                'Delivery: ${orderDetails.deliveryStatusString}',
+                orderDetails.deliveryStatus == 'confirmed' ? Colors.blue : Colors.orange,
+              ),
             ),
           ],
         ),

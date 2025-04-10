@@ -37,7 +37,7 @@ class OrderProvider extends ChangeNotifier {
   bool hasNextPage = false;
   bool isLoadingMore = false;
   Map<String, dynamic> paginationMeta = {};
-  Map<String, String> paginationLinks = {};
+  Map<String, dynamic> paginationLinks = {}; // Changed from Map<String, String>
 
   Future<void> fetchOrders({int page = 1}) async {
     try {
@@ -57,17 +57,22 @@ class OrderProvider extends ChangeNotifier {
         orders.addAll(result['orders'] as List<Order>);
       }
 
-      paginationMeta = result['meta'] as Map<String, dynamic>;
-      paginationLinks = result['links'] as Map<String, String>;
+      // Safe handling of meta and links
+      paginationMeta = result['meta'] as Map<String, dynamic>? ?? {};
+      paginationLinks = result['links'] as Map<String, dynamic>? ?? {};
 
-      currentPage = paginationMeta['current_page'] as int;
-      lastPage = paginationMeta['last_page'] as int;
+      // Safely extract current_page and last_page with null checks
+      currentPage = (paginationMeta['current_page'] as int?) ?? 1;
+      lastPage = (paginationMeta['last_page'] as int?) ?? 1;
       hasNextPage = currentPage < lastPage;
 
       ordersState = LoadingState.loaded;
     } catch (e) {
-      ordersState = LoadingState.error;
-      ordersError = e.toString();
+      print('Error fetching orders: $e'); // Add this for debugging
+      if (page == 1) {
+        ordersState = LoadingState.error;
+        ordersError = e.toString();
+      }
     } finally {
       isLoadingMore = false;
       notifyListeners();
@@ -88,6 +93,7 @@ class OrderProvider extends ChangeNotifier {
       selectedOrderDetails = await getOrderDetailsUseCase(orderId);
       orderDetailsState = LoadingState.loaded;
     } catch (e) {
+      print('Error fetching order details: $e'); // Add this for debugging
       orderDetailsState = LoadingState.error;
       orderDetailsError = e.toString();
     } finally {
@@ -103,10 +109,17 @@ class OrderProvider extends ChangeNotifier {
       orderItems = await getOrderItemsUseCase(orderId);
       orderItemsState = LoadingState.loaded;
     } catch (e) {
+      print('Error fetching order items: $e'); // Add this for debugging
       orderItemsState = LoadingState.error;
       orderItemsError = e.toString();
     } finally {
       notifyListeners();
     }
+  }
+
+  void refreshOrders() {
+    currentPage = 1;
+    orders = [];
+    fetchOrders(page: 1);
   }
 }
