@@ -20,25 +20,22 @@ class PaymentRepositoryImpl implements PaymentRepository {
 
   @override
   Future<OrderResponse> createKashierOrder({
-    required String name,
     required String stateId,
     required String address,
     required String city,
     required String phone,
-    required String paymentMethod,
+    required String postalCode,
     String? additionalInfo,
     BuildContext? context,
   }) async {
     try {
       final orderResponse = await remoteDataSource.createKashierOrder(
-        name: name,
         stateId: stateId,
         address: address,
         city: city,
         phone: phone,
-        paymentMethod: paymentMethod,
         additionalInfo: additionalInfo,
-        context: context,
+        context: context, postalCode: postalCode,
       );
       return orderResponse;
     } catch (e) {
@@ -48,7 +45,7 @@ class PaymentRepositoryImpl implements PaymentRepository {
 
   @override
   Future<OrderResponse> createCashOrder({
-    required String name,
+    required String postalCode,
     required String stateId,
     required String address,
     required String city,
@@ -58,13 +55,13 @@ class PaymentRepositoryImpl implements PaymentRepository {
   }) async {
     try {
       final orderResponse = await remoteDataSource.createCashOrder(
-        name: name,
         stateId: stateId,
         address: address,
         city: city,
         phone: phone,
         additionalInfo: additionalInfo,
         context: context,
+        postalCode: postalCode,
       );
       return orderResponse;
     } catch (e) {

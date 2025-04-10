@@ -37,36 +37,23 @@ class _WebViewPageState extends State<WebViewPage> {
   }
 
   void _onPageStarted(String url) {
+    print("Page started: $url");
     setState(() {
       _isLoading = true;
     });
-    
-    // Check if the URL contains success or failure indicators
-    if (url.contains('paymentStatus=SUCCESS') || 
-        url.contains('status=success') || 
-        url.contains('order-confirmed')) {
-      // Extract the order ID if present
-      String? orderId;
-      try {
-        final uri = Uri.parse(url);
-        orderId = uri.queryParameters['merchantOrderId'] ?? 
-                  uri.queryParameters['orderId'];
-        print('Order ID: $orderId');
-      } catch (e) {
-        print('Error parsing URL: $e');
-      }
-      
-      // Return to previous screen with success URL
-      Navigator.pop(context, url);
-    } else if (url.contains('paymentStatus=FAILED') || 
-               url.contains('status=failed') || 
-               url.contains('payment-failed')) {
-      // Return to previous screen with failure URL
+
+    final uri = Uri.parse(url);
+    final paymentStatus = uri.queryParameters['paymentStatus'];
+
+    // Only pop if paymentStatus is explicitly SUCCESS or FAILED
+    if (paymentStatus == 'SUCCESS' || paymentStatus == 'FAILED') {
+      print("Payment status detected: $paymentStatus");
       Navigator.pop(context, url);
     }
   }
 
   void _onPageFinished(String url) {
+    print("Page finished: $url");
     setState(() {
       _isLoading = false;
     });
@@ -95,39 +82,6 @@ class _WebViewPageState extends State<WebViewPage> {
               child: CircularProgressIndicator(),
             ),
         ],
-      ),
-      // Add simulation buttons for testing only
-      bottomNavigationBar: Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-          children: [
-            ElevatedButton(
-              onPressed: () {
-                Navigator.pop(
-                  context, 
-                  '${widget.url}?paymentStatus=SUCCESS&merchantOrderId=123456',
-                );
-              },
-              style: ElevatedButton.styleFrom(
-                backgroundColor: Colors.green,
-              ),
-              child: const Text('Simulate Success'),
-            ),
-            ElevatedButton(
-              onPressed: () {
-                Navigator.pop(
-                  context, 
-                  '${widget.url}?paymentStatus=FAILED',
-                );
-              },
-              style: ElevatedButton.styleFrom(
-                backgroundColor: Colors.red,
-              ),
-              child: const Text('Simulate Failure'),
-            ),
-          ],
-        ),
       ),
     );
   }

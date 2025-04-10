@@ -8,22 +8,20 @@ class CreateKashierOrderUseCase {
   CreateKashierOrderUseCase(this.repository);
 
   Future<OrderResponse> call({
-    required String name,
+    required String postalCode,
     required String stateId,
     required String address,
     required String city,
     required String phone,
-    required String paymentMethod,
     String? additionalInfo,
     BuildContext? context,
   }) async {
     return await repository.createKashierOrder(
-      name: name,
+      postalCode: postalCode,
       stateId: stateId,
       address: address,
       city: city,
       phone: phone,
-      paymentMethod: paymentMethod,
       additionalInfo: additionalInfo,
       context: context,
     );

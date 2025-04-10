@@ -57,7 +57,7 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
 
   @override
   Future<void> logout() async {
-    await apiProvider.post(LaravelApiEndPoint.logout);
+    await apiProvider.get(LaravelApiEndPoint.logout);
   }
 
   @override

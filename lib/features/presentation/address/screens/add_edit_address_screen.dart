@@ -1,7 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import '../../../../core/utils/enums/loading_state.dart';
 import '../../../domain/address/entities/address.dart';
 import '../controller/address_provider.dart';
+import '../widgets/address_form_fields.dart';
+import '../widgets/address_form_shimmer.dart';
+import '../widgets/save_address_button.dart';
+import '../../../domain/address/extensions/location_extensions.dart';
 
 class AddEditAddressScreen extends StatefulWidget {
   final Address? address;
@@ -82,6 +87,9 @@ class _AddEditAddressScreenState extends State<AddEditAddressScreen> {
       ),
       body: Consumer<AddressProvider>(
         builder: (context, addressProvider, child) {
+          // Show shimmer while loading countries
+          final bool isLoadingInitialData = addressProvider.addressState == LoadingState.loading;
+          
           return Form(
             key: _formKey,
             child: SingleChildScrollView(
@@ -89,189 +97,54 @@ class _AddEditAddressScreenState extends State<AddEditAddressScreen> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
-                  // Title field
-                  TextFormField(
-                    controller: _titleController,
-                    decoration: const InputDecoration(
-                      labelText: 'Address Title',
-                      hintText: 'e.g. Home, Office',
-                      border: OutlineInputBorder(),
-                      prefixIcon: Icon(Icons.title),
-                    ),
-                    validator: (value) {
-                      if (value == null || value.isEmpty) {
-                        return 'Please enter a title';
-                      }
-                      return null;
-                    },
-                  ),
-                  const SizedBox(height: 16),
+                  // Show shimmer or form fields based on loading state
+                  isLoadingInitialData
+                      ? const AddressFormShimmer()
+                      : AddressFormFields(
+                          titleController: _titleController,
+                          addressController: _addressController,
+                          postalCodeController: _postalCodeController,
+                          phoneController: _phoneController,
+                          selectedCountryId: _selectedCountryId,
+                          selectedStateId: _selectedStateId,
+                          selectedCityId: _selectedCityId,
+                          countries: addressProvider.countries.map((location) => location.toMap()).toList(),
+                          states: addressProvider.states.map((location) => location.toMap()).toList(),
+                          cities: addressProvider.cities.map((location) => location.toMap()).toList(),
+                          isLoading: _isLoading,
+                          onCountryChanged: (value) async {
+                            if (value != null) {
+                              setState(() {
+                                _selectedCountryId = value;
+                                _selectedStateId = null;
+                                _selectedCityId = null;
+                              });
+                              await addressProvider.fetchStatesByCountry(value);
+                            }
+                          },
+                          onStateChanged: (value) async {
+                            if (value != null) {
+                              setState(() {
+                                _selectedStateId = value;
+                                _selectedCityId = null;
+                              });
+                              await addressProvider.fetchCitiesByState(value);
+                            }
+                          },
+                          onCityChanged: (value) {
+                            setState(() {
+                              _selectedCityId = value;
+                            });
+                          },
+                        ),
                   
-                  // Country dropdown
-                  DropdownButtonFormField<int>(
-                    decoration: const InputDecoration(
-                      labelText: 'Country',
-                      border: OutlineInputBorder(),
-                      prefixIcon: Icon(Icons.public),
-                    ),
-                    value: _selectedCountryId,
-                    hint: const Text('Select Country'),
-                    items: addressProvider.countries.map((country) {
-                      return DropdownMenuItem<int>(
-                        value: country.id,
-                        child: Text(country.name),
-                      );
-                    }).toList(),
-                    validator: (value) {
-                      if (value == null) {
-                        return 'Please select a country';
-                      }
-                      return null;
-                    },
-                    onChanged: (value) async {
-                      if (value != null) {
-                        setState(() {
-                          _selectedCountryId = value;
-                          _selectedStateId = null;
-                          _selectedCityId = null;
-                        });
-                        await addressProvider.fetchStatesByCountry(value);
-                      }
-                    },
-                  ),
-                  const SizedBox(height: 16),
-                  
-                  // State dropdown
-                  DropdownButtonFormField<int>(
-                    decoration: const InputDecoration(
-                      labelText: 'State/Province',
-                      border: OutlineInputBorder(),
-                      prefixIcon: Icon(Icons.location_city),
-                    ),
-                    value: _selectedStateId,
-                    hint: const Text('Select State/Province'),
-                    items: addressProvider.states.map((state) {
-                      return DropdownMenuItem<int>(
-                        value: state.id,
-                        child: Text(state.name),
-                      );
-                    }).toList(),
-                    validator: (value) {
-                      if (value == null) {
-                        return 'Please select a state';
-                      }
-                      return null;
-                    },
-                    onChanged: (value) async {
-                      if (value != null) {
-                        setState(() {
-                          _selectedStateId = value;
-                          _selectedCityId = null;
-                        });
-                        await addressProvider.fetchCitiesByState(value);
-                      }
-                    },
-                  ),
-                  const SizedBox(height: 16),
-                  
-                  // City dropdown
-                  DropdownButtonFormField<int>(
-                    decoration: const InputDecoration(
-                      labelText: 'City',
-                      border: OutlineInputBorder(),
-                      prefixIcon: Icon(Icons.location_on),
-                    ),
-                    value: _selectedCityId,
-                    hint: const Text('Select City'),
-                    items: addressProvider.cities.map((city) {
-                      return DropdownMenuItem<int>(
-                        value: city.id,
-                        child: Text(city.name),
-                      );
-                    }).toList(),
-                    validator: (value) {
-                      if (value == null) {
-                        return 'Please select a city';
-                      }
-                      return null;
-                    },
-                    onChanged: (value) {
-                      if (value != null) {
-                        setState(() {
-                          _selectedCityId = value;
-                        });
-                      }
-                    },
-                  ),
-                  const SizedBox(height: 16),
-                  
-                  // Address field
-                  TextFormField(
-                    controller: _addressController,
-                    decoration: const InputDecoration(
-                      labelText: 'Address Details',
-                      hintText: 'Street name, building number, etc.',
-                      border: OutlineInputBorder(),
-                      prefixIcon: Icon(Icons.home),
-                    ),
-                    maxLines: 3,
-                    validator: (value) {
-                      if (value == null || value.isEmpty) {
-                        return 'Please enter address details';
-                      }
-                      return null;
-                    },
-                  ),
-                  const SizedBox(height: 16),
-                  
-                  // Postal code field
-                  TextFormField(
-                    controller: _postalCodeController,
-                    decoration: const InputDecoration(
-                      labelText: 'Postal Code',
-                      border: OutlineInputBorder(),
-                      prefixIcon: Icon(Icons.local_post_office),
-                    ),
-                    keyboardType: TextInputType.number,
-                    validator: (value) {
-                      if (value == null || value.isEmpty) {
-                        return 'Please enter a postal code';
-                      }
-                      return null;
-                    },
-                  ),
-                  const SizedBox(height: 16),
-                  
-                  // Phone field
-                  TextFormField(
-                    controller: _phoneController,
-                    decoration: const InputDecoration(
-                      labelText: 'Phone Number',
-                      border: OutlineInputBorder(),
-                      prefixIcon: Icon(Icons.phone),
-                    ),
-                    keyboardType: TextInputType.phone,
-                    validator: (value) {
-                      if (value == null || value.isEmpty) {
-                        return 'Please enter a phone number';
-                      }
-                      return null;
-                    },
-                  ),
                   const SizedBox(height: 24),
                   
                   // Save button
-                  ElevatedButton(
-                    onPressed: _isLoading ? null : _saveAddress,
-                    style: ElevatedButton.styleFrom(
-                      padding: const EdgeInsets.symmetric(vertical: 16),
-                    ),
-                    child: _isLoading
-                        ? const CircularProgressIndicator()
-                        : Text(
-                            widget.address == null ? 'Add Address' : 'Update Address',
-                            style: const TextStyle(fontSize: 16),
-                          ),
+                  SaveAddressButton(
+                    isLoading: _isLoading,
+                    onPressed: _saveAddress,
+                    isEditing: widget.address != null,
                   ),
                 ],
               ),

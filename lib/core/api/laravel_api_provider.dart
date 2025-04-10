@@ -20,13 +20,26 @@ class LaravelApiProvider implements ApiProvider {
         baseUrl: _appConfig.apiBaseUrl ?? '',
         connectTimeout: Duration(milliseconds: _appConfig.connectTimeout),
         receiveTimeout: Duration(milliseconds: _appConfig.receiveTimeout),
-          headers: {
-            'Accept': 'application/json',
-            'Content-Type': 'application/json',
-            'System-Key': '123456',
-            if (AppStrings.userId != null) 'Authorization': 'Bearer ${AppStrings.token}',
-            'App-Language': 'en',
+        headers: {
+          'Accept': 'application/json',
+          'Content-Type': 'application/json',
+          'System-Key': '123456',
+          'App-Language': 'en',
+        }
+      ),
+    );
+    
+    // Add auth token interceptor to dynamically check for token on each request
+    _dio.interceptors.add(
+      InterceptorsWrapper(
+        onRequest: (options, handler) {
+          // Dynamically add the auth token to each request if available
+          if (AppStrings.token != null && AppStrings.token!.isNotEmpty) {
+            options.headers['Authorization'] = 'Bearer ${AppStrings.token}';
+            _talker.debug('Adding auth token to request: ${options.uri}');
           }
+          return handler.next(options);
+        },
       ),
     );
 

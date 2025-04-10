@@ -7,19 +7,18 @@ abstract class PaymentRepository {
   
   /// Create a Kashier payment order
   Future<OrderResponse> createKashierOrder({
-    required String name,
+    required String postalCode,
     required String stateId,
     required String address,
     required String city,
     required String phone,
-    required String paymentMethod,
     String? additionalInfo,
     BuildContext? context,
   });
   
   /// Create a Cash on Delivery payment order
   Future<OrderResponse> createCashOrder({
-    required String name,
+    required String postalCode,
     required String stateId,
     required String address,
     required String city,

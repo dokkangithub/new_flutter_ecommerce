@@ -25,8 +25,6 @@ class _SplashScreenState extends State<SplashScreen> {
     final secureStorage = sl<SecureStorage>();
     final bool hasCompletedOnboarding =
         await secureStorage.get<bool>(LocalStorageKey.hasCompletedOnboarding) ?? false;
-    AppStrings.token =
-        await secureStorage.get<String>(LocalStorageKey.userToken);
 
     if (!hasCompletedOnboarding) {
       return AppRoutes.onboarding;

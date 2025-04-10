@@ -2,7 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../../../../core/utils/enums/loading_state.dart';
 import '../controller/address_provider.dart';
-import '../widgets/address_item_widget.dart';
+import '../widgets/address_list_widget.dart';
+import '../widgets/address_list_shimmer.dart';
+import '../widgets/empty_address_widget.dart';
 import 'add_edit_address_screen.dart';
 
 class AddressListScreen extends StatefulWidget {
@@ -35,61 +37,54 @@ class _AddressListScreenState extends State<AddressListScreen> {
       ),
       body: Consumer<AddressProvider>(
         builder: (context, addressProvider, child) {
+          // Show shimmer while loading
           if (addressProvider.addressState == LoadingState.loading) {
-            return const Center(child: CircularProgressIndicator());
-          } else if (addressProvider.addressState == LoadingState.error) {
-            return Center(
-              child: Text(
-                'Error: ${addressProvider.addressError}',
-                style: const TextStyle(color: Colors.red),
-              ),
-            );
-          } else if (addressProvider.addresses.isEmpty) {
+            return const AddressListShimmer();
+          } 
+          // Show error state
+          else if (addressProvider.addressState == LoadingState.error) {
             return Center(
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  const Icon(Icons.location_off, size: 64, color: Colors.grey),
+                  const Icon(Icons.error_outline, size: 64, color: Colors.red),
                   const SizedBox(height: 16),
-                  const Text(
-                    'No addresses found',
-                    style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-                  ),
-                  const SizedBox(height: 8),
-                  const Text(
-                    'Add a new address to continue',
-                    style: TextStyle(color: Colors.grey),
+                  Text(
+                    'Error: ${addressProvider.addressError}',
+                    style: const TextStyle(color: Colors.red),
+                    textAlign: TextAlign.center,
                   ),
                   const SizedBox(height: 24),
                   ElevatedButton.icon(
-                    onPressed: () => _navigateToAddAddress(context),
-                    icon: const Icon(Icons.add_location_alt),
-                    label: const Text('Add New Address'),
+                    onPressed: () {
+                      addressProvider.fetchAddresses();
+                    },
+                    icon: const Icon(Icons.refresh),
+                    label: const Text('Try Again'),
                   ),
                 ],
               ),
             );
+          } 
+          // Show empty state
+          else if (addressProvider.addresses.isEmpty) {
+            return EmptyAddressWidget(
+              onAddAddress: () => _navigateToAddAddress(context),
+            );
           }
 
+          // Show address list
           return Stack(
             children: [
-              ListView.separated(
-                padding: const EdgeInsets.all(16),
-                itemCount: addressProvider.addresses.length,
-                separatorBuilder: (context, index) => const SizedBox(height: 12),
-                itemBuilder: (context, index) {
-                  final address = addressProvider.addresses[index];
-                  return AddressItemWidget(
-                    address: address,
-                    isSelectable: widget.isSelectable,
-                    onEdit: () => _navigateToEditAddress(context, address.id),
-                    onDelete: () => _showDeleteConfirmation(context, address.id),
-                    onSetDefault: () => addressProvider.makeAddressDefault(address.id),
-                    onSelect: widget.isSelectable 
-                      ? () => Navigator.pop(context, address)
-                      : null,
-                  );
-                },
+              AddressListWidget(
+                addresses: addressProvider.addresses,
+                isSelectable: widget.isSelectable,
+                onEdit: (addressId) => _navigateToEditAddress(context, addressId),
+                onDelete: (addressId) => _showDeleteConfirmation(context, addressId),
+                onSetDefault: (addressId) => addressProvider.makeAddressDefault(addressId),
+                onSelect: widget.isSelectable 
+                  ? (address) => Navigator.pop(context, address)
+                  : null,
               ),
               Positioned(
                 bottom: 16,

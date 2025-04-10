@@ -2,6 +2,14 @@ import 'package:laravel_ecommerce/core/api/laravel_api_provider.dart';
 import 'package:get_it/get_it.dart';
 import 'package:dio/dio.dart';
 import 'package:laravel_ecommerce/features/presentation/home/controller/home_provider.dart';
+import 'package:laravel_ecommerce/features/data/profile/repositories/profile_repository_impl.dart';
+import 'package:laravel_ecommerce/features/data/profile/datasources/profile_remote_datasource.dart';
+import 'package:laravel_ecommerce/features/domain/profile/repositories/profile_repository.dart';
+import 'package:laravel_ecommerce/features/domain/profile/usecases/get_profile_counters_use_case.dart';
+import 'package:laravel_ecommerce/features/domain/profile/usecases/get_user_profile_use_case.dart';
+import 'package:laravel_ecommerce/features/domain/profile/usecases/update_profile_image_use_case.dart';
+import 'package:laravel_ecommerce/features/domain/profile/usecases/update_profile_use_case.dart';
+import 'package:laravel_ecommerce/features/presentation/profile/controller/profile_provider.dart';
 import '../../features/data/address/datasources/address_remote_datasource.dart';
 import '../../features/data/address/repositories/address_repository_impl.dart';
 import '../../features/data/auth/datasources/auth_remote_datasource.dart';
@@ -211,6 +219,15 @@ void setupDependencies() {
   sl.registerLazySingleton<PaymentRepository>(
     () => PaymentRepositoryImpl(remoteDataSource: sl<PaymentRemoteDataSource>()),
   );
+  
+  // Profile Data Sources
+  sl.registerLazySingleton<ProfileRemoteDataSource>(
+    () => ProfileRemoteDataSourceImpl(sl<ApiProvider>()),
+  );
+  
+  sl.registerLazySingleton<ProfileRepository>(
+    () => ProfileRepositoryImpl(sl<ProfileRemoteDataSource>()),
+  );
 
 
   // Use Cases - Auth
@@ -301,6 +318,12 @@ void setupDependencies() {
   sl.registerLazySingleton(() => CreateKashierOrderUseCase(sl()));
   sl.registerLazySingleton(() => CreateCashOrderUseCase(sl()));
   sl.registerLazySingleton(() => VerifyOrderSuccessUseCase(sl()));
+  
+  // Use Cases - Profile
+  sl.registerLazySingleton(() => GetProfileCountersUseCase(sl()));
+  sl.registerLazySingleton(() => GetUserProfileUseCase(sl()));
+  sl.registerLazySingleton(() => UpdateProfileUseCase(sl()));
+  sl.registerLazySingleton(() => UpdateProfileImageUseCase(sl()));
 
   // Providers
   sl.registerLazySingleton(
@@ -418,4 +441,13 @@ void setupDependencies() {
 
   sl.registerLazySingleton(() => LanguageProvider());
   sl.registerLazySingleton(() => LayoutProvider());
+  
+  sl.registerFactory(
+    () => ProfileProvider(
+      getUserProfileUseCase: sl(),
+      getProfileCountersUseCase: sl(),
+      updateProfileUseCase: sl(),
+      updateProfileImageUseCase: sl(),
+    ),
+  );
 }

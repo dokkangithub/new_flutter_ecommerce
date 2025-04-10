@@ -51,7 +51,7 @@ class PaymentProvider extends ChangeNotifier {
   }
 
   Future<OrderResponse> createOrder({
-    required String name,
+    required String postalCode,
     required String stateId,
     required String address,
     required String city,
@@ -67,18 +67,17 @@ class PaymentProvider extends ChangeNotifier {
 
       if (selectedPaymentTypeKey == 'kashier') {
         response = await createKashierOrderUseCase(
-          name: name,
+          postalCode: postalCode,
           stateId: stateId,
           address: address,
           city: city,
           phone: phone,
-          paymentMethod: 'kashier',
           additionalInfo: additionalInfo,
           context: context,
         );
       } else if (selectedPaymentTypeKey == 'cash_on_delivery') {
         response = await createCashOrderUseCase(
-          name: name,
+          postalCode: postalCode,
           stateId: stateId,
           address: address,
           city: city,

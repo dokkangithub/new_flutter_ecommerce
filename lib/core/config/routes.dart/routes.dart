@@ -15,7 +15,7 @@ import '../../../features/presentation/cart/screens/cart_screen.dart';
 import '../../../features/presentation/home/screens/home.dart';
 import '../../../features/presentation/main layout/screens/main_layout_screen.dart';
 import '../../../features/presentation/onboarding/onboarding_screen.dart';
-import '../../../features/presentation/payment/screens/new_checkout_screen.dart';
+import '../../../features/presentation/payment/screens/checkout_screen.dart';
 import '../../../features/presentation/payment/screens/success_screen.dart';
 import '../../../features/presentation/product/screens/product_screen.dart';
 import '../../../features/presentation/splash/splash_screen.dart';

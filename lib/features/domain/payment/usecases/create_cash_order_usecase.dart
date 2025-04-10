@@ -8,7 +8,7 @@ class CreateCashOrderUseCase {
   CreateCashOrderUseCase(this.repository);
 
   Future<OrderResponse> call({
-    required String name,
+    required String postalCode,
     required String stateId,
     required String address,
     required String city,
@@ -17,7 +17,7 @@ class CreateCashOrderUseCase {
     required BuildContext context,
   }) async {
     return await repository.createCashOrder(
-      name: name,
+      postalCode: postalCode,
       stateId: stateId,
       address: address,
       city: city,

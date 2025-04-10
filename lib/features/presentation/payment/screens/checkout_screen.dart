@@ -45,20 +45,20 @@ class _NewCheckoutScreenState extends State<NewCheckoutScreen> {
 
     // Load addresses
     await addressProvider.fetchAddresses();
-    
+
     // Load payment methods
     await paymentProvider.fetchPaymentTypes();
-    
+
     // Refresh cart summary
     await cartProvider.fetchCartSummary();
-    
+
     // Set default address if available
     if (addressProvider.addresses.isNotEmpty) {
       final defaultAddress = addressProvider.addresses.firstWhere(
         (addr) => addr.isDefault,
         orElse: () => addressProvider.addresses.first,
       );
-      
+
       setState(() {
         _selectedAddress = defaultAddress;
       });
@@ -96,16 +96,16 @@ class _NewCheckoutScreenState extends State<NewCheckoutScreen> {
               children: [
                 // Shipping Address Section
                 _buildShippingAddressSection(addressProvider),
-                
+
                 // Payment Method Section
                 _buildPaymentMethodSection(paymentProvider),
-                
+
                 // Coupon Section
                 _buildCouponSection(context),
-                
+
                 // Order Summary Section
                 _buildOrderSummarySection(cartProvider),
-                
+
                 // Payment Button
                 _buildPaymentButton(context),
               ],
@@ -129,16 +129,16 @@ class _NewCheckoutScreenState extends State<NewCheckoutScreen> {
             children: [
               const Text(
                 'Shipping to',
-                style: TextStyle(
-                  fontSize: 16,
-                  fontWeight: FontWeight.w600,
-                ),
+                style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
               ),
               TextButton(
                 onPressed: () => _navigateToAddressList(),
                 style: TextButton.styleFrom(
                   foregroundColor: Colors.blue,
-                  padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 12,
+                    vertical: 8,
+                  ),
                 ),
                 child: const Text('Change'),
               ),
@@ -149,10 +149,11 @@ class _NewCheckoutScreenState extends State<NewCheckoutScreen> {
             _buildNoAddressWidget()
           else
             Column(
-              children: addressProvider.addresses.map((address) {
-                final isSelected = _selectedAddress?.id == address.id;
-                return _buildAddressItem(address, isSelected);
-              }).toList(),
+              children:
+                  addressProvider.addresses.map((address) {
+                    final isSelected = _selectedAddress?.id == address.id;
+                    return _buildAddressItem(address, isSelected);
+                  }).toList(),
             ),
         ],
       ),
@@ -210,17 +211,11 @@ class _NewCheckoutScreenState extends State<NewCheckoutScreen> {
                 const SizedBox(height: 4),
                 Text(
                   '${address.phone}',
-                  style: const TextStyle(
-                    color: Colors.grey,
-                    fontSize: 14,
-                  ),
+                  style: const TextStyle(color: Colors.grey, fontSize: 14),
                 ),
                 Text(
                   address.address,
-                  style: const TextStyle(
-                    color: Colors.grey,
-                    fontSize: 14,
-                  ),
+                  style: const TextStyle(color: Colors.grey, fontSize: 14),
                 ),
               ],
             ),
@@ -248,32 +243,38 @@ class _NewCheckoutScreenState extends State<NewCheckoutScreen> {
             padding: EdgeInsets.only(bottom: 16),
             child: Text(
               'Payment method',
-              style: TextStyle(
-                fontSize: 16,
-                fontWeight: FontWeight.w600,
-              ),
+              style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
             ),
           ),
           if (paymentProvider.paymentTypes.isEmpty)
-            const Center(
-              child: Text('No payment methods available'),
-            )
+            const Center(child: Text('No payment methods available'))
           else
             Column(
-              children: paymentProvider.paymentTypes.map((paymentType) {
-                final isSelected = paymentProvider.selectedPaymentTypeKey == paymentType.paymentTypeKey;
-                return _buildPaymentMethodItem(paymentType, isSelected, paymentProvider);
-              }).toList(),
+              children:
+                  paymentProvider.paymentTypes.map((paymentType) {
+                    final isSelected =
+                        paymentProvider.selectedPaymentTypeKey ==
+                        paymentType.paymentTypeKey;
+                    return _buildPaymentMethodItem(
+                      paymentType,
+                      isSelected,
+                      paymentProvider,
+                    );
+                  }).toList(),
             ),
         ],
       ),
     );
   }
 
-  Widget _buildPaymentMethodItem(PaymentType paymentType, bool isSelected, PaymentProvider paymentProvider) {
+  Widget _buildPaymentMethodItem(
+    PaymentType paymentType,
+    bool isSelected,
+    PaymentProvider paymentProvider,
+  ) {
     // Map payment type keys to the icons shown in the design
     Widget paymentIcon;
-    
+
     if (paymentType.paymentTypeKey == 'kashier') {
       paymentIcon = Image.network(
         paymentType.image,
@@ -287,7 +288,8 @@ class _NewCheckoutScreenState extends State<NewCheckoutScreen> {
         width: 40,
         height: 24,
         fit: BoxFit.contain,
-        errorBuilder: (context, error, stackTrace) => const Icon(Icons.payment, size: 24),
+        errorBuilder:
+            (context, error, stackTrace) => const Icon(Icons.payment, size: 24),
       );
     } else if (paymentType.paymentTypeKey == 'google_pay') {
       paymentIcon = Image.asset(
@@ -295,7 +297,9 @@ class _NewCheckoutScreenState extends State<NewCheckoutScreen> {
         width: 40,
         height: 24,
         fit: BoxFit.contain,
-        errorBuilder: (context, error, stackTrace) => const Icon(Icons.g_mobiledata, size: 24),
+        errorBuilder:
+            (context, error, stackTrace) =>
+                const Icon(Icons.g_mobiledata, size: 24),
       );
     } else {
       // Default for cash on delivery or other methods
@@ -304,7 +308,9 @@ class _NewCheckoutScreenState extends State<NewCheckoutScreen> {
         width: 40,
         height: 24,
         fit: BoxFit.contain,
-        errorBuilder: (context, error, stackTrace) => const Icon(Icons.credit_card, size: 24),
+        errorBuilder:
+            (context, error, stackTrace) =>
+                const Icon(Icons.credit_card, size: 24),
       );
     }
 
@@ -322,12 +328,7 @@ class _NewCheckoutScreenState extends State<NewCheckoutScreen> {
           ),
           paymentIcon,
           const SizedBox(width: 12),
-          Text(
-            paymentType.name,
-            style: const TextStyle(
-              fontSize: 16,
-            ),
-          ),
+          Text(paymentType.name, style: const TextStyle(fontSize: 16)),
         ],
       ),
     );
@@ -336,12 +337,13 @@ class _NewCheckoutScreenState extends State<NewCheckoutScreen> {
   Widget _buildCouponSection(BuildContext context) {
     return Consumer2<CouponProvider, CartProvider>(
       builder: (context, couponProvider, cartProvider, _) {
-        final bool hasCoupon = cartProvider.cartSummary?.couponApplied == true && 
-                             cartProvider.cartSummary?.couponCode != null && 
-                             cartProvider.cartSummary!.couponCode!.isNotEmpty;
+        final bool hasCoupon =
+            cartProvider.cartSummary?.couponApplied == true &&
+            cartProvider.cartSummary?.couponCode != null &&
+            cartProvider.cartSummary!.couponCode!.isNotEmpty;
         // Only set isLoading when we're actively applying/removing a coupon
         final bool isLoading = _isApplyingCoupon;
-        
+
         return Container(
           color: Colors.white,
           margin: const EdgeInsets.only(bottom: 12),
@@ -351,13 +353,10 @@ class _NewCheckoutScreenState extends State<NewCheckoutScreen> {
             children: [
               const Text(
                 'Discount Coupon',
-                style: TextStyle(
-                  fontSize: 16,
-                  fontWeight: FontWeight.w600,
-                ),
+                style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
               ),
               const SizedBox(height: 12),
-              if (hasCoupon) ...[  
+              if (hasCoupon) ...[
                 // Applied coupon display
                 Container(
                   padding: const EdgeInsets.all(12),
@@ -376,7 +375,9 @@ class _NewCheckoutScreenState extends State<NewCheckoutScreen> {
                           children: [
                             Text(
                               cartProvider.cartSummary!.couponCode!,
-                              style: const TextStyle(fontWeight: FontWeight.bold),
+                              style: const TextStyle(
+                                fontWeight: FontWeight.bold,
+                              ),
                             ),
                             const Text(
                               'Coupon applied successfully',
@@ -386,15 +387,22 @@ class _NewCheckoutScreenState extends State<NewCheckoutScreen> {
                         ),
                       ),
                       isLoading
-                          ? const SizedBox(width: 20, height: 20, child: CircularProgressIndicator(strokeWidth: 2))
+                          ? const SizedBox(
+                            width: 20,
+                            height: 20,
+                            child: CircularProgressIndicator(strokeWidth: 2),
+                          )
                           : TextButton(
-                              onPressed: () => _removeCoupon(couponProvider),
-                              child: const Text('Remove', style: TextStyle(color: Colors.red)),
+                            onPressed: () => _removeCoupon(couponProvider),
+                            child: const Text(
+                              'Remove',
+                              style: TextStyle(color: Colors.red),
                             ),
+                          ),
                     ],
                   ),
                 ),
-              ] else ...[  
+              ] else ...[
                 // Coupon input field
                 Row(
                   children: [
@@ -406,7 +414,10 @@ class _NewCheckoutScreenState extends State<NewCheckoutScreen> {
                           border: OutlineInputBorder(
                             borderRadius: BorderRadius.circular(8),
                           ),
-                          contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
+                          contentPadding: const EdgeInsets.symmetric(
+                            horizontal: 12,
+                            vertical: 12,
+                          ),
                         ),
                         enabled: true, // Always enabled
                         textInputAction: TextInputAction.done,
@@ -417,19 +428,30 @@ class _NewCheckoutScreenState extends State<NewCheckoutScreen> {
                     SizedBox(
                       height: 48,
                       child: ElevatedButton(
-                        onPressed: isLoading ? null : () => _applyCoupon(couponProvider),
+                        onPressed:
+                            isLoading
+                                ? null
+                                : () => _applyCoupon(couponProvider),
                         style: ElevatedButton.styleFrom(
                           backgroundColor: const Color(0xFF4A3AFF),
                           padding: const EdgeInsets.symmetric(horizontal: 16),
                         ),
-                        child: isLoading 
-                          ? const SizedBox(width: 20, height: 20, child: CircularProgressIndicator(color: Colors.white, strokeWidth: 2)) 
-                          : const Text('Apply'),
+                        child:
+                            isLoading
+                                ? const SizedBox(
+                                  width: 20,
+                                  height: 20,
+                                  child: CircularProgressIndicator(
+                                    color: Colors.white,
+                                    strokeWidth: 2,
+                                  ),
+                                )
+                                : const Text('Apply'),
                       ),
                     ),
                   ],
                 ),
-                if (couponProvider.couponState == LoadingState.error) ...[  
+                if (couponProvider.couponState == LoadingState.error) ...[
                   const SizedBox(height: 8),
                   Text(
                     couponProvider.couponError,
@@ -451,10 +473,11 @@ class _NewCheckoutScreenState extends State<NewCheckoutScreen> {
 
     return Consumer<CouponProvider>(
       builder: (context, couponProvider, _) {
-        final bool hasCoupon = cartProvider.cartSummary!.couponApplied && 
-                              cartProvider.cartSummary!.couponCode != null && 
-                              cartProvider.cartSummary!.couponCode!.isNotEmpty;
-        
+        final bool hasCoupon =
+            cartProvider.cartSummary!.couponApplied &&
+            cartProvider.cartSummary!.couponCode != null &&
+            cartProvider.cartSummary!.couponCode!.isNotEmpty;
+
         return Container(
           color: Colors.white,
           margin: const EdgeInsets.only(bottom: 12),
@@ -464,23 +487,17 @@ class _NewCheckoutScreenState extends State<NewCheckoutScreen> {
             children: [
               const Text(
                 'Price Details',
-                style: TextStyle(
-                  fontSize: 16,
-                  fontWeight: FontWeight.w600,
-                ),
+                style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
               ),
               const SizedBox(height: 16),
-              
+
               // Subtotal
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
                   const Text(
                     'Subtotal',
-                    style: TextStyle(
-                      color: Colors.black54,
-                      fontSize: 16,
-                    ),
+                    style: TextStyle(color: Colors.black54, fontSize: 16),
                   ),
                   Text(
                     '${cartProvider.cartSummary!.currencySymbol}${cartProvider.cartSummary!.subtotal.toStringAsFixed(2)}',
@@ -492,17 +509,14 @@ class _NewCheckoutScreenState extends State<NewCheckoutScreen> {
                 ],
               ),
               const SizedBox(height: 12),
-              
+
               // Shipping fee
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
                   const Text(
                     'Shipping fee',
-                    style: TextStyle(
-                      color: Colors.black54,
-                      fontSize: 16,
-                    ),
+                    style: TextStyle(color: Colors.black54, fontSize: 16),
                   ),
                   Text(
                     '${cartProvider.cartSummary!.currencySymbol}${cartProvider.cartSummary!.shippingCost.toStringAsFixed(2)}',
@@ -513,19 +527,16 @@ class _NewCheckoutScreenState extends State<NewCheckoutScreen> {
                   ),
                 ],
               ),
-              
+
               // Tax (if available)
-              if (cartProvider.cartSummary!.tax > 0) ...[  
+              if (cartProvider.cartSummary!.tax > 0) ...[
                 const SizedBox(height: 12),
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
                     const Text(
                       'Tax',
-                      style: TextStyle(
-                        color: Colors.black54,
-                        fontSize: 16,
-                      ),
+                      style: TextStyle(color: Colors.black54, fontSize: 16),
                     ),
                     Text(
                       '${cartProvider.cartSummary!.currencySymbol}${cartProvider.cartSummary!.tax.toStringAsFixed(2)}',
@@ -537,7 +548,7 @@ class _NewCheckoutScreenState extends State<NewCheckoutScreen> {
                   ],
                 ),
               ],
-              
+
               // Discount (always show, will be 0 if no coupon)
               const SizedBox(height: 12),
               Row(
@@ -551,8 +562,9 @@ class _NewCheckoutScreenState extends State<NewCheckoutScreen> {
                     ),
                   ),
                   Text(
-                    hasCoupon ? '-${cartProvider.cartSummary!.currencySymbol}${cartProvider.cartSummary!.discount.toStringAsFixed(2)}' : 
-                              '${cartProvider.cartSummary!.currencySymbol}0.00',
+                    hasCoupon
+                        ? '-${cartProvider.cartSummary!.currencySymbol}${cartProvider.cartSummary!.discount.toStringAsFixed(2)}'
+                        : '${cartProvider.cartSummary!.currencySymbol}0.00',
                     style: TextStyle(
                       fontWeight: FontWeight.w500,
                       fontSize: 16,
@@ -561,26 +573,19 @@ class _NewCheckoutScreenState extends State<NewCheckoutScreen> {
                   ),
                 ],
               ),
-              
+
               const Padding(
                 padding: EdgeInsets.symmetric(vertical: 12),
-                child: Divider(
-                  color: Colors.grey,
-                  thickness: 1,
-                  height: 1,
-                ),
+                child: Divider(color: Colors.grey, thickness: 1, height: 1),
               ),
-              
+
               // Total
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
                   const Text(
                     'Total',
-                    style: TextStyle(
-                      fontWeight: FontWeight.w600,
-                      fontSize: 16,
-                    ),
+                    style: TextStyle(fontWeight: FontWeight.w600, fontSize: 16),
                   ),
                   Text(
                     '${cartProvider.cartSummary!.currencySymbol}${cartProvider.cartSummary!.total.toStringAsFixed(2)}',
@@ -592,9 +597,9 @@ class _NewCheckoutScreenState extends State<NewCheckoutScreen> {
                   ),
                 ],
               ),
-              
+
               // Coupon savings message
-              if (hasCoupon) ...[  
+              if (hasCoupon) ...[
                 const SizedBox(height: 12),
                 Container(
                   width: double.infinity,
@@ -605,7 +610,10 @@ class _NewCheckoutScreenState extends State<NewCheckoutScreen> {
                   ),
                   child: Text(
                     'You saved ${cartProvider.cartSummary!.currencySymbol}${cartProvider.cartSummary!.discount.toStringAsFixed(2)} with coupon ${cartProvider.cartSummary!.couponCode}!',
-                    style: TextStyle(color: Colors.green.shade700, fontSize: 14),
+                    style: TextStyle(
+                      color: Colors.green.shade700,
+                      fontSize: 14,
+                    ),
                     textAlign: TextAlign.center,
                   ),
                 ),
@@ -626,21 +634,20 @@ class _NewCheckoutScreenState extends State<NewCheckoutScreen> {
         style: ElevatedButton.styleFrom(
           backgroundColor: const Color(0xFF4A3AFF),
           padding: const EdgeInsets.symmetric(vertical: 16),
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(8),
-          ),
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
           elevation: 0,
         ),
-        child: _isProcessingPayment
-            ? const CircularProgressIndicator(color: Colors.white)
-            : const Text(
-                'Payment',
-                style: TextStyle(
-                  fontSize: 16,
-                  fontWeight: FontWeight.w600,
-                  color: Colors.white,
+        child:
+            _isProcessingPayment
+                ? const CircularProgressIndicator(color: Colors.white)
+                : const Text(
+                  'Payment',
+                  style: TextStyle(
+                    fontSize: 16,
+                    fontWeight: FontWeight.w600,
+                    color: Colors.white,
+                  ),
                 ),
-              ),
       ),
     );
   }
@@ -652,7 +659,7 @@ class _NewCheckoutScreenState extends State<NewCheckoutScreen> {
         builder: (context) => const AddressListScreen(isSelectable: true),
       ),
     );
-    
+
     if (result != null && result is Address) {
       setState(() {
         _selectedAddress = result;
@@ -662,8 +669,10 @@ class _NewCheckoutScreenState extends State<NewCheckoutScreen> {
 
   void _navigateToEditAddress(int addressId) async {
     final addressProvider = context.read<AddressProvider>();
-    final address = addressProvider.addresses.firstWhere((addr) => addr.id == addressId);
-    
+    final address = addressProvider.addresses.firstWhere(
+      (addr) => addr.id == addressId,
+    );
+
     // Navigate to edit address screen
     await Navigator.push(
       context,
@@ -671,7 +680,7 @@ class _NewCheckoutScreenState extends State<NewCheckoutScreen> {
         builder: (context) => AddEditAddressScreen(address: address),
       ),
     );
-    
+
     // Refresh addresses after editing
     addressProvider.fetchAddresses();
   }
@@ -684,22 +693,22 @@ class _NewCheckoutScreenState extends State<NewCheckoutScreen> {
       );
       return;
     }
-    
+
     setState(() {
       _isApplyingCoupon = true;
     });
-    
+
     try {
       await couponProvider.applyCoupon(couponCode);
-      
+
       // Refresh cart summary regardless of success/failure to get latest data
       await context.read<CartProvider>().fetchCartSummary();
-      
+
       if (couponProvider.appliedCoupon?.success == true) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(content: Text(couponProvider.appliedCoupon!.message)),
         );
-        
+
         // Clear the text field
         _couponController.clear();
       } else if (couponProvider.appliedCoupon?.success == false) {
@@ -724,13 +733,13 @@ class _NewCheckoutScreenState extends State<NewCheckoutScreen> {
     setState(() {
       _isApplyingCoupon = true;
     });
-    
+
     try {
       await couponProvider.removeCoupon();
-      
+
       // Refresh cart summary after removing coupon
       await context.read<CartProvider>().fetchCartSummary();
-      
+
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text('Coupon removed successfully')),
       );
@@ -756,14 +765,20 @@ class _NewCheckoutScreenState extends State<NewCheckoutScreen> {
       return;
     }
 
+    print('ssssss${_selectedAddress!.title}');
+    print('ssssss${_selectedAddress!.address}');
+    print('ssssss${_selectedAddress!.phone}');
+    print('ssssss${_selectedAddress!.stateId}');
+    print('ssssss${_selectedAddress!.cityName}');
     // Check if all required address fields are filled
-    if (_selectedAddress!.title.isEmpty || 
-        _selectedAddress!.address.isEmpty || 
-        _selectedAddress!.phone.isEmpty || 
-        _selectedAddress!.stateId <= 0 || 
+    if (_selectedAddress!.address.isEmpty ||
+        _selectedAddress!.phone.isEmpty ||
+        _selectedAddress!.stateId <= 0 ||
         _selectedAddress!.cityName.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Required fields (name, address, phone, state, city) are missing in the selected address')),
+        const SnackBar(
+          content: Text('Required fields (name, address, phone, state, city) are missing in the selected address'),
+        ),
       );
       return;
     }
@@ -782,11 +797,15 @@ class _NewCheckoutScreenState extends State<NewCheckoutScreen> {
     });
 
     try {
-      print('Processing payment with method: ${paymentProvider.selectedPaymentTypeKey}');
-      print('Address: ${_selectedAddress!.title}, ${_selectedAddress!.address}, ${_selectedAddress!.cityName}, ${_selectedAddress!.stateId}');
-      
+      print(
+        'Processing payment with method: ${paymentProvider.selectedPaymentTypeKey}',
+      );
+      print(
+        'Address: ${_selectedAddress!.title}, ${_selectedAddress!.address}, ${_selectedAddress!.cityName}, ${_selectedAddress!.stateId}',
+      );
+
       final response = await paymentProvider.createOrder(
-        name: _selectedAddress!.title,
+        postalCode: _selectedAddress!.postalCode,
         stateId: _selectedAddress!.stateId.toString(),
         address: _selectedAddress!.address,
         city: _selectedAddress!.cityName,
@@ -799,7 +818,7 @@ class _NewCheckoutScreenState extends State<NewCheckoutScreen> {
         // Clear cart after successful order
         context.read<CartProvider>().fetchCartItems();
         context.read<CartProvider>().fetchCartCount();
-        
+
         // Navigate to success screen
         Navigator.pushNamedAndRemoveUntil(
           context,
@@ -807,15 +826,15 @@ class _NewCheckoutScreenState extends State<NewCheckoutScreen> {
           (route) => route.settings.name == AppRoutes.homeScreen,
         );
       } else if (!response.result && mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Error: ${response.message}')),
-        );
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text('Error: ${response.message}')));
       }
     } catch (e) {
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Error: ${e.toString()}')),
-        );
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text('Error: ${e.toString()}')));
       }
     } finally {
       if (mounted) {

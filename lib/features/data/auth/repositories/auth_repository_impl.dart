@@ -4,14 +4,17 @@ import '../../../domain/auth/repositories/auth_repository.dart';
 import '../datasources/auth_remote_datasource.dart';
 import '../models/auth_response_model.dart';
 
-
 class AuthRepositoryImpl implements AuthRepository {
   final AuthRemoteDataSource authRemoteDataSource;
 
   AuthRepositoryImpl(this.authRemoteDataSource);
 
   @override
-  Future<Result<AuthResponseModel>> login(String email, String password, String loginBy) async {
+  Future<Result<AuthResponseModel>> login(
+    String email,
+    String password,
+    String loginBy,
+  ) async {
     return await authRemoteDataSource.login(email, password, loginBy);
   }
 
@@ -36,7 +39,11 @@ class AuthRepositoryImpl implements AuthRepository {
   }
 
   @override
-  Future<void> confirmResetPassword(String email, String code, String password) async {
+  Future<void> confirmResetPassword(
+    String email,
+    String code,
+    String password,
+  ) async {
     await authRemoteDataSource.confirmResetPassword(email, code, password);
   }
 
@@ -54,4 +61,5 @@ class AuthRepositoryImpl implements AuthRepository {
   Future<AuthResponseModel> getUserByToken(String token) async {
     return await authRemoteDataSource.getUserByToken(token);
   }
+
 }

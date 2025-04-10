@@ -20,6 +20,7 @@ import 'features/presentation/coupon/controller/coupon_provider.dart';
 import 'features/presentation/main layout/controller/layout_provider.dart';
 import 'features/presentation/payment/controller/payment_provider.dart';
 import 'features/presentation/product/controller/product_provider.dart';
+import 'features/presentation/profile/controller/profile_provider.dart';
 import 'features/presentation/review/controller/reviews_provider.dart';
 import 'features/presentation/slider/controller/provider.dart';
 import 'features/presentation/wishlist/controller/wishlist_provider.dart';
@@ -27,6 +28,8 @@ import 'features/presentation/wishlist/controller/wishlist_provider.dart';
 Future<void> getInitData() async {
   AppStrings.token = await SecureStorage().get<String>(LocalStorageKey.userToken);
   AppStrings.userId = await SecureStorage().get<String>(LocalStorageKey.userId);
+  AppStrings.userEmail = await SecureStorage().get<String>(LocalStorageKey.userEmail);
+  AppStrings.userName = await SecureStorage().get<String>(LocalStorageKey.userName);
 }
 
 
@@ -53,6 +56,7 @@ Future<void> main() async {
         ChangeNotifierProvider(create: (_) => sl<AddressProvider>()),
         ChangeNotifierProvider(create: (_) => sl<CouponProvider>()),
         ChangeNotifierProvider(create: (_) => sl<PaymentProvider>()),
+        ChangeNotifierProvider(create: (_) => sl<ProfileProvider>()),
 
       ],
       child: const MyApp(),
