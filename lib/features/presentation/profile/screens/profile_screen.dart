@@ -3,6 +3,7 @@ import 'package:laravel_ecommerce/core/config/routes.dart/routes.dart';
 import 'package:provider/provider.dart';
 import 'package:url_launcher/url_launcher.dart';
 import '../../../../core/config/themes.dart/theme.dart';
+import '../../../../core/providers/localization/language_provider.dart';
 import '../../../../core/utils/constants/app_strings.dart';
 import '../../../data/profile/models/profile_counters_model.dart';
 import '../../address/screens/address_list_screen.dart';
@@ -213,7 +214,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
             icon: Icons.language,
             title: 'اللغة',
             onTap: () {
-              // Show language dialog
+              _showLanguageSelectionDialog(context);
             },
             trailing: const Icon(Icons.chevron_right),
           ),
@@ -276,6 +277,58 @@ class _ProfileScreenState extends State<ProfileScreen> {
               textColor: AppTheme.primaryColor,
               iconColor: AppTheme.primaryColor,
             ),
+        ],
+      ),
+    );
+  }
+
+
+  void _showLanguageSelectionDialog(BuildContext context) {
+    final languageProvider = Provider.of<LanguageProvider>(context, listen: false);
+
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('اختر اللغة'),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: languageProvider.languages.map((language) {
+            bool isSelected = languageProvider.locale.languageCode == language.languageCode;
+
+            return ListTile(
+              title: Text(language.name),
+              trailing: isSelected ? const Icon(Icons.check, color: Colors.green) : null,
+              onTap: () async {
+                if (!isSelected) {
+                  // Change the language only if it's different from the current one
+                  await languageProvider.changeLanguage(
+                      language.languageCode,
+                      language.countryCode
+                  );
+
+                  Navigator.pop(context);
+
+                  // Restart the app to apply language changes properly
+                  if (context.mounted) {
+                    Navigator.pushNamedAndRemoveUntil(
+                        context,
+                        AppRoutes.mainLayoutScreen,
+                            (route) => false
+                    );
+                  }
+                } else {
+                  // If it's the same language, just close the dialog
+                  Navigator.pop(context);
+                }
+              },
+            );
+          }).toList(),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: const Text('إلغاء'),
+          ),
         ],
       ),
     );

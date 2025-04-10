@@ -5,6 +5,8 @@ import 'package:provider/provider.dart';
 import '../../../../core/config/themes.dart/theme.dart';
 import '../../../../core/utils/constants/app_strings.dart';
 import '../../../../core/utils/enums/loading_state.dart';
+import '../../../../core/utils/local_storage/local_storage_keys.dart';
+import '../../../../core/utils/local_storage/secure_storage.dart';
 import '../../../../core/utils/widgets/custom_button.dart';
 import '../../../../core/utils/widgets/custom_form_field.dart';
 import '../controller/profile_provider.dart';
@@ -26,26 +28,14 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
   @override
   void initState() {
     super.initState();
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      final profileProvider = Provider.of<ProfileProvider>(context, listen: false);
-      final userProfile = profileProvider.userProfile;
-      if (userProfile != null) {
-        _nameController.text = userProfile.name;
-      } else {
-        // If user profile is not loaded yet, fetch it
-        profileProvider.getUserProfile().then((_) {
-          if (profileProvider.userProfile != null) {
-            _nameController.text = profileProvider.userProfile!.name;
-          }
-        });
-      }
-    });
+    // Set the name controller text directly from AppStrings
+    _nameController.text = AppStrings.userName ?? '';
   }
 
   @override
   Widget build(BuildContext context) {
     final profileProvider = Provider.of<ProfileProvider>(context);
-    
+
     return Scaffold(
       appBar: AppBar(
         title: const Text('تعديل الملف الشخصي'),
@@ -84,35 +74,35 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                 border: Border.all(color: Colors.white, width: 2),
                 boxShadow: [
                   BoxShadow(
-                    color: Colors.black.withValues(alpha: 0.1),
+                    color: Colors.black.withOpacity(0.1),
                     blurRadius: 8,
                     offset: const Offset(0, 2),
                   ),
                 ],
-                color: AppTheme.accentColor.withValues(alpha: 0.2),
+                color: AppTheme.accentColor.withOpacity(0.2),
               ),
               child: ClipRRect(
                 borderRadius: BorderRadius.circular(60),
                 child: _selectedImage != null
                     ? Image.file(
-                        _selectedImage!,
-                        fit: BoxFit.cover,
-                      )
+                  _selectedImage!,
+                  fit: BoxFit.cover,
+                )
                     : profileProvider.profileImageUrl != null
-                        ? Image.network(
-                            profileProvider.profileImageUrl!,
-                            fit: BoxFit.cover,
-                            errorBuilder: (context, error, stackTrace) => const Icon(
-                              Icons.person,
-                              size: 60,
-                              color: Colors.grey,
-                            ),
-                          )
-                        : const Icon(
-                            Icons.person,
-                            size: 60,
-                            color: Colors.grey,
-                          ),
+                    ? Image.network(
+                  profileProvider.profileImageUrl!,
+                  fit: BoxFit.cover,
+                  errorBuilder: (context, error, stackTrace) => const Icon(
+                    Icons.person,
+                    size: 60,
+                    color: Colors.grey,
+                  ),
+                )
+                    : const Icon(
+                  Icons.person,
+                  size: 60,
+                  color: Colors.grey,
+                ),
               ),
             ),
           ),
@@ -194,7 +184,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
   Future<void> _pickImage() async {
     final ImagePicker picker = ImagePicker();
     final XFile? image = await picker.pickImage(source: ImageSource.gallery);
-    
+
     if (image != null) {
       setState(() {
         _selectedImage = File(image.path);
@@ -223,10 +213,16 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
         _nameController.text,
         _passwordController.text,
       );
-      
+
       if (!mounted) return;
-      
+
       if (success) {
+        // Update name in AppStrings and SecureStorage if the name was changed
+        if (_nameController.text != AppStrings.userName) {
+          AppStrings.userName = _nameController.text;
+          await SecureStorage().save(LocalStorageKey.userName, _nameController.text);
+        }
+
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(content: Text('تم تحديث الملف الشخصي بنجاح')),
         );
