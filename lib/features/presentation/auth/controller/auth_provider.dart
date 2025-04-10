@@ -18,9 +18,6 @@ import '../../../domain/auth/usecases/auth/logout_use_case.dart';
 import '../../../domain/auth/usecases/auth/resend_code_use_case.dart';
 import '../../../domain/auth/usecases/auth/signup_use_case.dart';
 import '../../../domain/auth/usecases/auth/social_login_use_case.dart';
-import 'package:google_sign_in/google_sign_in.dart';
-import 'package:flutter_facebook_auth/flutter_facebook_auth.dart';
-import 'package:sign_in_with_apple/sign_in_with_apple.dart';
 
 
 class AuthProvider extends ChangeNotifier {
@@ -290,68 +287,6 @@ class AuthProvider extends ChangeNotifier {
     }
     _setLoading(false);
   }
-
-  Future<bool> signInWithGoogle() async {
-    _setLoading(true);
-    try {
-      final GoogleSignIn googleSignIn = GoogleSignIn();
-      final GoogleSignInAccount? googleUser = await googleSignIn.signIn();
-
-      if (googleUser == null) {
-        _setLoading(false);
-        return false;
-      }
-
-      final GoogleSignInAuthentication googleAuth = await googleUser.authentication;
-      final String accessToken = googleAuth.accessToken!;
-
-      return await completeSocialLogin('google', accessToken);
-    } catch (e) {
-      _setRequestMessage('Google sign in failed: ${e.toString()}');
-      _setLoading(false);
-      return false;
-    }
-  }
-
-  Future<bool> signInWithFacebook() async {
-    _setLoading(true);
-    try {
-      final LoginResult result = await FacebookAuth.instance.login();
-
-      if (result.status == LoginStatus.success) {
-        final String accessToken = result.accessToken!.token;
-        return await completeSocialLogin('facebook', accessToken);
-      } else {
-        _setRequestMessage('Facebook login failed');
-        _setLoading(false);
-        return false;
-      }
-    } catch (e) {
-      _setRequestMessage('Facebook sign in failed: ${e.toString()}');
-      _setLoading(false);
-      return false;
-    }
-  }
-
-  Future<bool> signInWithApple() async {
-    _setLoading(true);
-    try {
-      final credential = await SignInWithApple.getAppleIDCredential(
-        scopes: [
-          AppleIDAuthorizationScopes.email,
-          AppleIDAuthorizationScopes.fullName,
-        ],
-      );
-
-      final String accessToken = credential.identityToken!;
-      return await completeSocialLogin('apple', accessToken);
-    } catch (e) {
-      _setRequestMessage('Apple sign in failed: ${e.toString()}');
-      _setLoading(false);
-      return false;
-    }
-  }
-
 
 
 }
