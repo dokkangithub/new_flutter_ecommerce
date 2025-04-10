@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:laravel_ecommerce/core/config/routes.dart/routes.dart';
 import 'package:provider/provider.dart';
 import 'package:url_launcher/url_launcher.dart';
 import '../../../../core/config/themes.dart/theme.dart';
@@ -35,10 +36,6 @@ class _ProfileScreenState extends State<ProfileScreen> {
     final isLoggedIn = AppStrings.token != null;
 
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('My Profile'),
-        elevation: 0,
-      ),
       body: SingleChildScrollView(
         child: Column(
           children: [
@@ -62,8 +59,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
   Widget _buildProfileHeader(BuildContext context) {
     final isLoggedIn = AppStrings.token != null;
     final profileProvider = Provider.of<ProfileProvider>(context);
-    final userProfile = profileProvider.userProfile;
-    
+
     return Center(
       child: Column(
         children: [
@@ -103,14 +99,14 @@ class _ProfileScreenState extends State<ProfileScreen> {
           ),
           const SizedBox(height: 8),
           Text(
-            isLoggedIn && userProfile != null ? userProfile.name : 'Guest User',
+            AppStrings.userName??'Guest User',
             style: const TextStyle(
               fontSize: 20,
               fontWeight: FontWeight.w600,
             ),
           ),
           Text(
-            isLoggedIn && userProfile != null ? userProfile.email : 'Sign in to access your account',
+            AppStrings.userEmail?? '',
             style: TextStyle(
               fontSize: 14,
               color: Colors.grey[600],
@@ -159,11 +155,11 @@ class _ProfileScreenState extends State<ProfileScreen> {
       onTap: () {
         // Navigate based on the counter type
         if (label == 'Cart Items') {
-          // Navigate to cart screen
+          AppRoutes.navigateTo(context, AppRoutes.cartScreen);
         } else if (label == 'Wishlist') {
-          // Navigate to wishlist screen
+          AppRoutes.navigateTo(context, AppRoutes.wishListScreen);
         } else if (label == 'Orders') {
-          // Navigate to orders screen
+          AppRoutes.navigateTo(context, AppRoutes.cartScreen);
         }
       },
       child: Container(

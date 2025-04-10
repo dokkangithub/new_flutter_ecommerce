@@ -60,4 +60,10 @@ class LaravelApiEndPoint {
   static const String paymentTypes = '/payment-types';
   static const String orderStore = '/order/store';
   static const String orderDetails = '/order-details';
+  static const String purchaseHistory = '/purchase-history';
+  static const String purchaseHistoryDetails = '/purchase-history-details';
+  static const String purchaseHistoryItems = '/purchase-history-items';
+
+
+
 }

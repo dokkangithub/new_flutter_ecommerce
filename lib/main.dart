@@ -1,3 +1,4 @@
+import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:laravel_ecommerce/core/utils/constants/app_strings.dart';
 import 'package:laravel_ecommerce/features/domain/coupon/entities/coupon.dart';
@@ -18,12 +19,14 @@ import 'features/presentation/cart/controller/cart_provider.dart';
 import 'features/presentation/category/controller/provider.dart';
 import 'features/presentation/coupon/controller/coupon_provider.dart';
 import 'features/presentation/main layout/controller/layout_provider.dart';
+import 'features/presentation/order/controller/order_provider.dart';
 import 'features/presentation/payment/controller/payment_provider.dart';
 import 'features/presentation/product/controller/product_provider.dart';
 import 'features/presentation/profile/controller/profile_provider.dart';
 import 'features/presentation/review/controller/reviews_provider.dart';
 import 'features/presentation/slider/controller/provider.dart';
 import 'features/presentation/wishlist/controller/wishlist_provider.dart';
+import 'firebase_options.dart';
 
 Future<void> getInitData() async {
   AppStrings.token = await SecureStorage().get<String>(LocalStorageKey.userToken);
@@ -36,6 +39,9 @@ Future<void> getInitData() async {
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
   setupDependencies();
+  await Firebase.initializeApp(
+    options: DefaultFirebaseOptions.currentPlatform,
+  );
 
   Locale locale = await sl<LanguageProvider>().getLocale();
   await getInitData();
@@ -57,6 +63,8 @@ Future<void> main() async {
         ChangeNotifierProvider(create: (_) => sl<CouponProvider>()),
         ChangeNotifierProvider(create: (_) => sl<PaymentProvider>()),
         ChangeNotifierProvider(create: (_) => sl<ProfileProvider>()),
+        ChangeNotifierProvider(create: (_) => sl<OrderProvider>()),
+
 
       ],
       child: const MyApp(),

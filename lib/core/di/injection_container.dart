@@ -20,6 +20,8 @@ import '../../features/data/category/datasources/category_remote_datasource.dart
 import '../../features/data/category/repositories/category_repository_impl.dart';
 import '../../features/data/coupon/datasources/coupon_remote_datasource.dart';
 import '../../features/data/coupon/repositories/coupon_repository_impl.dart';
+import '../../features/data/order/datasources/order_remote_datasource.dart';
+import '../../features/data/order/repositories/order_repository_impl.dart';
 import '../../features/data/payment/datasources/payment_remote_datasource.dart';
 import '../../features/data/payment/repositories/payment_repository_impl.dart';
 import '../../features/data/product details/datasources/product_details_remote_datasource.dart';
@@ -78,6 +80,11 @@ import '../../features/domain/category/usecases/get_top_categories_use_case.dart
 import '../../features/domain/coupon/repositories/coupon_repository.dart';
 import '../../features/domain/coupon/usecases/apply_coupon_usecases.dart';
 import '../../features/domain/coupon/usecases/remove_coupon_usecases.dart';
+import '../../features/domain/order/repositories/order_repository.dart';
+import '../../features/domain/order/usecases/get_order_details_use_case.dart';
+import '../../features/domain/order/usecases/get_order_items_use_case.dart';
+import '../../features/domain/order/usecases/get_orders_pagination_use_case.dart';
+import '../../features/domain/order/usecases/get_orders_use_case.dart';
 import '../../features/domain/payment/repositories/payment_repository.dart';
 import '../../features/domain/payment/usecases/create_cash_order_usecase.dart';
 import '../../features/domain/payment/usecases/create_kashier_order_usecase.dart';
@@ -118,6 +125,7 @@ import '../../features/presentation/cart/controller/cart_provider.dart';
 import '../../features/presentation/category/controller/provider.dart';
 import '../../features/presentation/coupon/controller/coupon_provider.dart';
 import '../../features/presentation/main layout/controller/layout_provider.dart';
+import '../../features/presentation/order/controller/order_provider.dart';
 import '../../features/presentation/payment/controller/payment_provider.dart';
 import '../../features/presentation/product/controller/product_provider.dart';
 import '../../features/presentation/review/controller/reviews_provider.dart';
@@ -185,6 +193,12 @@ void setupDependencies() {
   sl.registerLazySingleton<PaymentRemoteDataSource>(
     () => PaymentRemoteDataSourceImpl(sl<ApiProvider>()),
   );
+  sl.registerLazySingleton<OrderRemoteDataSource>(
+        () => OrderRemoteDataSourceImpl(sl()),
+  );
+
+
+
 
   // Repositories
   sl.registerLazySingleton<AuthRepository>(
@@ -228,6 +242,10 @@ void setupDependencies() {
   sl.registerLazySingleton<ProfileRepository>(
     () => ProfileRepositoryImpl(sl<ProfileRemoteDataSource>()),
   );
+  sl.registerLazySingleton<OrderRepository>(
+        () => OrderRepositoryImpl(sl()),
+  );
+
 
 
   // Use Cases - Auth
@@ -324,6 +342,12 @@ void setupDependencies() {
   sl.registerLazySingleton(() => GetUserProfileUseCase(sl()));
   sl.registerLazySingleton(() => UpdateProfileUseCase(sl()));
   sl.registerLazySingleton(() => UpdateProfileImageUseCase(sl()));
+
+  // Use cases - order
+  sl.registerLazySingleton(() => GetOrdersUseCase(sl()));
+  sl.registerLazySingleton(() => GetOrdersPaginationUseCase(sl()));
+  sl.registerLazySingleton(() => GetOrderDetailsUseCase(sl()));
+  sl.registerLazySingleton(() => GetOrderItemsUseCase(sl()));
 
   // Providers
   sl.registerLazySingleton(
@@ -450,4 +474,15 @@ void setupDependencies() {
       updateProfileImageUseCase: sl(),
     ),
   );
+
+  sl.registerFactory(
+        () => OrderProvider(
+      getOrdersPaginationUseCase: sl(),
+      getOrderDetailsUseCase: sl(),
+      getOrderItemsUseCase: sl(),
+    ),
+  );
+
+
+
 }
